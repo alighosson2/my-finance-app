@@ -1,0 +1,199 @@
+-- Drop tables if they exist (for clean setup)
+DROP TABLE IF EXISTS tax_records CASCADE;
+DROP TABLE IF EXISTS group_budget_members CASCADE;
+DROP TABLE IF EXISTS group_budgets CASCADE;
+DROP TABLE IF EXISTS alerts CASCADE;
+DROP TABLE IF EXISTS investment_records CASCADE;
+DROP TABLE IF EXISTS budgets CASCADE;
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP TABLE IF EXISTS financial_accounts CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- Users table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    profile_settings JSONB DEFAULT '{}',
+    date_joined TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Financial accounts table
+CREATE TABLE financial_accounts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    account_name VARCHAR(255) NOT NULL,
+    account_type VARCHAR(50) NOT NULL CHECK (account_type IN ('checking', 'savings', 'credit', 'investment', 'loan')),
+    balance DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    bank_name VARCHAR(255),
+    account_number_masked VARCHAR(20),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Transactions table
+CREATE TABLE transactions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    account_id INTEGER NOT NULL REFERENCES financial_accounts(id) ON DELETE CASCADE,
+    amount DECIMAL(15,2) NOT NULL,
+    transaction_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    description TEXT NOT NULL,
+    category VARCHAR(100),
+    subcategory VARCHAR(100),
+    transaction_type VARCHAR(20) NOT NULL CHECK (transaction_type IN ('income', 'expense', 'transfer')),
+    merchant_name VARCHAR(255),
+    location VARCHAR(255),
+    is_recurring BOOLEAN DEFAULT FALSE,
+    tags TEXT[],
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Budgets table
+CREATE TABLE budgets (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    budget_name VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    subcategory VARCHAR(100),
+    budget_limit DECIMAL(15,2) NOT NULL,
+    period_type VARCHAR(20) NOT NULL CHECK (period_type IN ('weekly', 'monthly', 'quarterly', 'yearly')),
+    start_date DATE NOT NULL,
+    end_date DATE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Investment records table
+CREATE TABLE investment_records (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    account_id INTEGER REFERENCES financial_accounts(id) ON DELETE SET NULL,
+    asset_name VARCHAR(255) NOT NULL,
+    asset_type VARCHAR(50) NOT NULL CHECK (asset_type IN ('stock', 'bond', 'etf', 'mutual_fund', 'crypto', 'real_estate', 'commodity')),
+    symbol VARCHAR(20),
+    quantity DECIMAL(15,8) NOT NULL,
+    purchase_price DECIMAL(15,2),
+    current_price DECIMAL(15,2),
+    current_value DECIMAL(15,2) NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    purchase_date DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Alerts table
+CREATE TABLE alerts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    alert_name VARCHAR(255) NOT NULL,
+    rule_description TEXT NOT NULL,
+    trigger_condition JSONB NOT NULL,
+    notification_method VARCHAR(50) NOT NULL CHECK (notification_method IN ('email', 'push', 'sms', 'in_app')),
+    is_active BOOLEAN DEFAULT TRUE,
+    last_triggered TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Group budgets table
+CREATE TABLE group_budgets (
+    id SERIAL PRIMARY KEY,
+    group_name VARCHAR(255) NOT NULL,
+    created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    description TEXT,
+    budget_limit DECIMAL(15,2),
+    currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    period_type VARCHAR(20) NOT NULL CHECK (period_type IN ('weekly', 'monthly', 'quarterly', 'yearly')),
+    start_date DATE NOT NULL,
+    end_date DATE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Group budget members table
+CREATE TABLE group_budget_members (
+    id SERIAL PRIMARY KEY,
+    group_budget_id INTEGER NOT NULL REFERENCES group_budgets(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(20) NOT NULL DEFAULT 'member' CHECK (role IN ('admin', 'member')),
+    contribution_limit DECIMAL(15,2),
+    joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(group_budget_id, user_id)
+);
+
+-- Tax records table
+CREATE TABLE tax_records (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tax_year INTEGER NOT NULL,
+    taxable_income DECIMAL(15,2) NOT NULL,
+    estimated_tax DECIMAL(15,2),
+    tax_bracket VARCHAR(20),
+    filing_status VARCHAR(20) CHECK (filing_status IN ('single', 'married_jointly', 'married_separately', 'head_of_household')),
+    deductions DECIMAL(15,2) DEFAULT 0.00,
+    credits DECIMAL(15,2) DEFAULT 0.00,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, tax_year)
+);
+
+-- Indexes
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_financial_accounts_user_id ON financial_accounts(user_id);
+CREATE INDEX idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX idx_transactions_account_id ON transactions(account_id);
+CREATE INDEX idx_transactions_date ON transactions(transaction_date);
+CREATE INDEX idx_transactions_category ON transactions(category);
+CREATE INDEX idx_budgets_user_id ON budgets(user_id);
+CREATE INDEX idx_investment_records_user_id ON investment_records(user_id);
+CREATE INDEX idx_alerts_user_id ON alerts(user_id);
+CREATE INDEX idx_group_budgets_created_by ON group_budgets(created_by);
+CREATE INDEX idx_group_budget_members_group_id ON group_budget_members(group_budget_id);
+CREATE INDEX idx_group_budget_members_user_id ON group_budget_members(user_id);
+CREATE INDEX idx_tax_records_user_id ON tax_records(user_id);
+CREATE INDEX idx_tax_records_year ON tax_records(tax_year);
+
+-- Updated_at trigger function
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Triggers
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_financial_accounts_updated_at BEFORE UPDATE ON financial_accounts
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_transactions_updated_at BEFORE UPDATE ON transactions
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_budgets_updated_at BEFORE UPDATE ON budgets
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_investment_records_updated_at BEFORE UPDATE ON investment_records
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_alerts_updated_at BEFORE UPDATE ON alerts
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_group_budgets_updated_at BEFORE UPDATE ON group_budgets
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_tax_records_updated_at BEFORE UPDATE ON tax_records
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+ if we needed something more on the databese and we are using prisma with express is it possible to change in the databasr

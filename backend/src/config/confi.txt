@@ -1,0 +1,15 @@
+// src/config/index.ts
+
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load .env regardless of folder depth (safer)
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+export default {
+  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,       // ✅ number instead of string
+  jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret',              // Used for JWT auth
+  frontendPath: path.join(__dirname, '../../frontend'),                // Path to static HTML files
+  isDev: process.env.NODE_ENV === 'development',                       // Boolean flag for dev mode
+  host: process.env.HOST || 'localhost',                               // Optional: hostname override
+};

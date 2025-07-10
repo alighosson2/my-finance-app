@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                          // Use modern JavaScript features (e.g. optional chaining)
+    "module": "CommonJS",                        // Use CommonJS module system (for Node.js)
+    "moduleResolution": "node",                  // Mimic Node.js module resolution strategy
+    "strict": true,                              // Enable all strict type checks
+    "esModuleInterop": true,                     // Allow default imports from CommonJS modules (e.g., express)
+    "forceConsistentCasingInFileNames": true,    // Ensure consistent casing across file imports
+    "skipLibCheck": true,                        // Skip type checking of declaration files (.d.ts)
+    "sourceMap": true,                           // Generate source maps (useful for debugging with breakpoints)
+    "noEmitOnError": true,                       // Don't emit .js files if there are TypeScript errors
+    "resolveJsonModule": true,                   // Allow importing `.json` files directly in TypeScript
+    "outDir": "./dist",                          // Output compiled JS to the `dist/` folder
+    "rootDir": "./src"                           // Treat `src/` as the root folder for .ts files
+  },
+  "include": ["src"],                            // Include all files under `src/`, including subfolders
+  "exclude": ["node_modules"]                    // Ignore `node_modules` folder during build
+}

@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model alerts {
+  id                  Int       @id @default(autoincrement())
+  user_id             Int
+  alert_name          String    @db.VarChar(255)
+  rule_description    String
+  trigger_condition   Json
+  notification_method String    @db.VarChar(50)
+  is_active           Boolean?  @default(true)
+  last_triggered      DateTime? @db.Timestamptz(6)
+  created_at          DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime? @default(now()) @db.Timestamptz(6)
+  users               users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_alerts_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model budgets {
+  id           Int       @id @default(autoincrement())
+  user_id      Int
+  budget_name  String    @db.VarChar(255)
+  category     String    @db.VarChar(100)
+  subcategory  String?   @db.VarChar(100)
+  budget_limit Decimal   @db.Decimal(15, 2)
+  period_type  String    @db.VarChar(20)
+  start_date   DateTime  @db.Date
+  end_date     DateTime? @db.Date
+  is_active    Boolean?  @default(true)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_budgets_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model financial_accounts {
+  id                    Int                  @id @default(autoincrement())
+  user_id               Int
+  account_name          String               @db.VarChar(255)
+  account_type          String               @db.VarChar(50)
+  balance               Decimal              @default(0.00) @db.Decimal(15, 2)
+  currency              String               @default("USD") @db.VarChar(3)
+  bank_name             String?              @db.VarChar(255)
+  account_number_masked String?              @db.VarChar(20)
+  is_active             Boolean?             @default(true)
+  created_at            DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime?            @default(now()) @db.Timestamptz(6)
+  users                 users                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  investment_records    investment_records[]
+  transactions          transactions[]
+
+  @@index([user_id], map: "idx_financial_accounts_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model group_budget_members {
+  id                 Int           @id @default(autoincrement())
+  group_budget_id    Int
+  user_id            Int
+  role               String        @default("member") @db.VarChar(20)
+  contribution_limit Decimal?      @db.Decimal(15, 2)
+  joined_at          DateTime?     @default(now()) @db.Timestamptz(6)
+  group_budgets      group_budgets @relation(fields: [group_budget_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users              users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([group_budget_id, user_id])
+  @@index([group_budget_id], map: "idx_group_budget_members_group_id")
+  @@index([user_id], map: "idx_group_budget_members_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model group_budgets {
+  id                   Int                    @id @default(autoincrement())
+  group_name           String                 @db.VarChar(255)
+  created_by           Int
+  description          String?
+  budget_limit         Decimal?               @db.Decimal(15, 2)
+  currency             String                 @default("USD") @db.VarChar(3)
+  period_type          String                 @db.VarChar(20)
+  start_date           DateTime               @db.Date
+  end_date             DateTime?              @db.Date
+  is_active            Boolean?               @default(true)
+  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  group_budget_members group_budget_members[]
+  users                users                  @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_by], map: "idx_group_budgets_created_by")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model investment_records {
+  id                 Int                 @id @default(autoincrement())
+  user_id            Int
+  account_id         Int?
+  asset_name         String              @db.VarChar(255)
+  asset_type         String              @db.VarChar(50)
+  symbol             String?             @db.VarChar(20)
+  quantity           Decimal             @db.Decimal(15, 8)
+  purchase_price     Decimal?            @db.Decimal(15, 2)
+  current_price      Decimal?            @db.Decimal(15, 2)
+  current_value      Decimal             @db.Decimal(15, 2)
+  currency           String              @default("USD") @db.VarChar(3)
+  purchase_date      DateTime?           @db.Date
+  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  financial_accounts financial_accounts? @relation(fields: [account_id], references: [id], onUpdate: NoAction)
+  users              users               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_investment_records_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model tax_records {
+  id             Int       @id @default(autoincrement())
+  user_id        Int
+  tax_year       Int
+  taxable_income Decimal   @db.Decimal(15, 2)
+  estimated_tax  Decimal?  @db.Decimal(15, 2)
+  tax_bracket    String?   @db.VarChar(20)
+  filing_status  String?   @db.VarChar(20)
+  deductions     Decimal?  @default(0.00) @db.Decimal(15, 2)
+  credits        Decimal?  @default(0.00) @db.Decimal(15, 2)
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
+  users          users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, tax_year])
+  @@index([user_id], map: "idx_tax_records_user_id")
+  @@index([tax_year], map: "idx_tax_records_year")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model transactions {
+  id                 Int                @id @default(autoincrement())
+  user_id            Int
+  account_id         Int
+  amount             Decimal            @db.Decimal(15, 2)
+  transaction_date   DateTime           @db.Timestamptz(6)
+  description        String
+  category           String?            @db.VarChar(100)
+  subcategory        String?            @db.VarChar(100)
+  transaction_type   String             @db.VarChar(20)
+  merchant_name      String?            @db.VarChar(255)
+  location           String?            @db.VarChar(255)
+  is_recurring       Boolean?           @default(false)
+  tags               String[]
+  created_at         DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?          @default(now()) @db.Timestamptz(6)
+  financial_accounts financial_accounts @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users              users              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([account_id], map: "idx_transactions_account_id")
+  @@index([category], map: "idx_transactions_category")
+  @@index([transaction_date], map: "idx_transactions_date")
+  @@index([user_id], map: "idx_transactions_user_id")
+}
+
+model users {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @db.VarChar(255)
+  email                String                 @unique @db.VarChar(255)
+  password_hash        String                 @db.VarChar(255)
+  profile_settings     Json?                  @default("{}")
+  date_joined          DateTime?              @default(now()) @db.Timestamptz(6)
+  is_active            Boolean?               @default(true)
+  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  role                 user_role              @default(user)
+  alerts               alerts[]
+  budgets              budgets[]
+  financial_accounts   financial_accounts[]
+  group_budget_members group_budget_members[]
+  group_budgets        group_budgets[]
+  investment_records   investment_records[]
+  tax_records          tax_records[]
+  transactions         transactions[]
+
+  @@index([email], map: "idx_users_email")
+}
+
+enum user_role {
+  admin
+  user
+  manager
+}

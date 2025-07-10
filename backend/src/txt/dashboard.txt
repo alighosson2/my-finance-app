@@ -1,0 +1,46 @@
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { authenticateToken, AuthRequest } from './authMiddleware';
+
+const router = Router();
+const prisma = new PrismaClient();
+
+router.get('/dashboard', authenticateToken, async (req: AuthRequest, res) => {
+  const userId = (req.user as any).userId;
+
+  try {
+    // Fetch user details (e.g., name)
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    // Fetch transactions
+    const transactions = await prisma.transactions.findMany({
+      where: { user_id: userId },
+      orderBy: { transaction_date: 'desc' },
+    });
+
+    // Calculate income and expenses
+    const income = transactions
+      .filter((t) => t.transaction_type === 'INCOME')
+      .reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
+
+    const expenses = transactions
+      .filter((t) => t.transaction_type === 'EXPENSE')
+      .reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
+
+    // Send data with the user's name and financial information
+    res.json({
+      user: user?.name, // User's name is included in the response
+      income,
+      expenses,
+      balance: income - expenses,
+      recentTransactions: transactions.slice(0, 5),
+    });
+  } catch (err) {
+    console.error('Dashboard error:', err);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+export default router;
