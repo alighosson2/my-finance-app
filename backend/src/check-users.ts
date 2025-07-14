@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+/*import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function checkUsers() {
@@ -18,4 +18,4 @@ async function checkUsers() {
   }
 }
 
-checkUsers();
+checkUsers();*/

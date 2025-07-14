@@ -7,13 +7,13 @@ import {StringValue} from "ms";
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 export default {
-  logDir: process.env.LOG_DIR ||"./logs",
-  isDev: process.env.NODE_ENV === 'development',                       // Boolean flag for dev mode
-  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,  
-   host: process.env.HOST || 'localhost',   // Optional: hostname override
+  logDir: process.env.LOG_DIR ||"./logs",
+  isDev: process.env.NODE_ENV === 'development',                       // Boolean flag for dev mode
+  port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,
+   host: process.env.HOST || 'localhost',   // Optional: hostname override
 
-  frontendPath: path.join(__dirname, '../../frontend'),                // Path to static HTML files
-  auth:{secretKey: process.env.JWT_SECRET_KEY|| "secret12345678",
-    tokenExpiration:(process.env.TOKEN_EXPIRATION||"1h") as StringValue
-  }                            
+  frontendPath: path.join(__dirname, '../../frontend'),                // Path to static HTML files
+  auth:{secretKey: process.env.JWT_SECRET_KEY|| "secret12345678",
+    tokenExpiration:(process.env.TOKEN_EXPIRATION||"1h") as StringValue
+  }
 };

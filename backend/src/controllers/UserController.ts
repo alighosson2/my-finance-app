@@ -23,31 +23,34 @@ export class UserController {
     }
   }
 
-async getUserById(req: Request, res: Response): Promise<void> {
-  try {
-    const id = parseInt(req.params.id, 10); // Convert string to number
-    if (isNaN(id) || id <= 0) {
-      throw new Error('Invalid user ID');
-    }
+  async getUserById(req: Request, res: Response): Promise<void> {
     try {
-      const user = await this.userService.getUserById(id); // Now id is a number
-      console.log('✅ Controller got user:', user); // Debug log
-      res.status(200).json(user);
-    } catch (error: any) {
-      logger.error('Error fetching user', error);
-      throw new NotFoundException('User not found');
-    }
-  } catch (error) {
-    res.status(400).json({ message: 'Invalid ID or internal server error', error });
-  }
-}
+      const id = req.params.id;
+      console.log(id);
 
+      if (isNaN(Number(id)) || Number(id) <= 0) {
+        res.status(400).json({ message: 'Invalid user ID' });
+        return;
+      }
+
+      try {
+        const user = await this.userService.getUserById(Number(id));
+        console.log('✅ Controller got user:', user);
+        res.status(200).json(user);
+      } catch (error: any) {
+        logger.error('Error fetching user', error);
+        res.status(404).json({ message: 'User not found', error: error.message });
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+  }
 
   async createUser(req: Request, res: Response): Promise<void> {
     try {
-      const { name, email, password_hash } = req.body;
+      const { name, email, password } = req.body; // Changed to password
 
-      if (!name || !email || !password_hash) {
+      if (!name || !email || !password) { // Validate password
         throw new BadRequestException('All fields are required');
       }
 
@@ -59,7 +62,7 @@ async getUserById(req: Request, res: Response): Promise<void> {
       const newUser = await this.userService.createUser({
         name,
         email,
-        password_hash,
+        password, // Pass password instead of password_hash
       });
 
       res.status(201).json(newUser);
@@ -69,41 +72,79 @@ async getUserById(req: Request, res: Response): Promise<void> {
     }
   }
 
- /* async updateUser(req: Request, res: Response): Promise<void> {
+  async updateUser(req: Request, res: Response): Promise<void> {
     const id = req.params.id;
-    if (!id) {
-      throw new BadRequestException('User id is required');
+    const userId = Number(id);
+    console.log(`Received ID: ${userId}`);
+
+    if (isNaN(userId) || userId <= 0) {
+      throw new BadRequestException('Invalid user ID');
     }
 
     try {
-      const updated = await this.userService.updateUser(id, req.body);
+      // Create update payload with password handling
+      const updatePayload = { ...req.body };
+      
+      if (updatePayload.password) {
+        // Password will be hashed in service
+        updatePayload.password = updatePayload.password;
+      } else {
+        // Remove password if not updating
+        delete updatePayload.password;
+      }
+
+      const updated = await this.userService.updateUser(userId, updatePayload);
+      console.log('Updated user:', updated);
       res.status(200).json(updated);
     } catch (error: any) {
       logger.error('Error updating user', error);
-      // Check if it's a "User not found" error from the repository
       if (error.message === 'User not found' || error.message.includes('could not be updated')) {
         throw new NotFoundException('User not found');
       }
       throw new ServiceException('Error updating user');
     }
-  }*/
+  }
 
- /* async deleteUser(req: Request, res: Response): Promise<void> {
+  async deleteUser(req: Request, res: Response): Promise<void> {
     const id = req.params.id;
-    if (!id) {
-      throw new BadRequestException('User id is required');
+    const userId = Number(id);
+    console.log(`Received ID: ${userId}`);
+
+    if (isNaN(userId) || userId <= 0) {
+      throw new BadRequestException('Invalid user ID');
     }
 
     try {
-      await this.userService.deleteUser(id);
+      await this.userService.deleteUser(userId);
+      console.log('User deleted successfully');
       res.status(204).send();
     } catch (error: any) {
       logger.error('Error deleting user', error);
-      // Check if it's a "User not found" error from the repository
       if (error.message === 'User not found') {
         throw new NotFoundException('User not found');
       }
       throw new ServiceException('Error deleting user');
     }
-  }*/
+  }
+
+  // Add login method
+  async loginUser(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        throw new BadRequestException('Email and password are required');
+      }
+      
+      const userId = await this.userService.validateUser(email, password);
+      res.status(200).json({ userId, message: 'Login successful' });
+    } catch (error: any) {
+      if (error instanceof NotFoundException) {
+        res.status(401).json({ message: 'Invalid credentials' });
+      } else {
+        logger.error('Login error', error);
+        res.status(500).json({ message: 'Internal server error' });
+      }
+    }
+  }
 }

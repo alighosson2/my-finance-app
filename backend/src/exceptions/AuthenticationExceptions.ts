@@ -17,5 +17,10 @@ export class InvalidTokenException extends AuthenticationExceptions{
     constructor(){
         super("InvalidToken");
         this.name="InvalidTokenException"
+    } }
+export class AunthenticationFailedException extends AuthenticationExceptions{
+    constructor(){
+        super("AunthenticationFailed");
+        this.name="AunthenticationFailedException"
     }
 }

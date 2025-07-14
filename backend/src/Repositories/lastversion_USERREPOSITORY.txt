@@ -145,7 +145,7 @@ export class UserRepository implements initializableRepository<users> {
     }
   }
 
-  async getByEmail(email: string): Promise<UserEntity> {
+  /*async getByEmail(email: string): Promise<UserEntity> {
     this.ensureConnected();
 
     // Validate email before proceeding
@@ -175,7 +175,7 @@ export class UserRepository implements initializableRepository<users> {
       // For other errors, re-throw with additional message
       throw new Error(`Failed to get user by email: ${(error as Error).message}`);
     }
-  }
+  }*/
 
 
 

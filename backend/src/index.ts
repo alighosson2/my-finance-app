@@ -1,3 +1,4 @@
+//src/index.ts
 import config from './config';
 import express, { Request, Response, NextFunction } from 'express';
 import logger from './util/logger';
@@ -6,13 +7,14 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
 // import cookieParser from 'cookie-parser';
-
+//import cookieParser from 'cookie-parser';
 import routes from './routes';
 import requestLogger from './middleware/requestLogger';
 import { HttpException } from './exceptions/HttpException';
 
 // ✅ Import the user routes
 import userRoutes from './routes/user.routes';
+import authRoutes from './routes/auth.routes';
 
 const app = express();
 
@@ -31,6 +33,7 @@ app.use(requestLogger);
 
 // ✅ Mount API routes
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 
 // Cookie support (optional)
 // app.use(cookieParser());
@@ -38,14 +41,14 @@ app.use('/api/users', userRoutes);
 // Static frontend
 app.use(express.static(config.frontendPath));
 
-// Public pages
+/*// Public pages
 app.get('/login', (req, res) =>
   res.sendFile(path.join(config.frontendPath, 'login.html'))
 );
 app.get('/signup', (req, res) =>
   res.sendFile(path.join(config.frontendPath, 'signup.html'))
 );
-
+*/
 
 // Error handler
 app.use(
