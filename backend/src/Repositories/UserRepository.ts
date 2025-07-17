@@ -1,13 +1,13 @@
-//User Repository 
-// UserRepository.ts
 import { PrismaClient, users, user_role } from '@prisma/client';
 import { ConnectionManager } from './ConnectionManager';
-import { initializableRepository, id } from './IRepository';
+import { id, IUserRepository } from './IRepository';
 import logger from '../util/logger';
 import { UserEntity, UserRole } from '../model/Usermodel';
 
-// 👇 Helper function to map Prisma result to UserEntity
-function toUserEntity(user: users): UserEntity {
+function toUserEntity(user: users & {
+  bank_tokens?: any[];
+  financial_accounts?: any[];
+}): UserEntity {
   return new UserEntity(
     user.id,
     user.name,
@@ -18,11 +18,13 @@ function toUserEntity(user: users): UserEntity {
     user.date_joined ?? new Date(),
     user.is_active ?? true,
     user.created_at ?? new Date(),
-    user.updated_at ?? new Date()
+    user.updated_at ?? new Date(),
+    user.bank_tokens,
+    user.financial_accounts
   );
 }
 
-export class UserRepository implements initializableRepository<users> {
+export class UserRepository implements IUserRepository {
   private prisma: PrismaClient | null = null;
 
   async init(): Promise<void> {
@@ -34,25 +36,18 @@ export class UserRepository implements initializableRepository<users> {
   }
 
   private parseId(id: id): number {
-    if (id <= 0) {
-      throw new Error('Invalid user ID');
-    }
+    if (id <= 0) throw new Error('Invalid user ID');
     return id;
   }
 
   async create(user: users): Promise<users> {
     this.ensureConnected();
-
     const existing = await this.prisma!.users.findUnique({
       where: { email: user.email }
     });
-
-    if (existing) {
-      throw new Error('User with this email already exists');
-    }
+    if (existing) throw new Error('User with this email already exists');
 
     const { id, created_at, updated_at, date_joined, ...userData } = user;
-
     return this.prisma!.users.create({
       data: {
         ...userData,
@@ -63,124 +58,43 @@ export class UserRepository implements initializableRepository<users> {
     });
   }
 
-
   async update(id: id, user: UserEntity): Promise<UserEntity | null> {
     this.ensureConnected();
+    this.parseId(id);
 
-    // Validate ID before proceeding
-    if (id <= 0) {
-      throw new Error('Invalid user ID');
-    }
+    const existing = await this.prisma!.users.findUnique({ where: { id } });
+    if (!existing) throw new Error('User not found');
 
-    try {
-      // Check if the user exists before proceeding with the update
-      const existing = await this.prisma!.users.findUnique({
-        where: { id },
-      });
-
-      // If the user does not exist, throw an error
-      if (!existing) {
-        throw new Error('User not found');
-      }
-
-      // Proceed with the update if the user exists
-      const updated = await this.prisma!.users.update({
-        where: { id },
-        data: {
-          name: user.name,
-          email: user.email,
-          password_hash: user.password_hash,
-          profile_settings: user.profile_settings ?? {},
-          is_active: user.is_active,
-          role: user.role,
-          updated_at: new Date(),
-        },
-      });
-
-      return toUserEntity(updated);
-
-    } catch (error) {
-      // Handle user not found error
-      if ((error as Error).message === 'User not found') {
-        throw error;
-      }
-
-      // Handle any other errors that occur during the update
-      throw new Error(`Failed to update user: ${(error as Error).message}`);
-    }
+    const updated = await this.prisma!.users.update({
+      where: { id },
+      data: {
+        name: user.name,
+        email: user.email,
+        password_hash: user.password_hash,
+        profile_settings: user.profile_settings ?? {},
+        is_active: user.is_active,
+        role: user.role,
+        updated_at: new Date(),
+      },
+    });
+    return toUserEntity(updated);
   }
-
-
 
   async get(id: id): Promise<UserEntity> {
     this.ensureConnected();
-
-    // Validate ID before proceeding
-
-    if (id <= 0) {
-      throw new Error('Invalid user ID');
-    }
-
-    try {
-      // Query user from the database
-      const user = await this.prisma!.users.findUnique({
-        where: { id },
-      });
-
-      // If the user is not found, throw an error
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      // Return mapped UserEntity
-      return toUserEntity(user);
-    } catch (error) {
-      // Check if the error is "User not found" and throw it
-      if ((error as Error).message === 'User not found') {
-        throw error;
-      }
-
-      // For other errors, re-throw with additional message
-      throw new Error(`Failed to get user: ${(error as Error).message}`);
-    }
+    this.parseId(id);
+    const user = await this.prisma!.users.findUnique({ where: { id } });
+    if (!user) throw new Error('User not found');
+    return toUserEntity(user);
   }
 
   async getByEmail(email: string): Promise<UserEntity> {
     this.ensureConnected();
-
-    // Validate email before proceeding
-    if (!email || !email.includes('@')) {
-      throw new Error('Invalid email address');
-    }
-
-    try {
-      // Query user from the database
-      const user = await this.prisma!.users.findUnique({
-        where: { email },
-      });
-
-      // If the user is not found, throw an error
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      // Return mapped UserEntity
-      return toUserEntity(user);
-    } catch (error) {
-      // Check if the error is "User not found" and throw it
-      if ((error as Error).message === 'User not found') {
-        throw error;
-      }
-
-      // For other errors, re-throw with additional message
-      throw new Error(`Failed to get user by email: ${(error as Error).message}`);
-    }
+    if (!email?.includes('@')) throw new Error('Invalid email address');
+    const user = await this.prisma!.users.findUnique({ where: { email } });
+    if (!user) throw new Error('User not found');
+    return toUserEntity(user);
   }
-
-
-
-
-
 
   async getAll(): Promise<users[]> {
     this.ensureConnected();
@@ -189,49 +103,36 @@ export class UserRepository implements initializableRepository<users> {
 
   async delete(id: id): Promise<void> {
     this.ensureConnected();
-
-    // Validate ID before proceeding
-    if (id <= 0) {
-      throw new Error('Invalid user ID');
-    }
-
-    try {
-      // Try to delete the user from the database
-      const user = await this.prisma!.users.findUnique({
-        where: { id },
-      });
-
-      // If user not found, throw an error (similar to get method)
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      // Proceed with deletion after confirming user exists
-      await this.prisma!.users.delete({
-        where: { id },
-      });
-
-    } catch (error) {
-      // Handle the error if user not found
-      if ((error as Error).message === 'User not found') {
-        throw error;
-      }
-
-      // For any other errors, re-throw with additional message
-      throw new Error(`Failed to delete user: ${(error as Error).message}`);
-    }
+    this.parseId(id);
+    const user = await this.prisma!.users.findUnique({ where: { id } });
+    if (!user) throw new Error('User not found');
+    await this.prisma!.users.delete({ where: { id } });
   }
 
+  // NEW: Relationship methods
+  async getWithBankTokens(id: id): Promise<UserEntity> {
+    this.ensureConnected();
+    const user = await this.prisma!.users.findUnique({
+      where: { id },
+      include: { bank_tokens: true }
+    });
+    if (!user) throw new Error('User not found');
+    return toUserEntity(user);
+  }
 
+  async getWithAccounts(id: id): Promise<UserEntity> {
+    this.ensureConnected();
+    const user = await this.prisma!.users.findUnique({
+      where: { id },
+      include: { financial_accounts: true }
+    });
+    if (!user) throw new Error('User not found');
+    return toUserEntity(user);
+  }
 }
 
-
-
-export async function createUserRepository(): Promise<UserRepository> {
+export async function createUserRepository(): Promise<IUserRepository> {
   const repo = new UserRepository();
   await repo.init();
   return repo;
 }
-
-
-

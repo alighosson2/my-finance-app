@@ -6,8 +6,7 @@ import helmet from 'helmet';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
-// import cookieParser from 'cookie-parser';
-//import cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import routes from './routes';
 import requestLogger from './middleware/requestLogger';
 import { HttpException } from './exceptions/HttpException';
@@ -15,6 +14,11 @@ import { HttpException } from './exceptions/HttpException';
 // ✅ Import the user routes
 import userRoutes from './routes/user.routes';
 import authRoutes from './routes/auth.routes';
+import bankOAuth from './routes/bankOAuth.routes';
+import bankRoutes from './routes/bank.routes';
+
+
+
 
 const app = express();
 
@@ -30,13 +34,16 @@ app.use(cors({ credentials: true, origin: true }));
 
 // Add middleware
 app.use(requestLogger);
+ 
+app.use(cookieParser());
 
 // ✅ Mount API routes
+app.use('/api/OAuth', bankOAuth);
+app.use('/api/bank', bankRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 
-// Cookie support (optional)
-// app.use(cookieParser());
+
 
 // Static frontend
 app.use(express.static(config.frontendPath));

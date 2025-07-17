@@ -1,10 +1,10 @@
-// UserService.ts
 import bcrypt from 'bcrypt';
 import { users, user_role } from '@prisma/client';
 import { createUserRepository } from '../Repositories/UserRepository';
-import { id, initializableRepository } from '../Repositories/IRepository';
+import { id, IUserRepository } from '../Repositories/IRepository';
 import logger from '../util/logger';
 import { NotFoundException } from '../exceptions/NotFoundException';
+import { UserEntity } from '../model/Usermodel';
 
 const SALT_ROUNDS = 10;
 
@@ -27,9 +27,9 @@ interface UpdateUserRequest {
 }
 
 export class UserService {
-  private userRepository: initializableRepository<users> | null = null;
+  private userRepository: IUserRepository | null = null;
 
-  private async getRepo(): Promise<initializableRepository<users>> {
+  private async getRepo(): Promise<IUserRepository> {
     if (!this.userRepository) {
       this.userRepository = await createUserRepository();
     }
@@ -44,32 +44,22 @@ export class UserService {
     return (await this.getRepo()).get(userId);
   }
 
-async createUser(data: CreateUserRequest): Promise<users> {
-  console.log('🔍 Original password:', data.password);
-  
-  const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
-  console.log('🔐 Hashed password:', hashedPassword);
-  
-  const user: users = {
-    id: 0,
-    name: data.name,
-    email: data.email,
-    password_hash: hashedPassword,
-    profile_settings: data.profile_settings ?? {},
-    is_active: data.is_active ?? true,
-    role: data.role ?? user_role.user,
-    created_at: null,
-    updated_at: null,
-    date_joined: null,
-  };
-  
-  console.log('📝 User object before save:', user);
-  
-  const result = await (await this.getRepo()).create(user);
-  console.log('💾 Result from database:', result);
-  
-  return result;
-}
+  async createUser(data: CreateUserRequest): Promise<users> {
+    const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
+    const user: users = {
+      id: 0,
+      name: data.name,
+      email: data.email,
+      password_hash: hashedPassword,
+      profile_settings: data.profile_settings ?? {},
+      is_active: data.is_active ?? true,
+      role: data.role ?? user_role.user,
+      created_at: null,
+      updated_at: null,
+      date_joined: null,
+    };
+    return (await this.getRepo()).create(user);
+  }
 
   async updateUser(userId: id, data: UpdateUserRequest): Promise<users> {
     const repo = await this.getRepo();
@@ -88,30 +78,31 @@ async createUser(data: CreateUserRequest): Promise<users> {
     };
 
     const updated = await repo.update(userId, toSave);
-    if (!updated) {
-      throw new Error(`User with id ${userId} could not be updated`);
-    }
-
+    if (!updated) throw new Error(`User with id ${userId} could not be updated`);
     return updated;
   }
 
-async validateUser(email: string, password: string): Promise<id> {
+  async validateUser(email: string, password: string): Promise<id> {
     try {
-        const user = await (await this.getRepo()).getByEmail(email);
-        
-        const passwordMatch = await bcrypt.compare(password, user.password_hash);
-        if (!passwordMatch) {
-            throw new NotFoundException('Invalid credentials');
-        }
-        
-        return user.id;
+      const user = await (await this.getRepo()).getByEmail(email);
+      const passwordMatch = await bcrypt.compare(password, user.password_hash);
+      if (!passwordMatch) throw new NotFoundException('Invalid credentials');
+      return user.id;
     } catch (error: any) {
-        // If user not found or any other error, throw invalid credentials
-        throw new NotFoundException('Invalid credentials');
+      throw new NotFoundException('Invalid credentials');
     }
-}
+  }
 
   async deleteUser(userId: id): Promise<void> {
     return (await this.getRepo()).delete(userId);
+  }
+
+  // NEW: Relationship methods
+  async getUserWithBankTokens(userId: id): Promise<UserEntity> {
+    return (await this.getRepo()).getWithBankTokens(userId);
+  }
+
+  async getUserWithAccounts(userId: id): Promise<UserEntity> {
+    return (await this.getRepo()).getWithAccounts(userId);
   }
 }
