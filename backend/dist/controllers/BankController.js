@@ -51,6 +51,65 @@ class BankController {
             const token = await this.bankService.updateToken(tokenId, req.body);
             res.json(token.toJSON());
         });
+        // ===== OBP DATA SYNC ENDPOINTS =====
+        this.testOBPConnection = (0, errorMiddleware_1.asyncHandler)(async (req, res) => {
+            const userId = req.user_id;
+            const { tokenId } = req.body;
+            const isConnected = await this.bankService.testOBPConnection(userId, tokenId);
+            res.json({
+                connected: isConnected,
+                message: isConnected ? 'OBP connection successful' : 'OBP connection failed',
+                timestamp: new Date().toISOString()
+            });
+        });
+        this.syncAccountsFromOBP = (0, errorMiddleware_1.asyncHandler)(async (req, res) => {
+            const userId = req.user_id;
+            const { tokenId } = req.body;
+            const result = await this.bankService.syncAccountsFromOBP(userId, tokenId);
+            res.json({
+                success: result.errors.length === 0,
+                synced: result.synced,
+                errors: result.errors,
+                accounts: result.accounts,
+                message: `Successfully synced ${result.synced} accounts from OBP`,
+                timestamp: new Date().toISOString()
+            });
+        });
+        this.syncTransactionsFromOBP = (0, errorMiddleware_1.asyncHandler)(async (req, res) => {
+            const userId = req.user_id;
+            const accountId = parseInt(req.params.accountId);
+            const { limit = 50 } = req.body;
+            if (isNaN(accountId)) {
+                return res.status(400).json({ error: 'Invalid account ID' });
+            }
+            const result = await this.bankService.syncTransactionsFromOBP(userId, accountId, limit);
+            res.json({
+                success: result.errors.length === 0,
+                synced: result.synced,
+                errors: result.errors,
+                transactions: result.transactions,
+                message: `Successfully synced ${result.synced} transactions from OBP`,
+                timestamp: new Date().toISOString()
+            });
+        });
+        this.syncAllDataFromOBP = (0, errorMiddleware_1.asyncHandler)(async (req, res) => {
+            const userId = req.user_id;
+            const { transactionLimit = 50 } = req.body;
+            const result = await this.bankService.syncAllDataFromOBP(userId, transactionLimit);
+            res.json({
+                success: result.accounts.errors.length === 0 && result.transactions.errors.length === 0,
+                accounts: {
+                    synced: result.accounts.synced,
+                    errors: result.accounts.errors
+                },
+                transactions: {
+                    synced: result.transactions.synced,
+                    errors: result.transactions.errors
+                },
+                message: `Successfully synced ${result.accounts.synced} accounts and ${result.transactions.synced} transactions from OBP`,
+                timestamp: new Date().toISOString()
+            });
+        });
     }
 }
 exports.BankController = BankController;

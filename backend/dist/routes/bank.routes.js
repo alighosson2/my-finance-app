@@ -13,5 +13,10 @@ const bankController = new BankController_1.BankController(bankService);
 router.post('/tokens', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.connectBankAccount));
 router.get('/tokens', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.getBankConnections));
 router.delete('/tokens/:tokenId', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.revokeBankConnection));
+// OBP Data Sync routes (all require authentication)
+router.post('/sync/test', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.testOBPConnection));
+router.post('/sync/accounts', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.syncAccountsFromOBP));
+router.post('/sync/transactions/:accountId', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.syncTransactionsFromOBP));
+router.post('/sync/all', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.syncAllDataFromOBP));
 exports.default = router;
 //# sourceMappingURL=bank.routes.js.map

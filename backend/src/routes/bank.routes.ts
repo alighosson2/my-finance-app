@@ -15,4 +15,10 @@ router.post('/tokens', authenticate, asyncHandler(bankController.connectBankAcco
 router.get('/tokens', authenticate, asyncHandler(bankController.getBankConnections));
 router.delete('/tokens/:tokenId', authenticate, asyncHandler(bankController.revokeBankConnection));
 
+// OBP Data Sync routes (all require authentication)
+router.post('/sync/test', authenticate, asyncHandler(bankController.testOBPConnection));
+router.post('/sync/accounts', authenticate, asyncHandler(bankController.syncAccountsFromOBP));
+router.post('/sync/transactions/:accountId', authenticate, asyncHandler(bankController.syncTransactionsFromOBP));
+router.post('/sync/all', authenticate, asyncHandler(bankController.syncAllDataFromOBP));
+
 export default router;
