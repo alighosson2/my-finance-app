@@ -6,7 +6,9 @@ const client_1 = require("@prisma/client");
 Object.defineProperty(exports, "TransactionType", { enumerable: true, get: function () { return client_1.transaction_type; } });
 // 3. Entity class with business logic
 class TransactionEntity {
-    constructor(id, user_id, account_id, amount, transaction_date, description, transaction_type, budget_id = null, group_budget_id = null, category = null, subcategory = null, merchant_name = null, location = null, is_recurring = false, tags = [], created_at = new Date(), updated_at = new Date(), financial_account, user, budget, group_budget) {
+    constructor(id, user_id, account_id, amount, transaction_date, description, transaction_type, budget_id = null, group_budget_id = null, category = null, subcategory = null, merchant_name = null, location = null, is_recurring = false, tags = [], 
+    // OBP Integration fields
+    external_transaction_id = null, import_source = "manual", sync_status = "synced", created_at = new Date(), updated_at = new Date(), financial_account, user, budget, group_budget) {
         this.id = id;
         this.user_id = user_id;
         this.account_id = account_id;
@@ -14,6 +16,9 @@ class TransactionEntity {
         this.transaction_type = transaction_type;
         this.is_recurring = is_recurring;
         this.tags = tags;
+        this.external_transaction_id = external_transaction_id;
+        this.import_source = import_source;
+        this.sync_status = sync_status;
         this.created_at = created_at;
         this.updated_at = updated_at;
         this.financial_account = financial_account;
@@ -99,6 +104,10 @@ class TransactionEntity {
             location: this.location,
             is_recurring: this.is_recurring,
             tags: this.tags,
+            // OBP Integration fields
+            external_transaction_id: this.external_transaction_id,
+            import_source: this.import_source,
+            sync_status: this.sync_status,
             created_at: this.created_at,
             updated_at: this.updated_at,
             financial_account: this.financial_account,
@@ -123,7 +132,11 @@ function toTransactionDto(transaction) {
         transaction_type: transaction.transaction_type,
         merchant_name: transaction.merchant_name,
         is_recurring: transaction.is_recurring,
-        tags: transaction.tags
+        tags: transaction.tags,
+        // OBP Integration fields
+        external_transaction_id: transaction.external_transaction_id,
+        import_source: transaction.import_source,
+        sync_status: transaction.sync_status
     };
 }
 // 6. Helper functions and constants

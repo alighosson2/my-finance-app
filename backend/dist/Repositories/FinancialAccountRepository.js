@@ -6,7 +6,9 @@ const library_1 = require("@prisma/client/runtime/library");
 const ConnectionManager_1 = require("./ConnectionManager");
 const FinancialAccountModel_1 = require("../model/FinancialAccountModel");
 function toFinancialAccountEntity(account) {
-    return new FinancialAccountModel_1.FinancialAccountEntity(account.id, account.user_id, account.bank_token_id, account.account_name, account.account_type, Number(account.balance), account.currency, account.bank_name, account.account_number_masked, account.is_active ?? true, account.created_at ?? new Date(), account.updated_at ?? new Date());
+    return new FinancialAccountModel_1.FinancialAccountEntity(account.id, account.user_id, account.bank_token_id, account.account_name, account.account_type, Number(account.balance), account.currency, account.bank_name, account.account_number_masked, 
+    // OBP Integration fields
+    account.external_account_id || null, account.bank_id || null, account.last_synced_at || null, account.is_active ?? true, account.created_at ?? new Date(), account.updated_at ?? new Date());
 }
 class FinancialAccountRepository {
     constructor() {

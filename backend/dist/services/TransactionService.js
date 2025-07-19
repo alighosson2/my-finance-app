@@ -73,6 +73,10 @@ class TransactionService {
             location: data.location?.trim() || null,
             is_recurring: data.is_recurring || false,
             tags: cleanTags,
+            // OBP Integration fields
+            external_transaction_id: null,
+            import_source: "manual",
+            sync_status: "synced",
             created_at: null,
             updated_at: null,
         };
@@ -121,7 +125,9 @@ class TransactionService {
         if (!updated)
             throw new Error(`Transaction with id ${transactionId} could not be updated`);
         // Convert back to TransactionEntity
-        return new TransactionModel_1.TransactionEntity(updated.id, updated.user_id, updated.account_id, Number(updated.amount), updated.transaction_date, updated.description, updated.transaction_type, updated.budget_id, updated.group_budget_id, updated.category, updated.subcategory, updated.merchant_name, updated.location, updated.is_recurring, updated.tags, updated.created_at, updated.updated_at);
+        return new TransactionModel_1.TransactionEntity(updated.id, updated.user_id, updated.account_id, Number(updated.amount), updated.transaction_date, updated.description, updated.transaction_type, updated.budget_id, updated.group_budget_id, updated.category, updated.subcategory, updated.merchant_name, updated.location, updated.is_recurring, updated.tags, 
+        // OBP Integration fields
+        updated.external_transaction_id || null, updated.import_source || "manual", updated.sync_status || "synced", updated.created_at, updated.updated_at);
     }
     async deleteTransaction(transactionId, userId) {
         const repo = await this.getRepo();

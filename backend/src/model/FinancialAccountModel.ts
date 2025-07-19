@@ -10,6 +10,10 @@ export interface IFinancialAccount {
   currency: string;
   bank_name?: string | null;
   account_number_masked?: string | null;
+  // OBP Integration fields
+  external_account_id?: string | null;
+  bank_id?: string | null;
+  last_synced_at?: Date | null;
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
@@ -26,6 +30,10 @@ export class FinancialAccountEntity implements IFinancialAccount {
     public currency: string,
     public bank_name: string | null,
     public account_number_masked: string | null,
+    // OBP Integration fields
+    public external_account_id: string | null,
+    public bank_id: string | null,
+    public last_synced_at: Date | null,
     public is_active: boolean,
     public created_at: Date,
     public updated_at: Date
@@ -42,6 +50,10 @@ export class FinancialAccountEntity implements IFinancialAccount {
       account.currency,
       account.bank_name,
       account.account_number_masked,
+      // OBP Integration fields (these will be null for existing accounts until we add the actual database fields)
+      (account as any).external_account_id || null,
+      (account as any).bank_id || null,
+      (account as any).last_synced_at || null,
       account.is_active ?? true,
       account.created_at ?? new Date(),
       account.updated_at ?? new Date()

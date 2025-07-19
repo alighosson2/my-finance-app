@@ -26,6 +26,10 @@ function toTransactionEntity(transaction: transactions & {
     transaction.location,
     transaction.is_recurring,
     transaction.tags,
+    // OBP Integration fields
+    (transaction as any).external_transaction_id || null,
+    (transaction as any).import_source || "manual",
+    (transaction as any).sync_status || "synced",
     transaction.created_at,
     transaction.updated_at,
     transaction.financial_accounts,

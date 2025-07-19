@@ -20,6 +20,10 @@ export interface ITransaction {
   location?: string | null;
   is_recurring?: boolean | null;
   tags: string[];
+  // OBP Integration fields
+  external_transaction_id?: string | null;
+  import_source?: string | null;
+  sync_status?: string | null;
   created_at?: Date | null;
   updated_at?: Date | null;
   // Relationships
@@ -56,6 +60,10 @@ export class TransactionEntity implements ITransaction {
     location: string | null = null,
     public is_recurring: boolean | null = false,
     public tags: string[] = [],
+    // OBP Integration fields
+    public external_transaction_id: string | null = null,
+    public import_source: string | null = "manual",
+    public sync_status: string | null = "synced",
     public created_at: Date | null = new Date(),
     public updated_at: Date | null = new Date(),
     public financial_account?: financial_accounts,
@@ -155,6 +163,10 @@ export class TransactionEntity implements ITransaction {
       location: this.location,
       is_recurring: this.is_recurring,
       tags: this.tags,
+      // OBP Integration fields
+      external_transaction_id: this.external_transaction_id,
+      import_source: this.import_source,
+      sync_status: this.sync_status,
       created_at: this.created_at,
       updated_at: this.updated_at,
       financial_account: this.financial_account,
@@ -179,6 +191,10 @@ export interface TransactionDto {
   merchant_name?: string | null;
   is_recurring?: boolean | null;
   tags: string[];
+  // OBP Integration fields
+  external_transaction_id?: string | null;
+  import_source?: string | null;
+  sync_status?: string | null;
 }
 
 export interface CreateTransactionRequest {
@@ -250,7 +266,11 @@ export function toTransactionDto(transaction: TransactionEntity): TransactionDto
     transaction_type: transaction.transaction_type,
     merchant_name: transaction.merchant_name,
     is_recurring: transaction.is_recurring,
-    tags: transaction.tags
+    tags: transaction.tags,
+    // OBP Integration fields
+    external_transaction_id: transaction.external_transaction_id,
+    import_source: transaction.import_source,
+    sync_status: transaction.sync_status
   };
 }
 

@@ -61,7 +61,7 @@ export class TransactionService {
     // Clean and normalize tags
     const cleanTags = this.normalizeTags(data.tags);
 
-    const transaction: transactions = {
+    const transaction: any = {
       id: 0,
       user_id: userId,
       account_id: data.account_id,
@@ -77,6 +77,10 @@ export class TransactionService {
       location: data.location?.trim() || null,
       is_recurring: data.is_recurring || false,
       tags: cleanTags,
+      // OBP Integration fields
+      external_transaction_id: null,
+      import_source: "manual",
+      sync_status: "synced",
       created_at: null,
       updated_at: null,
     };
@@ -149,6 +153,10 @@ export class TransactionService {
       updated.location,
       updated.is_recurring,
       updated.tags,
+      // OBP Integration fields
+      (updated as any).external_transaction_id || null,
+      (updated as any).import_source || "manual",
+      (updated as any).sync_status || "synced",
       updated.created_at,
       updated.updated_at
     );

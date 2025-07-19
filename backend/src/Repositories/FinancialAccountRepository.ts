@@ -16,6 +16,10 @@ function toFinancialAccountEntity(account: financial_accounts & { bank_token_id?
     account.currency,
     account.bank_name,
     account.account_number_masked,
+    // OBP Integration fields
+    (account as any).external_account_id || null,
+    (account as any).bank_id || null,
+    (account as any).last_synced_at || null,
     account.is_active ?? true,
     account.created_at ?? new Date(),
     account.updated_at ?? new Date()

@@ -14,16 +14,18 @@ class TransactionController {
         this.transactionService = transactionService;
     }
     async getAllTransactions(req, res) {
+        logger_1.default.info('📋 getAllTransactions method called');
         try {
             const transactions = await this.transactionService.getAllTransactions();
             res.status(200).json(transactions);
         }
         catch (error) {
-            logger_1.default.error('Error fetching all transactions', error);
-            throw new ServiceException_1.ServiceException('Error fetching transactions');
+            logger_1.default.error('Error fetching all transactions - Full error:', error);
+            throw new ServiceException_1.ServiceException(`Error fetching transactions: ${error.message}`);
         }
     }
     async getTransactionById(req, res) {
+        logger_1.default.info('🔎 getTransactionById method called');
         try {
             const id = req.params.id;
             if (isNaN(Number(id))) {
@@ -36,7 +38,8 @@ class TransactionController {
             if (error.message === 'Transaction not found') {
                 throw new NotFoundException_1.NotFoundException('Transaction not found');
             }
-            throw new ServiceException_1.ServiceException('Error fetching transaction');
+            logger_1.default.error('Error fetching transaction by ID - Full error:', error);
+            throw new ServiceException_1.ServiceException(`Error fetching transaction: ${error.message}`);
         }
     }
     async getTransactionsByUser(req, res) {
@@ -171,6 +174,7 @@ class TransactionController {
         }
     }
     async searchTransactions(req, res) {
+        logger_1.default.info('🔍 searchTransactions method called');
         try {
             const userId = req.user_id || Number(req.query.user_id);
             logger_1.default.info(`Search - Raw request user_id: ${userId}, type: ${typeof userId}`);
@@ -195,6 +199,19 @@ class TransactionController {
                 filters.date_from = new Date(req.query.date_from);
             if (req.query.date_to)
                 filters.date_to = new Date(req.query.date_to);
+            // Amount range filters
+            if (req.query.amount_min)
+                filters.amount_min = Number(req.query.amount_min);
+            if (req.query.amount_max)
+                filters.amount_max = Number(req.query.amount_max);
+            // Recurring filter
+            if (req.query.is_recurring !== undefined)
+                filters.is_recurring = req.query.is_recurring === 'true';
+            // Tags filter
+            if (req.query.tags) {
+                const tags = Array.isArray(req.query.tags) ? req.query.tags : [req.query.tags];
+                filters.tags = tags;
+            }
             logger_1.default.info(`Searching transactions for user ${userId} with filters:`, filters);
             const result = await this.transactionService.searchTransactions(userId, filters, page, limit);
             res.status(200).json({
@@ -217,6 +234,7 @@ class TransactionController {
         }
     }
     async getDashboardSummary(req, res) {
+        logger_1.default.info('🎯 getDashboardSummary method called');
         try {
             const userId = req.user_id;
             logger_1.default.info(`Raw request user_id: ${userId}, type: ${typeof userId}`);

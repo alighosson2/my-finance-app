@@ -75,6 +75,10 @@ export class FinancialAccountService {
         currency: dto.currency || 'USD',
         bank_name: dto.bank_name ?? null,
         account_number_masked: dto.account_number_masked ?? null,
+        // OBP Integration fields
+        external_account_id: null,
+        bank_id: null,
+        last_synced_at: null,
         is_active: dto.is_active ?? true,
         created_at: new Date(),
         updated_at: new Date()
@@ -146,10 +150,14 @@ export class FinancialAccountService {
         currency: dto.currency ?? existing.currency,
         bank_name: dto.bank_name !== undefined ? dto.bank_name : existing.bank_name,
         account_number_masked: dto.account_number_masked !== undefined ? dto.account_number_masked : existing.account_number_masked,
+        // OBP Integration fields (preserve existing values)
+        external_account_id: existing.external_account_id,
+        bank_id: existing.bank_id,
+        last_synced_at: existing.last_synced_at,
         is_active: dto.is_active !== undefined ? dto.is_active : existing.is_active,
         created_at: existing.created_at,
         updated_at: new Date()
-      });
+      } as any);
 
       if (!updated) {
         throw new ServiceException('Failed to update account');
@@ -248,10 +256,14 @@ export class FinancialAccountService {
         currency: account.currency,
         bank_name: account.bank_name,
         account_number_masked: account.account_number_masked,
+        // OBP Integration fields (preserve existing values)
+        external_account_id: account.external_account_id,
+        bank_id: account.bank_id,
+        last_synced_at: account.last_synced_at,
         is_active: false,
         created_at: account.created_at,
         updated_at: new Date()
-      });
+      } as any);
     }
   }
 
