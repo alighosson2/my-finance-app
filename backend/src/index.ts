@@ -16,6 +16,8 @@ import userRoutes from './routes/user.routes';
 import authRoutes from './routes/auth.routes';
 import bankOAuth from './routes/bankOAuth.routes';
 import bankRoutes from './routes/bank.routes';
+import accountRoutes from './routes/financialAccount.routes';
+import transactionRoutes from './routes/transaction.routes';
 
 
 
@@ -38,11 +40,12 @@ app.use(requestLogger);
 app.use(cookieParser());
 
 // ✅ Mount API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/OAuth', bankOAuth);
 app.use('/api/bank', bankRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
-
+app.use('/api/accounts', accountRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 
 // Static frontend
