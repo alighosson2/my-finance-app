@@ -7,7 +7,6 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
 import cookieParser from 'cookie-parser';
-import routes from './routes';
 import requestLogger from './middleware/requestLogger';
 import { HttpException } from './exceptions/HttpException';
 
@@ -42,8 +41,8 @@ app.use(cookieParser());
 // ✅ Mount API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/OAuth', bankOAuth);
-app.use('/api/bank', bankRoutes);
+app.use('/api/bank', bankOAuth);       // OAuth routes at /bank (matches OBP registration)
+app.use('/api/bank/api', bankRoutes);  // Bank API routes at /bank/api
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
 

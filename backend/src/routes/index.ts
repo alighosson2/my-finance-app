@@ -6,16 +6,16 @@ import { authenticate } from "../middleware/auth";
 import BankRoutes from "./bank.routes";
 import OAuthBankRoutes from "./bankOAuth.routes";
 import FinancialAccountRoutes from "./financialAccount.routes";
-//import TransactionRoutes from "./transaction.routes";
+import TransactionRoutes from "./transaction.routes";
 
 const routes = Router();
 
 routes.use('/user',UserRoutes);
-routes.use('/auth',AuthRoutes)
-routes.use('/OAuthbank',OAuthBankRoutes)
-routes.use('/bank',BankRoutes)
+routes.use('/auth',AuthRoutes);
+routes.use('/bank',OAuthBankRoutes);  // OAuth routes: /test, /start, /callback 
+routes.use('/bank/api',BankRoutes);   // Bank API routes under /bank/api to avoid conflicts
 routes.use('/accounts', FinancialAccountRoutes);
-//routes.use('/transactions', TransactionRoutes);
+routes.use('/transactions', TransactionRoutes);
 
 export default routes;
 

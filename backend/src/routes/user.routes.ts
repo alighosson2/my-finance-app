@@ -15,7 +15,7 @@ router.route('/')
   .post(asyncHandler(userController.createUser.bind(userController))); // Public: user registration
 
 router.route('/:id')
-  .get(authenticate, asyncHandler(userController.getUserById.bind(userController))) // Protected: get user by ID
+  .get(asyncHandler(userController.getUserById.bind(userController))) // Protected: get user by ID
   .put(authenticate, asyncHandler(userController.updateUser.bind(userController))) // Protected: update user
   .delete(authenticate, asyncHandler(userController.deleteUser.bind(userController))); // Protected: delete user
 

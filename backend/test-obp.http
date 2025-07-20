@@ -1,0 +1,59 @@
+### OBP Integration Testing File  
+### UPDATED URLS - Make sure you have completed OAuth first: http://localhost:3000/api/bank/oauth/start
+
+### Step 1: Test OBP Connection
+POST http://localhost:3000/api/bank/sync/test
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "tokenId": 1
+}
+
+### Step 2: Sync Accounts from OBP
+POST http://localhost:3000/api/bank/sync/accounts  
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "tokenId": 1
+}
+
+### Step 3: Sync Transactions for Account (replace accountId with real ID)
+POST http://localhost:3000/api/bank/sync/transactions/1
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "limit": 20
+}
+
+### Step 4: Sync All Data (accounts + transactions)
+POST http://localhost:3000/api/bank/sync/all
+Content-Type: application/json  
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "transactionLimit": 50
+}
+
+### Helper: Get your JWT token (login first)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "your-email@example.com",
+  "password": "your-password"
+}
+
+### Helper: Check your bank tokens
+GET http://localhost:3000/api/bank/tokens
+Authorization: Bearer YOUR_JWT_TOKEN
+
+### Helper: Check your accounts
+GET http://localhost:3000/api/accounts
+Authorization: Bearer YOUR_JWT_TOKEN
+
+### Helper: Check your transactions
+GET http://localhost:3000/api/transactions
+Authorization: Bearer YOUR_JWT_TOKEN 

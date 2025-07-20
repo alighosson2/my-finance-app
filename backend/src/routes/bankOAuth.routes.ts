@@ -7,8 +7,8 @@ const router = Router();
 
 router.use(validateOAuthConfig);
 
-router.get('/test-oauth', testOAuthSignature);
-router.get('/connect', startAuth);
-router.get('/callback', authCallback); // This route now matches the OBP configuration
+router.get('/test', testOAuthSignature);
+router.get('/start', startAuth);  // Changed from /connect to /start for clarity
+router.get('/callback', authCallback);
 
 export default router;

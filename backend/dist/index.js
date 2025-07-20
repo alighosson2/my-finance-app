@@ -34,8 +34,8 @@ app.use((0, cookie_parser_1.default)());
 // ✅ Mount API routes
 app.use('/api/auth', auth_routes_1.default);
 app.use('/api/users', user_routes_1.default);
-app.use('/api/OAuth', bankOAuth_routes_1.default);
-app.use('/api/bank', bank_routes_1.default);
+app.use('/api/bank', bankOAuth_routes_1.default); // OAuth routes at /bank (matches OBP registration)
+app.use('/api/bank/api', bank_routes_1.default); // Bank API routes at /bank/api
 app.use('/api/accounts', financialAccount_routes_1.default);
 app.use('/api/transactions', transaction_routes_1.default);
 // Static frontend
