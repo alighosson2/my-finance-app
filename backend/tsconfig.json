@@ -14,10 +14,5 @@
     "rootDir": "./src"                           // Treat `src/` as the root folder for .ts files
   },
   "include": ["src"],                            // Include all files under `src/`, including subfolders
-  "exclude": [
-    "node_modules",
-    "src/services/TransactionService.ts",
-    "src/Repositories/TransactionRepository.ts",
-    "src/model/TransactionModel.ts"
-  ]
+  "exclude": ["node_modules"]
 }

@@ -41,7 +41,7 @@ app.use(cors({
 }));
 // Add middleware
 app.use(requestLogger);
- 
+
 app.use(cookieParser());
 
 // ✅ Mount API routes
@@ -57,15 +57,6 @@ app.use('/api/admin', adminRoutes);    // <-- Add this line
 
 // Static frontend
 app.use(express.static(config.frontendPath));
-
-/*// Public pages
-app.get('/login', (req, res) =>
-  res.sendFile(path.join(config.frontendPath, 'login.html'))
-);
-app.get('/signup', (req, res) =>
-  res.sendFile(path.join(config.frontendPath, 'signup.html'))
-);
-*/
 
 // Error handler
 app.use(
