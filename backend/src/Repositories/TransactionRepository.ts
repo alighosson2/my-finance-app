@@ -8,7 +8,6 @@ function toTransactionEntity(transaction: transactions & {
   financial_accounts?: any;
   user?: any;
   budget?: any;
-  group_budget?: any;
 }): TransactionEntity {
   return new TransactionEntity(
     transaction.id,
@@ -17,25 +16,22 @@ function toTransactionEntity(transaction: transactions & {
     Number(transaction.amount),
     transaction.transaction_date,
     transaction.description,
-    transaction.transaction_type,
-    transaction.budget_id,
-    transaction.group_budget_id,
     transaction.category,
     transaction.subcategory,
+    transaction.transaction_type,
+    transaction.budget_id,
     transaction.merchant_name,
     transaction.location,
     transaction.is_recurring,
     transaction.tags,
-    // OBP Integration fields
-    (transaction as any).external_transaction_id || null,
-    (transaction as any).import_source || "manual",
-    (transaction as any).sync_status || "synced",
+    transaction.external_transaction_id,
+    transaction.import_source,
+    transaction.sync_status,
     transaction.created_at,
     transaction.updated_at,
     transaction.financial_accounts,
     transaction.user,
-    transaction.budget,
-    transaction.group_budget
+    transaction.budget
   );
 }
 
@@ -46,8 +42,7 @@ async function getTransactionEntityById(prisma: PrismaClient, id: number): Promi
     include: {
       financial_accounts: true,
       users: true,
-      budget: true,
-      group_budget: true
+      budget: true
     }
   });
 
@@ -104,7 +99,6 @@ export class TransactionRepository implements ITransactionRepository {
         user_id: item.user_id,
         account_id: item.account_id,
         budget_id: item.budget_id,
-        group_budget_id: item.group_budget_id,
         amount: item.amount,
         transaction_date: item.transaction_date,
         description: item.description,
@@ -131,8 +125,7 @@ export class TransactionRepository implements ITransactionRepository {
       include: {
         financial_accounts: true,
         users: true,
-        budget: true,
-        group_budget: true
+        budget: true
       }
     });
     
@@ -169,7 +162,6 @@ export class TransactionRepository implements ITransactionRepository {
         include: {
           financial_accounts: true,
           budget: true,
-          group_budget: true
         },
         orderBy: { transaction_date: 'desc' },
         skip: offset,
@@ -195,7 +187,6 @@ export class TransactionRepository implements ITransactionRepository {
         include: {
           financial_accounts: true,
           budget: true,
-          group_budget: true
         },
         orderBy: { transaction_date: 'desc' },
         skip: offset,
@@ -251,7 +242,6 @@ export class TransactionRepository implements ITransactionRepository {
         include: {
           financial_accounts: true,
           budget: true,
-          group_budget: true
         },
         orderBy: { transaction_date: 'desc' },
         skip: offset,
@@ -280,7 +270,6 @@ export class TransactionRepository implements ITransactionRepository {
         include: {
           financial_accounts: true,
           budget: true,
-          group_budget: true
         },
         orderBy: { transaction_date: 'desc' },
         skip: offset,
@@ -317,7 +306,6 @@ export class TransactionRepository implements ITransactionRepository {
         include: {
           financial_accounts: true,
           budget: true,
-          group_budget: true
         },
         orderBy: { transaction_date: 'desc' },
         skip: offset,
@@ -351,7 +339,6 @@ export class TransactionRepository implements ITransactionRepository {
       include: {
         financial_accounts: true,
         budget: true,
-        group_budget: true
       },
       orderBy: { transaction_date: 'desc' }
     });
@@ -429,11 +416,21 @@ export class TransactionRepository implements ITransactionRepository {
         financial_accounts: true,
         users: true,
         budget: true,
-        group_budget: true
       }
     });
 
     return transaction ? toTransactionEntity(transaction) : null;
+  }
+
+  // Add missing interface methods
+  async getByUserId(userId: number, page?: number, limit?: number): Promise<TransactionEntity[]> {
+    const result = await this.getTransactionsByUser(userId, page || 1, limit || 50);
+    return result.transactions;
+  }
+
+  async getByAccountId(accountId: number, page?: number, limit?: number): Promise<TransactionEntity[]> {
+    const result = await this.getTransactionsByAccount(accountId, page || 1, limit || 50);
+    return result.transactions;
   }
 }
 

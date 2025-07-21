@@ -191,6 +191,32 @@ export const authCallback = async (req: Request, res: Response): Promise<void> =
     
     console.log('🎉 OAuth flow completed successfully');
     
+    // TODO: Save tokens to database for a specific user
+    // For now, we'll use user ID 1 as a placeholder
+    // In a real app, you'd get the user ID from the session/JWT
+    const userId = 1; // This should come from authenticated session
+    
+    try {
+      // Import BankService dynamically to avoid circular dependency
+      const { BankService } = await import('../services/BankService');
+      const bankService = new BankService();
+      
+      // Save tokens to database
+      await bankService.createToken({
+        user_id: userId,
+        provider: 'obp',
+        access_token,
+        access_token_secret,
+        expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+      });
+      
+      console.log('✅ Tokens saved to database for user', userId);
+      
+    } catch (dbError: any) {
+      console.error('❌ Failed to save tokens to database:', dbError);
+      // Don't fail the entire flow, just log the error
+    }
+    
     res.status(200).json({
       message: 'Bank connected successfully!',
       access_token,

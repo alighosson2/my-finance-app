@@ -4,7 +4,7 @@ import { NotFoundException } from '../exceptions/NotFoundException';
 import { OBPDataService, OBPAccount, OBPTransaction } from './OBPDataService';
 import { FinancialAccountService } from './FinancialAccountService';
 import { TransactionService } from './TransactionService';
-import { CreateFinancialAccountDto } from '../model/FinancialAccountModel';
+import { CreateFinancialAccountDTO } from '../model/FinancialAccountModel';
 import { CreateTransactionRequest } from '../model/TransactionModel';
 import logger from '../util/logger';
 
@@ -191,18 +191,18 @@ export class BankService {
       for (const obpAccount of obpAccounts) {
         try {
           // Check if account already exists
-          const existingAccounts = await this.accountService.getAccountsByUser(userId);
-          const existingAccount = existingAccounts.find(
-            acc => acc.external_account_id === obpAccount.id
+          const existingAccountsResult = await this.accountService.getAllAccounts(userId);
+          const existingAccount = existingAccountsResult.accounts.find(
+            (acc: any) => acc.external_account_id === obpAccount.id
           );
 
-          if (existingAccount) {
+          if (existingAccount && existingAccount.id) {
             // Update existing account
-            await this.updateAccountFromOBP(existingAccount.id, obpAccount, token.id);
+            await this.updateAccountFromOBP(existingAccount.id, obpAccount, token.id, userId);
             logger.info(`✅ Updated existing account: ${obpAccount.label}`);
           } else {
             // Create new account
-            const accountDto: CreateFinancialAccountDto = {
+            const accountDto: CreateFinancialAccountDTO = {
               user_id: userId,
               bank_token_id: token.id,
               account_name: obpAccount.label,
@@ -210,17 +210,21 @@ export class BankService {
               balance: parseFloat(obpAccount.balance.amount),
               currency: obpAccount.balance.currency,
               bank_name: `OBP Demo Bank (${obpAccount.bank_id})`,
-              account_number_masked: `****${obpAccount.id.slice(-4)}`
+              account_number_masked: `****${obpAccount.id.slice(-4)}`,
+              external_account_id: obpAccount.id,
+              bank_id: obpAccount.bank_id
             };
 
             const newAccount = await this.accountService.createAccount(accountDto);
             
-            // Update with OBP-specific fields
-            await this.accountService.updateAccount(newAccount.id, {
-              external_account_id: obpAccount.id,
-              bank_id: obpAccount.bank_id,
-              last_synced_at: new Date()
-            } as any);
+            // Update with OBP-specific fields - ensure ID exists
+            if (newAccount.id) {
+              await this.accountService.updateAccount(newAccount.id, {
+                external_account_id: obpAccount.id,
+                bank_id: obpAccount.bank_id,
+                last_synced_at: new Date()
+              } as any, userId);
+            }
 
             logger.info(`✅ Created new account: ${obpAccount.label}`);
           }
@@ -272,7 +276,7 @@ export class BankService {
       }
 
       // Get the account to sync
-      const account = await this.accountService.getAccountById(accountId);
+      const account = await this.accountService.getAccountById(accountId, userId);
       if (!account || account.user_id !== userId) {
         throw new NotFoundException('Account not found or does not belong to user');
       }
@@ -342,11 +346,11 @@ export class BankService {
       // Update account sync timestamp
       await this.accountService.updateAccount(accountId, {
         last_synced_at: new Date()
-      } as any);
+      } as any, userId);
 
       logger.info(`🎉 OBP transaction sync completed. Synced: ${result.synced}, Errors: ${result.errors.length}`);
       return result;
-
+      
     } catch (error: any) {
       logger.error('❌ OBP transaction sync failed:', error);
       result.errors.push(`Sync failed: ${error.message}`);
@@ -371,14 +375,16 @@ export class BankService {
       let totalTransactionsSynced = 0;
       const transactionErrors: string[] = [];
 
-      const userAccounts = await this.accountService.getAccountsByUser(userId);
-      const obpAccounts = userAccounts.filter(acc => acc.external_account_id);
+      const userAccountsResult = await this.accountService.getAllAccounts(userId);
+      const obpAccounts = userAccountsResult.accounts.filter((acc: any) => acc.external_account_id);
 
       for (const account of obpAccounts) {
         try {
-          const txResult = await this.syncTransactionsFromOBP(userId, account.id, transactionLimit);
-          totalTransactionsSynced += txResult.synced;
-          transactionErrors.push(...txResult.errors);
+          if (account.id) {
+            const txResult = await this.syncTransactionsFromOBP(userId, account.id, transactionLimit);
+            totalTransactionsSynced += txResult.synced;
+            transactionErrors.push(...txResult.errors);
+          }
         } catch (error: any) {
           transactionErrors.push(`Account "${account.account_name}": ${error.message}`);
         }
@@ -399,7 +405,7 @@ export class BankService {
 
   // === PRIVATE HELPER METHODS ===
 
-  private async updateAccountFromOBP(accountId: number, obpAccount: OBPAccount, tokenId: number): Promise<void> {
+  private async updateAccountFromOBP(accountId: number, obpAccount: OBPAccount, tokenId: number, userId: number): Promise<void> {
     await this.accountService.updateAccount(accountId, {
       account_name: obpAccount.label,
       balance: parseFloat(obpAccount.balance.amount),
@@ -408,7 +414,7 @@ export class BankService {
       external_account_id: obpAccount.id,
       bank_id: obpAccount.bank_id,
       last_synced_at: new Date()
-    } as any);
+    } as any, userId);
   }
 
   private categorizeTransaction(description: string): string {

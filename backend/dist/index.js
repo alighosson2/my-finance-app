@@ -20,6 +20,8 @@ const bankOAuth_routes_1 = __importDefault(require("./routes/bankOAuth.routes"))
 const bank_routes_1 = __importDefault(require("./routes/bank.routes"));
 const financialAccount_routes_1 = __importDefault(require("./routes/financialAccount.routes"));
 const transaction_routes_1 = __importDefault(require("./routes/transaction.routes"));
+const tax_routes_1 = __importDefault(require("./routes/tax.routes"));
+const budget_routes_1 = __importDefault(require("./routes/budget.routes"));
 const app = (0, express_1.default)();
 // Security
 app.use((0, helmet_1.default)());
@@ -27,7 +29,23 @@ app.use((0, helmet_1.default)());
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
 // CORS
-app.use((0, cors_1.default)({ credentials: true, origin: true }));
+// index.ts
+app.use((0, cors_1.default)({
+    origin: [
+        'http://localhost:3000', // Web
+        'http://127.0.0.1:3000', // Web
+        'http://localhost:8080', // Flutter web
+        'http://localhost:8081', // Flutter web alternative
+        'capacitor://localhost', // Flutter mobile (Capacitor)
+        'ionic://localhost', // Ionic/Capacitor
+        'http://localhost:4200', // Angular dev server
+        'http://localhost:3001', // React dev server
+        'http://localhost:5173' // Vite dev server
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
 // Add middleware
 app.use(requestLogger_1.default);
 app.use((0, cookie_parser_1.default)());
@@ -38,6 +56,8 @@ app.use('/api/bank', bankOAuth_routes_1.default); // OAuth routes at /bank (matc
 app.use('/api/bank/api', bank_routes_1.default); // Bank API routes at /bank/api
 app.use('/api/accounts', financialAccount_routes_1.default);
 app.use('/api/transactions', transaction_routes_1.default);
+app.use('/api/tax', tax_routes_1.default);
+app.use('/api/budgets', budget_routes_1.default);
 // Static frontend
 app.use(express_1.default.static(config_1.default.frontendPath));
 /*// Public pages

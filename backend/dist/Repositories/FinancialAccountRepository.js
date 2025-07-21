@@ -2,14 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FinancialAccountRepository = void 0;
 exports.createFinancialAccountRepository = createFinancialAccountRepository;
-const library_1 = require("@prisma/client/runtime/library");
 const ConnectionManager_1 = require("./ConnectionManager");
-const FinancialAccountModel_1 = require("../model/FinancialAccountModel");
-function toFinancialAccountEntity(account) {
-    return new FinancialAccountModel_1.FinancialAccountEntity(account.id, account.user_id, account.bank_token_id, account.account_name, account.account_type, Number(account.balance), account.currency, account.bank_name, account.account_number_masked, 
-    // OBP Integration fields
-    account.external_account_id || null, account.bank_id || null, account.last_synced_at || null, account.is_active ?? true, account.created_at ?? new Date(), account.updated_at ?? new Date());
-}
 class FinancialAccountRepository {
     constructor() {
         this.prisma = null;
@@ -17,228 +10,116 @@ class FinancialAccountRepository {
     async init() {
         this.prisma = await ConnectionManager_1.ConnectionManager.getConnection();
     }
-    ensureConnected() {
-        if (!this.prisma)
-            throw new Error('Database not initialized');
+    ensureConnection() {
+        if (!this.prisma) {
+            throw new Error('Repository not initialized. Call init() first.');
+        }
+        return this.prisma;
     }
-    parseId(id) {
-        if (id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        return id;
-    }
-    async create(account) {
-        this.ensureConnected();
-        // Validate required fields
-        if (!account.user_id || account.user_id <= 0) {
-            throw new Error('Valid user_id is required');
-        }
-        if (!account.account_name || account.account_name.trim() === '') {
-            throw new Error('Account name is required');
-        }
-        if (!account.account_type || account.account_type.toString().trim() === '') {
-            throw new Error('Account type is required');
-        }
-        // Create the account without the id field (auto-generated)
-        const createData = {
-            user_id: account.user_id,
-            bank_token_id: account.bank_token_id,
-            account_name: account.account_name,
-            account_type: account.account_type,
-            balance: new library_1.Decimal(Number(account.balance) || 0),
-            currency: account.currency || 'USD',
-            bank_name: account.bank_name,
-            account_number_masked: account.account_number_masked,
-            is_active: account.is_active ?? true,
-            created_at: account.created_at || new Date(),
-            updated_at: account.updated_at || new Date()
-        };
-        const result = await this.prisma.financial_accounts.create({
-            data: createData
+    async create(data) {
+        const prisma = this.ensureConnection();
+        const result = await prisma.financial_accounts.create({
+            data: {
+                ...data,
+                created_at: new Date(),
+                updated_at: new Date(),
+                is_active: true,
+            },
         });
         return result;
     }
-    async update(id, account) {
-        this.ensureConnected();
-        this.parseId(id);
-        try {
-            const existing = await this.prisma.financial_accounts.findUnique({
-                where: { id },
-            });
-            if (!existing) {
-                return null;
-            }
-            const updateData = {
-                bank_token_id: account.bank_token_id,
-                account_name: account.account_name,
-                account_type: account.account_type,
-                balance: new library_1.Decimal(Number(account.balance)),
-                currency: account.currency,
-                bank_name: account.bank_name,
-                account_number_masked: account.account_number_masked,
-                is_active: account.is_active,
-                updated_at: new Date()
-            };
-            return this.prisma.financial_accounts.update({
-                where: { id },
-                data: updateData
-            });
-        }
-        catch (error) {
-            throw new Error(`Failed to update account: ${error.message}`);
-        }
+    async findById(id) {
+        const prisma = this.ensureConnection();
+        return await prisma.financial_accounts.findUnique({
+            where: { id },
+        });
     }
+    // Required by IRepository interface
     async get(id) {
-        this.ensureConnected();
-        this.parseId(id);
-        try {
-            const account = await this.prisma.financial_accounts.findUnique({
-                where: { id },
-            });
-            if (!account) {
-                throw new Error('Account not found');
-            }
-            return account;
-        }
-        catch (error) {
-            if (error.message === 'Account not found') {
-                throw error;
-            }
-            throw new Error(`Failed to get account: ${error.message}`);
-        }
+        return this.findById(id);
     }
     async getAll() {
-        this.ensureConnected();
-        return this.prisma.financial_accounts.findMany();
+        const prisma = this.ensureConnection();
+        return await prisma.financial_accounts.findMany();
+    }
+    async findMany(options) {
+        const prisma = this.ensureConnection();
+        return await prisma.financial_accounts.findMany(options || {});
+    }
+    async update(id, data) {
+        const prisma = this.ensureConnection();
+        return await prisma.financial_accounts.update({
+            where: { id },
+            data: {
+                ...data,
+                updated_at: new Date(),
+            },
+        });
     }
     async delete(id) {
-        this.ensureConnected();
-        this.parseId(id);
-        try {
-            const existing = await this.prisma.financial_accounts.findUnique({
-                where: { id },
-            });
-            if (!existing) {
-                throw new Error('Account not found');
-            }
-            await this.prisma.financial_accounts.delete({
-                where: { id },
-            });
-        }
-        catch (error) {
-            if (error.message === 'Account not found') {
-                throw error;
-            }
-            throw new Error(`Failed to delete account: ${error.message}`);
-        }
+        const prisma = this.ensureConnection();
+        await prisma.financial_accounts.delete({
+            where: { id },
+        });
     }
-    // Financial Account-specific methods
-    async getAccountsByUser(userId) {
-        this.ensureConnected();
-        if (userId <= 0) {
-            throw new Error('Invalid user ID');
-        }
-        try {
-            const accounts = await this.prisma.financial_accounts.findMany({
+    async count(where) {
+        const prisma = this.ensureConnection();
+        return await prisma.financial_accounts.count({ where: where || {} });
+    }
+    async findByUserId(userId, page = 1, limit = 10) {
+        const prisma = this.ensureConnection();
+        const [accounts, total] = await Promise.all([
+            prisma.financial_accounts.findMany({
                 where: { user_id: userId },
-                orderBy: { created_at: 'desc' }
-            });
-            return accounts.map(toFinancialAccountEntity);
-        }
-        catch (error) {
-            throw new Error(`Failed to get accounts: ${error.message}`);
-        }
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: { created_at: 'desc' },
+            }),
+            prisma.financial_accounts.count({
+                where: { user_id: userId },
+            }),
+        ]);
+        return { accounts, total };
     }
-    async getAccountById(id) {
-        this.ensureConnected();
-        this.parseId(id);
-        try {
-            const account = await this.prisma.financial_accounts.findUnique({
-                where: { id },
-            });
-            return account ? toFinancialAccountEntity(account) : null;
-        }
-        catch (error) {
-            throw new Error(`Failed to get account: ${error.message}`);
-        }
+    async findByExternalAccountId(externalAccountId) {
+        const prisma = this.ensureConnection();
+        // Use raw query to avoid Prisma type issues with custom fields
+        return await prisma.$queryRaw `
+      SELECT * FROM financial_accounts 
+      WHERE external_account_id = ${externalAccountId} 
+      LIMIT 1
+    `;
     }
-    async getActiveAccountsByUser(userId) {
-        this.ensureConnected();
-        if (userId <= 0) {
-            throw new Error('Invalid user ID');
-        }
-        try {
-            const accounts = await this.prisma.financial_accounts.findMany({
-                where: {
-                    user_id: userId,
-                    is_active: true
-                },
-                orderBy: { created_at: 'desc' }
-            });
-            return accounts.map(toFinancialAccountEntity);
-        }
-        catch (error) {
-            throw new Error(`Failed to get active accounts: ${error.message}`);
-        }
+    async updateSyncStatus(accountId, syncData) {
+        const prisma = this.ensureConnection();
+        // Use raw query for custom fields
+        await prisma.$executeRaw `
+      UPDATE financial_accounts 
+      SET last_synced_at = ${syncData.last_synced_at}, updated_at = NOW()
+      WHERE id = ${accountId}
+    `;
     }
-    async getAccountSummaryByUser(userId) {
-        this.ensureConnected();
-        if (userId <= 0) {
-            throw new Error('Invalid user ID');
-        }
-        try {
-            const accounts = await this.prisma.financial_accounts.findMany({
-                where: { user_id: userId }
-            });
-            const totalBalance = accounts.reduce((sum, account) => sum + Number(account.balance), 0);
-            const accountsByType = accounts.reduce((acc, account) => {
-                acc[account.account_type] = (acc[account.account_type] || 0) + 1;
+    async getUserAccountSummary(userId) {
+        const prisma = this.ensureConnection();
+        const accounts = await prisma.financial_accounts.findMany({
+            where: { user_id: userId, is_active: true },
+        });
+        return {
+            total_accounts: accounts.length,
+            total_balance: accounts.reduce((sum, acc) => sum + (parseFloat(acc.balance?.toString() || '0') || 0), 0),
+            accounts_by_type: accounts.reduce((acc, account) => {
+                const type = account.account_type;
+                acc[type] = (acc[type] || 0) + 1;
                 return acc;
-            }, {});
-            const currencyBreakdown = accounts.reduce((acc, account) => {
-                acc[account.currency] = (acc[account.currency] || 0) + Number(account.balance);
-                return acc;
-            }, {});
-            return {
-                total_balance: totalBalance,
-                accounts_by_type: accountsByType,
-                currency_breakdown: currencyBreakdown,
-                active_accounts: accounts.filter(a => a.is_active).length,
-                total_accounts: accounts.length
-            };
-        }
-        catch (error) {
-            throw new Error(`Failed to get account summary: ${error.message}`);
-        }
-    }
-    async updateBalance(id, balance) {
-        this.ensureConnected();
-        this.parseId(id);
-        try {
-            const existing = await this.prisma.financial_accounts.findUnique({
-                where: { id },
-            });
-            if (!existing) {
-                return null;
-            }
-            const updated = await this.prisma.financial_accounts.update({
-                where: { id },
-                data: {
-                    balance: new library_1.Decimal(balance),
-                    updated_at: new Date()
-                }
-            });
-            return toFinancialAccountEntity(updated);
-        }
-        catch (error) {
-            throw new Error(`Failed to update balance: ${error.message}`);
-        }
+            }, {}),
+        };
     }
 }
 exports.FinancialAccountRepository = FinancialAccountRepository;
+// Factory function to create and initialize the repository
 async function createFinancialAccountRepository() {
-    const repo = new FinancialAccountRepository();
-    await repo.init();
-    return repo;
+    const repository = new FinancialAccountRepository();
+    await repository.init();
+    return repository;
 }
 //# sourceMappingURL=FinancialAccountRepository.js.map

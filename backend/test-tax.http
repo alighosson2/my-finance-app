@@ -1,0 +1,278 @@
+### ===== TAX ENDPOINTS TESTING =====
+### Test all tax functionality endpoints
+
+@baseUrl = http://localhost:3000/api
+@authToken = {{your_jwt_token_here}}
+
+### STEP 1: Login to get JWT token (if needed)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "yourpassword"
+}
+
+### STEP 2: Create a Tax Record for Current Year
+POST {{baseUrl}}/tax
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "tax_year": 2024,
+  "filing_status": "single",
+  "deductions": 5000,
+  "credits": 2000
+}
+
+### STEP 3: Get All Tax Records
+GET {{baseUrl}}/tax
+Authorization: Bearer {{authToken}}
+
+### STEP 4: Get Tax Record by Year
+GET {{baseUrl}}/tax/year/2024
+Authorization: Bearer {{authToken}}
+
+### STEP 5: Calculate Tax Estimate (without saving)
+POST {{baseUrl}}/tax/calculate
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "tax_year": 2024,
+  "filing_status": "single"
+}
+
+### STEP 6: Update Tax Record Filing Status
+PUT {{baseUrl}}/tax/1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "filing_status": "married_jointly",
+  "deductions": 7500,
+  "credits": 3000
+}
+
+### STEP 7: Refresh Tax Calculations (recalculate with latest transactions)
+POST {{baseUrl}}/tax/year/2024/refresh
+Authorization: Bearer {{authToken}}
+
+### STEP 8: Generate Comprehensive Tax Report
+GET {{baseUrl}}/tax/year/2024/report
+Authorization: Bearer {{authToken}}
+
+### STEP 9: Get Available Tax Years
+GET {{baseUrl}}/tax/years
+Authorization: Bearer {{authToken}}
+
+### STEP 10: Create Tax Record for Previous Year
+POST {{baseUrl}}/tax
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "tax_year": 2023,
+  "filing_status": "single",
+  "deductions": 4500
+}
+
+### STEP 11: Test Different Filing Statuses
+POST {{baseUrl}}/tax/calculate
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "tax_year": 2024,
+  "filing_status": "married_jointly"
+}
+
+### STEP 12: Test Head of Household Filing Status
+POST {{baseUrl}}/tax/calculate
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "tax_year": 2024,
+  "filing_status": "head_of_household"
+}
+
+### STEP 13: Get Specific Tax Record by ID
+GET {{baseUrl}}/tax/1
+Authorization: Bearer {{authToken}}
+
+### STEP 14: Test Invalid Data (should return errors)
+POST {{baseUrl}}/tax
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "tax_year": 2030,
+  "filing_status": "invalid_status"
+}
+
+### STEP 15: Delete Tax Record
+DELETE {{baseUrl}}/tax/2
+Authorization: Bearer {{authToken}}
+
+### ===== TRANSACTION INTEGRATION TESTS =====
+### These tests check how tax calculations work with actual transaction data
+
+### Prerequisites: Make sure you have some transactions in your system first
+### You can use the transaction sync endpoints to populate data:
+
+### Sync some transactions from OBP (if you have OAuth set up)
+POST {{baseUrl}}/bank/api/sync/transactions
+Authorization: Bearer {{authToken}}
+
+### Then test tax calculations with real transaction data
+POST {{baseUrl}}/tax/calculate
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "tax_year": 2024,
+  "filing_status": "single"
+}
+
+### ===== ERROR TESTING =====
+
+### Test invalid tax year
+POST {{baseUrl}}/tax
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "tax_year": 2019,
+  "filing_status": "single"
+}
+
+### Test missing required fields
+POST {{baseUrl}}/tax
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "deductions": 5000
+}
+
+### Test unauthorized access (remove Authorization header)
+GET {{baseUrl}}/tax
+
+### Test non-existent tax record
+GET {{baseUrl}}/tax/999
+Authorization: Bearer {{authToken}}
+
+### Test non-existent year
+GET {{baseUrl}}/tax/year/2010
+Authorization: Bearer {{authToken}}
+
+### ===== EXPECTED RESPONSES =====
+
+/*
+STEP 2 Response (Create Tax Record):
+{
+  "message": "Tax record created successfully",
+  "data": {
+    "id": 1,
+    "user_id": 1,
+    "tax_year": 2024,
+    "taxable_income": 50000.0,
+    "estimated_tax": 8000.0,
+    "tax_bracket": "22%",
+    "filing_status": "single",
+    "deductions": 5000.0,
+    "credits": 2000.0,
+    "effective_rate": 16.0,
+    "is_current_year": true,
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
+}
+
+STEP 5 Response (Calculate Tax Estimate):
+{
+  "message": "Tax estimate calculated successfully",
+  "data": {
+    "taxableIncome": 45000,
+    "federalTax": 7500,
+    "effectiveRate": 16.7,
+    "marginalRate": 22.0,
+    "taxBracket": "22%",
+    "deductions": 14600,
+    "credits": 0,
+    "netTax": 7500,
+    "breakdown": [
+      {
+        "bracket": "10%",
+        "min": 0,
+        "max": 11000,
+        "rate": 0.1,
+        "incomeInBracket": 11000,
+        "taxOnBracket": 1100
+      },
+      {
+        "bracket": "12%",
+        "min": 11000,
+        "max": 44725,
+        "rate": 0.12,
+        "incomeInBracket": 33725,
+        "taxOnBracket": 4047
+      },
+      {
+        "bracket": "22%",
+        "min": 44725,
+        "max": 95375,
+        "rate": 0.22,
+        "incomeInBracket": 275,
+        "taxOnBracket": 60.5
+      }
+    ]
+  }
+}
+
+STEP 8 Response (Tax Report):
+{
+  "message": "Tax report generated successfully",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "Tax User",
+      "email": "user@example.com"
+    },
+    "taxYear": 2024,
+    "filingStatus": "single",
+    "calculation": { ... },
+    "incomeBreakdown": {
+      "totalIncome": 60000,
+      "salaryIncome": 55000,
+      "businessIncome": 3000,
+      "investmentIncome": 2000,
+      "otherIncome": 0,
+      "totalDeductions": 14600,
+      "standardDeduction": 14600,
+      "itemizedDeductions": 5000,
+      "taxableIncome": 45400
+    },
+    "deductions": [
+      {
+        "category": "business_expense",
+        "description": "Business expenses and supplies",
+        "amount": 2500,
+        "transactionCount": 15,
+        "isDeductible": true,
+        "estimatedSavings": 550
+      }
+    ],
+    "quarterlyEstimates": [
+      {
+        "quarter": "Q1",
+        "dueDate": "2024-04-15T00:00:00Z",
+        "estimatedPayment": 1875,
+        "isPaid": false
+      }
+    ],
+    "generatedAt": "2024-01-15T10:45:00Z"
+  }
+}
+*/ 

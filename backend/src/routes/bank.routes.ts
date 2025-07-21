@@ -10,10 +10,10 @@ const router = Router();
 const bankService = new BankService();
 const bankController = new BankController(bankService);
 
-// Token management routes (all require authentication)
-router.post('/tokens', authenticate, asyncHandler(bankController.connectBankAccount));
-router.get('/tokens', authenticate, asyncHandler(bankController.getBankConnections));
-router.delete('/tokens/:tokenId', authenticate, asyncHandler(bankController.revokeBankConnection));
+// Token management routes
+router.post('/tokens',authenticate, asyncHandler(bankController.connectBankAccount));
+router.get('/tokens',authenticate, asyncHandler(bankController.getBankConnections));
+router.delete('/tokens/:tokenId',authenticate,asyncHandler(bankController.revokeBankConnection));
 
 // OBP Data Sync routes (all require authentication)
 router.post('/sync/test', authenticate, asyncHandler(bankController.testOBPConnection));

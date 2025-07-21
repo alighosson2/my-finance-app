@@ -1,114 +1,59 @@
 import { financial_accounts, account_type } from '@prisma/client';
 
-export interface IFinancialAccount {
-  id: number;
+export interface FinancialAccountModel {
+  id?: number;
   user_id: number;
   bank_token_id?: number | null;
   account_name: string;
-  account_type: account_type; // Use the Prisma enum type
-  balance: number;
+  account_type: account_type;
+  balance: any; // Handles both number and Prisma Decimal
   currency: string;
   bank_name?: string | null;
   account_number_masked?: string | null;
+  
   // OBP Integration fields
   external_account_id?: string | null;
   bank_id?: string | null;
   last_synced_at?: Date | null;
-  is_active: boolean;
-  created_at: Date;
-  updated_at: Date;
+  
+  is_active: boolean | null;
+  created_at?: Date | null;
+  updated_at?: Date | null;
 }
 
-export class FinancialAccountEntity implements IFinancialAccount {
-  constructor(
-    public id: number,
-    public user_id: number,
-    public bank_token_id: number | null,
-    public account_name: string,
-    public account_type: account_type, // Use the Prisma enum type
-    public balance: number,
-    public currency: string,
-    public bank_name: string | null,
-    public account_number_masked: string | null,
-    // OBP Integration fields
-    public external_account_id: string | null,
-    public bank_id: string | null,
-    public last_synced_at: Date | null,
-    public is_active: boolean,
-    public created_at: Date,
-    public updated_at: Date
-  ) {}
-
-  static fromPrisma(account: financial_accounts & { bank_token_id?: number | null }): FinancialAccountEntity {
-    return new FinancialAccountEntity(
-      account.id,
-      account.user_id,
-      account.bank_token_id || null,
-      account.account_name,
-      account.account_type,
-      Number(account.balance),
-      account.currency,
-      account.bank_name,
-      account.account_number_masked,
-      // OBP Integration fields (these will be null for existing accounts until we add the actual database fields)
-      (account as any).external_account_id || null,
-      (account as any).bank_id || null,
-      (account as any).last_synced_at || null,
-      account.is_active ?? true,
-      account.created_at ?? new Date(),
-      account.updated_at ?? new Date()
-    );
-  }
-
-  toJSON() {
-    return {
-      id: this.id,
-      user_id: this.user_id,
-      bank_token_id: this.bank_token_id,
-      account_name: this.account_name,
-      account_type: this.account_type,
-      balance: this.balance,
-      currency: this.currency,
-      bank_name: this.bank_name,
-      account_number_masked: this.account_number_masked,
-      is_active: this.is_active,
-      created_at: this.created_at,
-      updated_at: this.updated_at
-    };
-  }
-}
-
-export interface CreateFinancialAccountDto {
+export interface CreateFinancialAccountDTO {
   user_id: number;
-  bank_token_id?: number;
+  bank_token_id?: number | null;
   account_name: string;
-  account_type: string; // Keep as string for input validation
-  balance?: number;
-  currency?: string;
-  bank_name?: string;
-  account_number_masked?: string;
-  is_active?: boolean;
+  account_type: account_type;
+  balance: any;
+  currency: string;
+  bank_name?: string | null;
+  account_number_masked?: string | null;
+  external_account_id?: string | null;
+  bank_id?: string | null;
 }
 
-export interface UpdateFinancialAccountDto {
-  bank_token_id?: number | null;
+export interface UpdateFinancialAccountDTO {
   account_name?: string;
-  account_type?: string; // Keep as string for input validation
-  balance?: number;
+  account_type?: account_type | string;  // Allow both enum and string for flexibility
+  balance?: any;
   currency?: string;
   bank_name?: string | null;
   account_number_masked?: string | null;
-  is_active?: boolean;
+  external_account_id?: string | null;
+  bank_id?: string | null;
+  last_synced_at?: Date | null;
+  is_active?: boolean | null;
 }
 
-export interface AccountBalanceUpdateDto {
-  balance: number;
-}
-
-export interface AccountSummary {
+export interface FinancialAccountSummary {
+  total_accounts: number;
   total_balance: number;
   accounts_by_type: Record<string, number>;
-  currency_breakdown: Record<string, number>;
-  active_accounts: number;
-  total_accounts: number;
+  last_sync_status: {
+    synced_accounts: number;
+    needs_sync: number;
+    sync_errors: number;
+  };
 }

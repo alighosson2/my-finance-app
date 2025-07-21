@@ -6,9 +6,7 @@ const client_1 = require("@prisma/client");
 const ConnectionManager_1 = require("./ConnectionManager");
 const TransactionModel_1 = require("../model/TransactionModel");
 function toTransactionEntity(transaction) {
-    return new TransactionModel_1.TransactionEntity(transaction.id, transaction.user_id, transaction.account_id, Number(transaction.amount), transaction.transaction_date, transaction.description, transaction.transaction_type, transaction.budget_id, transaction.group_budget_id, transaction.category, transaction.subcategory, transaction.merchant_name, transaction.location, transaction.is_recurring, transaction.tags, 
-    // OBP Integration fields
-    transaction.external_transaction_id || null, transaction.import_source || "manual", transaction.sync_status || "synced", transaction.created_at, transaction.updated_at, transaction.financial_accounts, transaction.user, transaction.budget, transaction.group_budget);
+    return new TransactionModel_1.TransactionEntity(transaction.id, transaction.user_id, transaction.account_id, Number(transaction.amount), transaction.transaction_date, transaction.description, transaction.category, transaction.subcategory, transaction.transaction_type, transaction.budget_id, transaction.merchant_name, transaction.location, transaction.is_recurring, transaction.tags, transaction.external_transaction_id, transaction.import_source, transaction.sync_status, transaction.created_at, transaction.updated_at, transaction.financial_accounts, transaction.user, transaction.budget);
 }
 // Helper function to get TransactionEntity by ID
 async function getTransactionEntityById(prisma, id) {
@@ -17,8 +15,7 @@ async function getTransactionEntityById(prisma, id) {
         include: {
             financial_accounts: true,
             users: true,
-            budget: true,
-            group_budget: true
+            budget: true
         }
     });
     return transaction ? toTransactionEntity(transaction) : null;
@@ -68,7 +65,6 @@ class TransactionRepository {
                 user_id: item.user_id,
                 account_id: item.account_id,
                 budget_id: item.budget_id,
-                group_budget_id: item.group_budget_id,
                 amount: item.amount,
                 transaction_date: item.transaction_date,
                 description: item.description,
@@ -92,8 +88,7 @@ class TransactionRepository {
             include: {
                 financial_accounts: true,
                 users: true,
-                budget: true,
-                group_budget: true
+                budget: true
             }
         });
         if (!transaction)
@@ -124,7 +119,6 @@ class TransactionRepository {
                 include: {
                     financial_accounts: true,
                     budget: true,
-                    group_budget: true
                 },
                 orderBy: { transaction_date: 'desc' },
                 skip: offset,
@@ -146,7 +140,6 @@ class TransactionRepository {
                 include: {
                     financial_accounts: true,
                     budget: true,
-                    group_budget: true
                 },
                 orderBy: { transaction_date: 'desc' },
                 skip: offset,
@@ -204,7 +197,6 @@ class TransactionRepository {
                 include: {
                     financial_accounts: true,
                     budget: true,
-                    group_budget: true
                 },
                 orderBy: { transaction_date: 'desc' },
                 skip: offset,
@@ -229,7 +221,6 @@ class TransactionRepository {
                 include: {
                     financial_accounts: true,
                     budget: true,
-                    group_budget: true
                 },
                 orderBy: { transaction_date: 'desc' },
                 skip: offset,
@@ -262,7 +253,6 @@ class TransactionRepository {
                 include: {
                     financial_accounts: true,
                     budget: true,
-                    group_budget: true
                 },
                 orderBy: { transaction_date: 'desc' },
                 skip: offset,
@@ -293,7 +283,6 @@ class TransactionRepository {
             include: {
                 financial_accounts: true,
                 budget: true,
-                group_budget: true
             },
             orderBy: { transaction_date: 'desc' }
         });
@@ -361,10 +350,18 @@ class TransactionRepository {
                 financial_accounts: true,
                 users: true,
                 budget: true,
-                group_budget: true
             }
         });
         return transaction ? toTransactionEntity(transaction) : null;
+    }
+    // Add missing interface methods
+    async getByUserId(userId, page, limit) {
+        const result = await this.getTransactionsByUser(userId, page || 1, limit || 50);
+        return result.transactions;
+    }
+    async getByAccountId(accountId, page, limit) {
+        const result = await this.getTransactionsByAccount(accountId, page || 1, limit || 50);
+        return result.transactions;
     }
 }
 exports.TransactionRepository = TransactionRepository;

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>JavaScript Test Page</h1>
+    <button id="testBtn">Test JavaScript</button>
+    <div id="output"></div>
+
+    <script>
+        console.log('JavaScript is loading...');
+        
+        // Test if axios is available
+        if (typeof axios !== 'undefined') {
+            console.log('✅ Axios loaded successfully');
+            document.getElementById('output').innerHTML += '<p>✅ Axios loaded</p>';
+        } else {
+            console.log('❌ Axios failed to load');
+            document.getElementById('output').innerHTML += '<p>❌ Axios failed</p>';
+        }
+        
+        // Test DOM manipulation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOMContentLoaded fired');
+            document.getElementById('output').innerHTML += '<p>✅ DOM ready</p>';
+            
+            document.getElementById('testBtn').addEventListener('click', async function() {
+                console.log('✅ Button click handler working');
+                document.getElementById('output').innerHTML += '<p>✅ Click handler works</p>';
+                
+                try {
+                    const response = await axios.get('http://localhost:3000/api/users/');
+                    console.log('✅ Axios request successful:', response.status);
+                    document.getElementById('output').innerHTML += '<p>✅ Axios request works (Status: ' + response.status + ')</p>';
+                } catch (error) {
+                    console.log('ℹ️ Axios request result:', error.response?.status || error.message);
+                    document.getElementById('output').innerHTML += '<p>ℹ️ Axios request: ' + (error.response?.status || error.message) + '</p>';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

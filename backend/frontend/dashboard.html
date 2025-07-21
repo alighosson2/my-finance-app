@@ -1,285 +1,547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard - MyFinance360</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root {
-      --primary: #2c3e50;
-      --secondary: #3498db;
-      --accent: #1abc9c;
-      --light: #ecf0f1;
-      --dark: #2c3e50;
-      --success: #27ae60;
-      --warning: #f39c12;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #333;
-      line-height: 1.6;
-      padding-left: 250px;
-      transition: padding-left 0.3s ease;
-    }
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 250px;
-      height: 100vh;
-      background-color: var(--primary);
-      color: white;
-      padding: 20px;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-    }
-    .sidebar .navbar-brand {
-      font-weight: 700;
-      font-size: 1.5rem;
-      color: white !important;
-      letter-spacing: 0.5px;
-      display: block;
-      margin-bottom: 30px;
-    }
-    .sidebar .nav-link {
-      color: rgba(255, 255, 255, 0.85) !important;
-      font-weight: 500;
-      padding: 10px 15px;
-      border-radius: 4px;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .sidebar .nav-link:hover,
-    .sidebar .nav-link.active {
-      color: white !important;
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-    .sidebar .social-links {
-      margin-top: 30px;
-      display: flex;
-      gap: 10px;
-    }
-    .sidebar .social-links a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      font-size: 1.1rem;
-      transition: all 0.3s;
-    }
-    .sidebar .social-links a:hover {
-      background: var(--accent);
-      transform: translateY(-3px);
-    }
-    .btn {
-      border-radius: 30px;
-      padding: 10px 20px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 0.9rem;
-    }
-    .btn-primary {
-      background-color: var(--accent);
-      border-color: var(--accent);
-    }
-    .btn-primary:hover {
-      background-color: #16a085;
-      border-color: #16a085;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
-    }
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      background: white;
-      padding: 20px 30px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-    .page-title {
-      margin: 0;
-      color: var(--primary);
-      font-weight: 700;
-      font-size: 1.8rem;
-    }
-    .page-subtitle {
-      color: #7f8c8d;
-      margin: 5px 0 0 0;
-    }
-    .card {
-      border-radius: 12px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      border: none;
-      background: white;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    }
-    .card-title {
-      color: var(--primary);
-      font-weight: 700;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .stat-card {
-      padding: 25px;
-      text-align: center;
-      position: relative;
-    }
-    .stat-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 15px;
-      font-size: 1.5rem;
-      color: white;
-    }
-    .stat-icon.balance { background: linear-gradient(135deg, var(--accent), #16a085); }
-    .stat-icon.income { background: linear-gradient(135deg, var(--success), #229954); }
-    .stat-icon.expense { background: linear-gradient(135deg, var(--warning), #e67e22); }
-    @media (max-width: 768px) {
-      body { padding-left: 0; }
-      .sidebar {
-        transform: translateX(-100%);
-        z-index: 1000;
-      }
-      .sidebar.active { transform: translateX(0); }
-      .sidebar-toggle {
-        position: fixed;
-        top: 15px;
-        left: 15px;
-        z-index: 1100;
-        background-color: var(--primary);
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyFinance360 - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .banking-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .banking-option {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .banking-option:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .oauth-option {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border: none;
+        }
+        
+        .oauth-option h3 {
+            color: white;
+        }
+        
+        .oauth-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .oauth-button:hover {
+            background: white;
+            color: #27ae60;
+            transform: scale(1.05);
+        }
+        
+        form {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .sync-button {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+        }
+        
+        .nav-button {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            border-color: #3498db;
+            color: #0c5460;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #27ae60;
+            color: #155724;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .banking-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-  <a class="navbar-brand" href="/"><i class="fas fa-chart-line me-2"></i>MyFinance360</a>
-  <ul class="nav flex-column">
-    <li class="nav-item"><a class="nav-link active" href="/dashboard"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
-    <li class="nav-item"><a class="nav-link" href="/transactions"><i class="fas fa-exchange-alt"></i>Transactions</a></li>
-    <li class="nav-item"><a class="nav-link" href="/reports"><i class="fas fa-chart-bar"></i>Reports</a></li>
-    <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-cog"></i>Settings</a></li>
-    <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
-  </ul>
-</div>
-
-<!-- Toggle -->
-<button class="sidebar-toggle d-md-none" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-
-<!-- Dashboard -->
-<section class="py-5" id="dashboard" style="background-color: #f8fafc;">
-  <div class="container">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Welcome, <span id="userName">User</span></h1>
-        <p class="page-subtitle">Monitor your finances with real-time insights and reports</p>
-      </div>
+    <div class="dashboard">
+        <div class="header">
+            <h1>🏦 MyFinance360 Dashboard</h1>
+            <p>Comprehensive Personal Finance Management System</p>
+        </div>
+        
+        <div class="content">
+            <!-- Bank Connection Section -->
+            <div class="section">
+                <h2>🔗 Bank Account Connection</h2>
+                
+                <div class="banking-options">
+                    <!-- Real OAuth Banking (NEW!) -->
+                    <div class="banking-option oauth-option">
+                        <h3>🚀 Real Bank OAuth Integration</h3>
+                        <p style="margin: 15px 0; opacity: 0.9;">Connect to your real bank account using secure OAuth flow. This will redirect you to your bank's official login page.</p>
+                        <div class="alert alert-info">
+                            <strong>🔒 Secure:</strong> Uses OAuth 1.0a standard for maximum security. Your bank credentials are never shared with our app.
+                        </div>
+                        <a href="/api/bank/start" class="oauth-button">
+                            🏛️ Start Bank OAuth Login
+                        </a>
+                    </div>
+                    
+                    <!-- Manual Token Entry -->
+                    <div class="banking-option">
+                        <h3>🔧 Manual Token Entry</h3>
+                        <p style="margin: 15px 0; color: #666;">For testing or if you already have API tokens from your bank.</p>
+                        <form action="/api/bank/api/tokens" method="POST">
+                            <div class="form-group">
+                                <label for="provider">Bank Provider *</label>
+                                <input type="text" id="provider" name="provider" placeholder="e.g., Wells Fargo, Chase, Bank of America" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="access_token">Access Token *</label>
+                                <input type="text" id="access_token" name="access_token" placeholder="Your bank API access token" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="access_token_secret">Access Token Secret</label>
+                                <input type="text" id="access_token_secret" name="access_token_secret" placeholder="Token secret (if required)">
+                            </div>
+                            <div class="form-group">
+                                <label for="expires_at">Token Expiration</label>
+                                <input type="datetime-local" id="expires_at" name="expires_at">
+                            </div>
+                            <button type="submit">🔗 Connect Bank Account</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Bank Management -->
+                <form action="/api/bank/api/tokens" method="GET" style="margin-bottom: 20px;">
+                    <button type="submit" class="test-button">📋 Refresh Bank List</button>
+                </form>
+            </div>
+            
+            <!-- Data Synchronization Section -->
+            <div class="section">
+                <h2>🔄 Bank Data Synchronization</h2>
+                <p style="margin-bottom: 20px; color: #666;">Import your real banking data automatically from connected accounts.</p>
+                
+                <div class="feature-grid">
+                    <form action="/api/bank/api/sync/test" method="POST">
+                        <h3>🧪 Test Connection</h3>
+                        <p>Verify your bank connection is working properly.</p>
+                        <button type="submit" class="test-button">Test Bank Connection</button>
+                    </form>
+                    
+                    <form action="/api/bank/api/sync/accounts" method="POST">
+                        <h3>🏦 Sync Accounts</h3>
+                        <p>Import all your bank accounts with current balances.</p>
+                        <button type="submit" class="sync-button">Import Bank Accounts</button>
+                    </form>
+                    
+                    <form action="/api/bank/api/sync/transactions" method="POST">
+                        <h3>💳 Sync Transactions</h3>
+                        <div class="form-group">
+                            <label for="accountId">Account ID</label>
+                            <input type="text" id="accountId" name="accountId" placeholder="Enter account ID" required>
+                        </div>
+                        <button type="submit" class="sync-button">Import Transactions</button>
+                    </form>
+                    
+                    <form action="/api/bank/api/sync/all" method="POST">
+                        <h3>🚀 Full Sync</h3>
+                        <p>Import all accounts and transactions in one go.</p>
+                        <button type="submit" class="sync-button">Sync All Data</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Navigation Section -->
+            <div class="section">
+                <h2>📊 Financial Management</h2>
+                <div class="button-group">
+                    <button onclick="window.location.href='/accounts.html'" class="nav-button">
+                        🏦 View Accounts
+                    </button>
+                    <button onclick="window.location.href='/transactions.html'" class="nav-button">
+                        💰 View Transactions  
+                    </button>
+                    <button onclick="window.location.href='/budgets.html'" class="nav-button">
+                        📊 Manage Budgets
+                    </button>
+                    <button onclick="window.location.href='/tax.html'" class="nav-button">
+                        📈 Tax Records
+                    </button>
+                </div>
+            </div>
+            
+            <!-- System Information -->
+            <div class="section">
+                <h2>ℹ️ System Information</h2>
+                <div class="alert alert-success">
+                    <strong>🎉 Ready for Your FYP!</strong><br>
+                    • <strong>Manual Mode:</strong> Use the token entry form for demo purposes<br>
+                    • <strong>Real Banking:</strong> Use OAuth button for actual bank integration<br>
+                    • <strong>Full Features:</strong> All 8 major financial management modules available
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="row g-4 mb-4">
-      <div class="col-12 col-md-4">
-        <div class="card stat-card">
-          <div class="stat-icon balance"><i class="fas fa-wallet"></i></div>
-          <h5 class="card-title">Total Balance</h5>
-          <h3>$12,500.00</h3>
-        </div>
-      </div>
-      <div class="col-12 col-md-4">
-        <div class="card stat-card">
-          <div class="stat-icon income"><i class="fas fa-money-check-alt"></i></div>
-          <h5 class="card-title">Monthly Income</h5>
-          <h3>$3,200.00</h3>
-        </div>
-      </div>
-      <div class="col-12 col-md-4">
-        <div class="card stat-card">
-          <div class="stat-icon expense"><i class="fas fa-shopping-cart"></i></div>
-          <h5 class="card-title">Monthly Expenses</h5>
-          <h3>$2,100.00</h3>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Footer -->
-<footer class="text-center">
-  <div class="container">
-    <p>© 2025 MyFinance360. All rights reserved.</p>
-  </div>
-</footer>
-
-<!-- Scripts -->
 <script>
-  // Function to toggle sidebar visibility
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('active');
+// Function to get JWT token from cookies (your login system uses cookies)
+function getAuthToken() {
+  // Your system stores JWT token as a cookie
+  const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+  if (tokenCookie) {
+    return tokenCookie.split('=')[1];
+  }
+  
+  // Alternative cookie names (check which one your AuthService uses)
+  const authTokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+  if (authTokenCookie) {
+    return authTokenCookie.split('=')[1];
+  }
+  
+  // Fallback to localStorage just in case
+  return localStorage.getItem('authToken') || localStorage.getItem('token');
+}
+
+// Handle Connect Bank Account form
+document.addEventListener('DOMContentLoaded', function() {
+  const connectForm = document.querySelector('form[action="/api/bank/api/tokens"]');
+  
+  if (connectForm) {
+    connectForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const token = getAuthToken();
+      console.log('🔍 Debug - Found JWT token:', token ? 'YES' : 'NO');
+      console.log('🔍 Debug - All cookies:', document.cookie);
+      
+      if (!token) {
+        alert('Please login first. No authentication token found.');
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      // Get form data
+      const formData = new FormData(this);
+      
+      // Fix datetime conversion
+      const expiresAtInput = formData.get('expires_at');
+      let expiresAtISO;
+      
+      if (expiresAtInput) {
+        // datetime-local sends "2025-07-21T23:21"
+        // We need to add seconds and convert to ISO: "2025-07-21T23:21:00.000Z"
+        const dateString = expiresAtInput + ':00'; // Add seconds
+        expiresAtISO = new Date(dateString).toISOString();
+      } else {
+        // Default to 1 year from now if no date provided
+        expiresAtISO = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+      }
+      
+      console.log('🔧 Date conversion:', {
+        input: expiresAtInput,
+        withSeconds: expiresAtInput + ':00',
+        final: expiresAtISO
+      });
+      
+      const data = {
+        provider: formData.get('provider'),
+        access_token: formData.get('access_token'),
+        access_token_secret: formData.get('access_token_secret') || null,
+        expires_at: expiresAtISO
+      };
+      
+      console.log('Sending data:', data);
+      
+      try {
+        const response = await fetch('/api/bank/api/tokens', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Response:', result);
+        
+        if (response.ok) {
+          alert('✅ Bank account connected successfully!');
+          connectForm.reset();
+        } else {
+          alert(`❌ Error: ${result.error || result.message || 'Failed to connect bank'}`);
+        }
+      } catch (error) {
+        console.error('Network error:', error);
+        alert('❌ Network error. Please check console for details.');
+      }
+    });
+  }
+  
+  // Handle Refresh Bank List button
+  const refreshForm = document.querySelector('form[action="/api/bank/api/tokens"][method="GET"]');
+  if (refreshForm) {
+    refreshForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const token = getAuthToken();
+      if (!token) {
+        alert('Please login first.');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/bank/api/tokens', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const tokens = await response.json();
+        console.log('📋 Existing bank tokens:', tokens);
+        
+        // Show tokens in a nice format
+        if (tokens.length === 0) {
+          alert('📭 No bank connections found. Connect your first bank account above!');
+        } else {
+          let message = '🏦 Your Connected Banks:\\n\\n';
+          tokens.forEach((token, index) => {
+            message += `${index + 1}. ${token.provider}\\n`;
+            message += `   Token: ${token.access_token.substring(0, 10)}...\\n`;
+            message += `   Status: ${token.isExpired ? '❌ EXPIRED' : '✅ Active'}\\n`;
+            message += `   Expires: ${token.expiresIn > 0 ? `${token.expiresIn} days` : 'Expired'}\\n\\n`;
+          });
+          message += '💡 To connect a new bank, use a different provider name or delete existing ones.';
+          alert(message);
+        }
+      } catch (error) {
+        console.error('Refresh error:', error);
+        alert('❌ Failed to refresh bank list');
+      }
+    });
   }
 
-  // Check if the user is logged in (token must be present in localStorage)
-  const token = localStorage.getItem('token'); // Or sessionStorage if you use it
-  console.log('Token:', token); // Log the token to see if it's present
-
-  if (!token) {
-    alert('You must log in');
-    window.location.href = '/login';
-  }
-
-  // Fetch user data from the server using the stored token
-  fetch('/api/dashboard', {
-    headers: { 'Authorization': 'Bearer ' + token } // Send the token for auth
-  })
-  .then(res => {
-    if (!res.ok) {
-      console.error('Unauthorized request:', res); // Log the failed response
-      throw new Error('Unauthorized');
-    }
-    return res.json();
-  })
-  .then(data => {
-    console.log('User data:', data); // Log the fetched user data
-    // Update the 'userName' span with the user's name from the response
-    document.getElementById('userName').textContent = data.user || 'User'; // Show name or fallback to 'User'
-    
-    // Optionally, update other data (like total balance, transactions) here
-    // Example:
-    // document.getElementById('totalBalance').textContent = data.balance || '$0.00';
-  })
-  .catch(err => {
-    console.error('Error fetching user data:', err); // Log the error
-    alert('Session expired or something went wrong');
-    window.location.href = '/login';
+  // Handle other forms that need authentication
+  const authForms = document.querySelectorAll('form[action^="/api/bank/api/sync"]');
+  authForms.forEach(form => {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const token = getAuthToken();
+      if (!token) {
+        alert('Please login first. No authentication token found.');
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      const formData = new FormData(this);
+      const actionUrl = this.getAttribute('action');
+      const method = this.getAttribute('method') || 'POST';
+      
+      // Handle different sync endpoints
+      let requestData = {};
+      if (formData.has('accountId')) {
+        requestData.accountId = formData.get('accountId');
+      }
+      
+      try {
+        const response = await fetch(actionUrl, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: method === 'POST' ? JSON.stringify(requestData) : null
+        });
+        
+        const result = await response.json();
+        console.log('Sync response:', result);
+        
+        if (response.ok) {
+          alert(`✅ ${actionUrl.includes('test') ? 'Connection test' : 'Sync'} successful!`);
+          if (result.accounts || result.transactions) {
+            console.log('Sync results:', result);
+          }
+        } else {
+          alert(`❌ Error: ${result.error || result.message || 'Sync failed'}`);
+        }
+      } catch (error) {
+        console.error('Sync error:', error);
+        alert('❌ Sync failed. Please check console for details.');
+      }
+    });
   });
+});
 </script>
 </body>
-</html>
+</html> 

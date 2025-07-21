@@ -9,7 +9,7 @@ const router = (0, express_1.Router)();
 // Create service and controller instances
 const bankService = new BankService_1.BankService();
 const bankController = new BankController_1.BankController(bankService);
-// Token management routes (all require authentication)
+// Token management routes
 router.post('/tokens', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.connectBankAccount));
 router.get('/tokens', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.getBankConnections));
 router.delete('/tokens/:tokenId', auth_1.authenticate, (0, errorMiddleware_1.asyncHandler)(bankController.revokeBankConnection));

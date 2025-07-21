@@ -148,11 +148,11 @@ class BankService {
             for (const obpAccount of obpAccounts) {
                 try {
                     // Check if account already exists
-                    const existingAccounts = await this.accountService.getAccountsByUser(userId);
-                    const existingAccount = existingAccounts.find(acc => acc.external_account_id === obpAccount.id);
-                    if (existingAccount) {
+                    const existingAccountsResult = await this.accountService.getAllAccounts(userId);
+                    const existingAccount = existingAccountsResult.accounts.find((acc) => acc.external_account_id === obpAccount.id);
+                    if (existingAccount && existingAccount.id) {
                         // Update existing account
-                        await this.updateAccountFromOBP(existingAccount.id, obpAccount, token.id);
+                        await this.updateAccountFromOBP(existingAccount.id, obpAccount, token.id, userId);
                         logger_1.default.info(`✅ Updated existing account: ${obpAccount.label}`);
                     }
                     else {
@@ -165,15 +165,19 @@ class BankService {
                             balance: parseFloat(obpAccount.balance.amount),
                             currency: obpAccount.balance.currency,
                             bank_name: `OBP Demo Bank (${obpAccount.bank_id})`,
-                            account_number_masked: `****${obpAccount.id.slice(-4)}`
+                            account_number_masked: `****${obpAccount.id.slice(-4)}`,
+                            external_account_id: obpAccount.id,
+                            bank_id: obpAccount.bank_id
                         };
                         const newAccount = await this.accountService.createAccount(accountDto);
-                        // Update with OBP-specific fields
-                        await this.accountService.updateAccount(newAccount.id, {
-                            external_account_id: obpAccount.id,
-                            bank_id: obpAccount.bank_id,
-                            last_synced_at: new Date()
-                        });
+                        // Update with OBP-specific fields - ensure ID exists
+                        if (newAccount.id) {
+                            await this.accountService.updateAccount(newAccount.id, {
+                                external_account_id: obpAccount.id,
+                                bank_id: obpAccount.bank_id,
+                                last_synced_at: new Date()
+                            }, userId);
+                        }
                         logger_1.default.info(`✅ Created new account: ${obpAccount.label}`);
                     }
                     result.synced++;
@@ -213,7 +217,7 @@ class BankService {
                 throw new NotFoundException_1.NotFoundException('No OBP bank token found for user');
             }
             // Get the account to sync
-            const account = await this.accountService.getAccountById(accountId);
+            const account = await this.accountService.getAccountById(accountId, userId);
             if (!account || account.user_id !== userId) {
                 throw new NotFoundException_1.NotFoundException('Account not found or does not belong to user');
             }
@@ -265,7 +269,7 @@ class BankService {
             // Update account sync timestamp
             await this.accountService.updateAccount(accountId, {
                 last_synced_at: new Date()
-            });
+            }, userId);
             logger_1.default.info(`🎉 OBP transaction sync completed. Synced: ${result.synced}, Errors: ${result.errors.length}`);
             return result;
         }
@@ -286,13 +290,15 @@ class BankService {
             // Then sync transactions for each account
             let totalTransactionsSynced = 0;
             const transactionErrors = [];
-            const userAccounts = await this.accountService.getAccountsByUser(userId);
-            const obpAccounts = userAccounts.filter(acc => acc.external_account_id);
+            const userAccountsResult = await this.accountService.getAllAccounts(userId);
+            const obpAccounts = userAccountsResult.accounts.filter((acc) => acc.external_account_id);
             for (const account of obpAccounts) {
                 try {
-                    const txResult = await this.syncTransactionsFromOBP(userId, account.id, transactionLimit);
-                    totalTransactionsSynced += txResult.synced;
-                    transactionErrors.push(...txResult.errors);
+                    if (account.id) {
+                        const txResult = await this.syncTransactionsFromOBP(userId, account.id, transactionLimit);
+                        totalTransactionsSynced += txResult.synced;
+                        transactionErrors.push(...txResult.errors);
+                    }
                 }
                 catch (error) {
                     transactionErrors.push(`Account "${account.account_name}": ${error.message}`);
@@ -310,7 +316,7 @@ class BankService {
         }
     }
     // === PRIVATE HELPER METHODS ===
-    async updateAccountFromOBP(accountId, obpAccount, tokenId) {
+    async updateAccountFromOBP(accountId, obpAccount, tokenId, userId) {
         await this.accountService.updateAccount(accountId, {
             account_name: obpAccount.label,
             balance: parseFloat(obpAccount.balance.amount),
@@ -319,7 +325,7 @@ class BankService {
             external_account_id: obpAccount.id,
             bank_id: obpAccount.bank_id,
             last_synced_at: new Date()
-        });
+        }, userId);
     }
     categorizeTransaction(description) {
         const desc = description.toLowerCase();

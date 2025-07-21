@@ -7,67 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums for better data validation
-enum user_role {
-  admin
-  user
-  manager
-}
-
-enum transaction_type {
-  income
-  expense
-  transfer
-}
-
-enum period_type {
-  daily
-  weekly
-  monthly
-  quarterly
-  yearly
-}
-
-enum account_type {
-  checking
-  savings
-  credit_card
-  investment
-  loan
-  other
-}
-
-enum notification_method {
-  email
-  sms
-  push
-  in_app
-}
-
-enum asset_type {
-  stock
-  bond
-  etf
-  mutual_fund
-  crypto
-  real_estate
-  commodity
-  other
-}
-
 model BankToken {
-  id                  Int                  @id @default(autoincrement())
+  id                  Int      @id @default(autoincrement())
   user_id             Int
-  provider            String               @db.VarChar(50)
-  access_token        String               @db.VarChar(255)
-  access_token_secret String?              @db.VarChar(255)
-  refresh_token       String?              @db.VarChar(255)
-  expires_at          DateTime             @db.Timestamptz(6)
-  created_at          DateTime             @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime             @default(now()) @db.Timestamptz(6)
+  provider            String   @db.VarChar(50)
+  access_token        String   @db.VarChar(255)
+  access_token_secret String?  @db.VarChar(255)
+  refresh_token       String?  @db.VarChar(255)
+  expires_at          DateTime @db.Timestamptz(6)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime @default(now()) @db.Timestamptz(6)
   
-  users               users                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  financial_accounts  financial_accounts[]  // New relation to track which accounts use this token
+  users               users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([user_id, provider], name: "uniq_user_provider")
   @@index([user_id], name: "idx_bank_token_user_id")
@@ -76,36 +27,36 @@ model BankToken {
 }
 
 model alerts {
-  id                  Int                 @id @default(autoincrement())
+  id                  Int       @id @default(autoincrement())
   user_id             Int
-  alert_name          String              @db.VarChar(255)
+  alert_name          String    @db.VarChar(255)
   rule_description    String
   trigger_condition   Json
-  notification_method notification_method
-  is_active           Boolean?            @default(true)
-  last_triggered      DateTime?           @db.Timestamptz(6)
-  created_at          DateTime?           @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?           @default(now()) @db.Timestamptz(6)
-  users               users               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  notification_method String    @db.VarChar(50)
+  is_active           Boolean?  @default(true)
+  last_triggered      DateTime? @db.Timestamptz(6)
+  created_at          DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime? @default(now()) @db.Timestamptz(6)
+  users               users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_alerts_user_id")
 }
 
 model budgets {
-  id           Int           @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   user_id      Int
-  budget_name  String        @db.VarChar(255)
-  category     String        @db.VarChar(100)
-  subcategory  String?       @db.VarChar(100)
-  budget_limit Decimal       @db.Decimal(15, 2)
-  period_type  period_type
-  start_date   DateTime      @db.Date
-  end_date     DateTime?     @db.Date
-  is_active    Boolean?      @default(true)
-  created_at   DateTime?     @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime?     @default(now()) @db.Timestamptz(6)
-  users        users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  transactions transactions[] // New relation to track budget spending
+  budget_name  String    @db.VarChar(255)
+  category     String    @db.VarChar(100)
+  subcategory  String?   @db.VarChar(100)
+  budget_limit Decimal   @db.Decimal(15, 2)
+  period_type  String    @db.VarChar(20)
+  start_date   DateTime  @db.Date
+  end_date     DateTime? @db.Date
+  is_active    Boolean?  @default(true)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+  users        users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  transactions transactions[]
 
   @@index([user_id], map: "idx_budgets_user_id")
 }
@@ -113,7 +64,6 @@ model budgets {
 model financial_accounts {
   id                    Int                  @id @default(autoincrement())
   user_id               Int
-  bank_token_id         Int?                 // New field to link OAuth token
   account_name          String               @db.VarChar(255)
   account_type          account_type
   balance               Decimal              @default(0.00) @db.Decimal(15, 2)
@@ -127,74 +77,15 @@ model financial_accounts {
   is_active             Boolean?             @default(true)
   created_at            DateTime?            @default(now()) @db.Timestamptz(6)
   updated_at            DateTime?            @default(now()) @db.Timestamptz(6)
-  
   users                 users                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  bank_token            BankToken?           @relation(fields: [bank_token_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  investment_records    investment_records[]
   transactions          transactions[]
 
   @@index([user_id], map: "idx_financial_accounts_user_id")
-  @@index([bank_token_id], map: "idx_financial_accounts_bank_token_id")
 }
 
-model group_budget_members {
-  id                 Int           @id @default(autoincrement())
-  group_budget_id    Int
-  user_id            Int
-  role               String        @default("member") @db.VarChar(20)
-  contribution_limit Decimal?      @db.Decimal(15, 2)
-  actual_contribution Decimal      @default(0.00) @db.Decimal(15, 2) // New field to track actual spending
-  joined_at          DateTime?     @default(now()) @db.Timestamptz(6)
-  group_budgets      group_budgets @relation(fields: [group_budget_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users              users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([group_budget_id, user_id])
-  @@index([group_budget_id], map: "idx_group_budget_members_group_id")
-  @@index([user_id], map: "idx_group_budget_members_user_id")
-}
 
-model group_budgets {
-  id                   Int                    @id @default(autoincrement())
-  group_name           String                 @db.VarChar(255)
-  created_by           Int
-  description          String?
-  budget_limit         Decimal?               @db.Decimal(15, 2)
-  currency             String                 @default("USD") @db.VarChar(3)
-  period_type          period_type
-  start_date           DateTime               @db.Date
-  end_date             DateTime?              @db.Date
-  is_active            Boolean?               @default(true)
-  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
-  group_budget_members group_budget_members[]
-  users                users                  @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  transactions         transactions[]         // New relation to track group transactions
 
-  @@index([created_by], map: "idx_group_budgets_created_by")
-}
-
-model investment_records {
-  id                 Int                 @id @default(autoincrement())
-  user_id            Int
-  account_id         Int?
-  asset_name         String              @db.VarChar(255)
-  asset_type         asset_type
-  symbol             String?             @db.VarChar(20)
-  quantity           Decimal             @db.Decimal(15, 8)
-  purchase_price     Decimal?            @db.Decimal(15, 2)
-  current_price      Decimal?            @db.Decimal(15, 2)
-  current_value      Decimal             @db.Decimal(15, 2)
-  currency           String              @default("USD") @db.VarChar(3)
-  purchase_date      DateTime?           @db.Date
-  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime?           @default(now()) @db.Timestamptz(6)
-  
-  financial_accounts financial_accounts? @relation(fields: [account_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  users              users               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([user_id], map: "idx_investment_records_user_id")
-  @@index([account_id], map: "idx_investment_records_account_id")
-}
 
 model tax_records {
   id             Int       @id @default(autoincrement())
@@ -220,7 +111,6 @@ model transactions {
   user_id                 Int
   account_id              Int
   budget_id               Int?               // New field to track budget spending
-  group_budget_id         Int?               // New field for group budget transactions
   amount                  Decimal            @db.Decimal(15, 2)
   transaction_date        DateTime           @db.Timestamptz(6)
   description             String
@@ -237,18 +127,14 @@ model transactions {
   sync_status             String?            @default("synced") @db.VarChar(20) // "synced", "pending", "error"
   created_at              DateTime?          @default(now()) @db.Timestamptz(6)
   updated_at              DateTime?          @default(now()) @db.Timestamptz(6)
-  
   financial_accounts financial_accounts @relation(fields: [account_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users              users              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  budget             budgets?           @relation(fields: [budget_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  group_budget       group_budgets?     @relation(fields: [group_budget_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  budget             budgets?           @relation(fields: [budget_id], references: [id], onUpdate: NoAction)
 
   @@index([account_id], map: "idx_transactions_account_id")
   @@index([category], map: "idx_transactions_category")
   @@index([transaction_date], map: "idx_transactions_date")
   @@index([user_id], map: "idx_transactions_user_id")
-  @@index([budget_id], map: "idx_transactions_budget_id")
-  @@index([group_budget_id], map: "idx_transactions_group_budget_id")
 }
 
 model users {
@@ -265,12 +151,30 @@ model users {
   alerts               alerts[]
   budgets              budgets[]
   financial_accounts   financial_accounts[]
-  group_budget_members group_budget_members[]
-  group_budgets        group_budgets[]
-  investment_records   investment_records[]
+
   tax_records          tax_records[]
   transactions         transactions[]
-  bank_tokens          BankToken[]
+  bank_tokens          BankToken[]            // Added relation to BankToken
 
   @@index([email], map: "idx_users_email")
+}
+
+enum user_role {
+  admin
+  user
+  manager
+}
+
+enum transaction_type {
+  income
+  expense
+  transfer
+}
+
+enum account_type {
+  checking
+  savings
+  credit_card
+  investment
+  loan
 }

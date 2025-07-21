@@ -6,14 +6,18 @@ const client_1 = require("@prisma/client");
 Object.defineProperty(exports, "TransactionType", { enumerable: true, get: function () { return client_1.transaction_type; } });
 // 3. Entity class with business logic
 class TransactionEntity {
-    constructor(id, user_id, account_id, amount, transaction_date, description, transaction_type, budget_id = null, group_budget_id = null, category = null, subcategory = null, merchant_name = null, location = null, is_recurring = false, tags = [], 
+    constructor(id, user_id, account_id, amount, transaction_date, description, category = null, subcategory = null, transaction_type, budget_id = null, merchant_name = null, location = null, is_recurring = false, tags = [], 
     // OBP Integration fields
-    external_transaction_id = null, import_source = "manual", sync_status = "synced", created_at = new Date(), updated_at = new Date(), financial_account, user, budget, group_budget) {
+    external_transaction_id = null, import_source = "manual", sync_status = "synced", created_at = new Date(), updated_at = new Date(), financial_account, user, budget) {
         this.id = id;
         this.user_id = user_id;
         this.account_id = account_id;
         this.transaction_date = transaction_date;
+        this.category = category;
+        this.subcategory = subcategory;
         this.transaction_type = transaction_type;
+        this.merchant_name = merchant_name;
+        this.location = location;
         this.is_recurring = is_recurring;
         this.tags = tags;
         this.external_transaction_id = external_transaction_id;
@@ -24,16 +28,16 @@ class TransactionEntity {
         this.financial_account = financial_account;
         this.user = user;
         this.budget = budget;
-        this.group_budget = group_budget;
         this._amount = amount;
         this._description = description.trim();
         // Convert undefined to null for Prisma compatibility
         this.budget_id = budget_id ?? null;
-        this.group_budget_id = group_budget_id ?? null;
-        this.category = category ?? null;
-        this.subcategory = subcategory ?? null;
         this.merchant_name = merchant_name ?? null;
         this.location = location ?? null;
+        this.is_recurring = is_recurring ?? false;
+        this.external_transaction_id = external_transaction_id ?? null;
+        this.import_source = import_source ?? "manual";
+        this.sync_status = sync_status ?? "synced";
     }
     get amount() {
         return this._amount;
@@ -93,7 +97,6 @@ class TransactionEntity {
             user_id: this.user_id,
             account_id: this.account_id,
             budget_id: this.budget_id,
-            group_budget_id: this.group_budget_id,
             amount: this.amount,
             transaction_date: this.transaction_date,
             description: this.description,
@@ -110,10 +113,10 @@ class TransactionEntity {
             sync_status: this.sync_status,
             created_at: this.created_at,
             updated_at: this.updated_at,
+            // Include relationship objects if available
             financial_account: this.financial_account,
             user: this.user,
-            budget: this.budget,
-            group_budget: this.group_budget
+            budget: this.budget
         };
     }
 }

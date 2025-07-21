@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - MyFinance360</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- Axios for HTTP requests -->
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #3498db;
+      --accent: #1abc9c;
+      --light: #ecf0f1;
+      --dark: #2c3e50;
+      --success: #27ae60;
+      --warning: #f39c12;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      line-height: 1.6;
+      padding-left: 250px;
+      transition: padding-left 0.3s ease;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: var(--primary);
+      color: white;
+      padding: 20px;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .sidebar .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: white !important;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 30px;
+    }
+    .sidebar .nav-link {
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-weight: 500;
+      padding: 10px 15px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      color: white !important;
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+    .sidebar .social-links {
+      margin-top: 30px;
+      display: flex;
+      gap: 10px;
+    }
+    .sidebar .social-links a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+    }
+    .sidebar .social-links a:hover {
+      background: var(--accent);
+      transform: translateY(-3px);
+    }
+    .btn {
+      border-radius: 30px;
+      padding: 10px 20px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.9rem;
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+    .btn-primary:hover {
+      background-color: #16a085;
+      border-color: #16a085;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    .page-title {
+      margin: 0;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+    .page-subtitle {
+      color: #7f8c8d;
+      margin: 5px 0 0 0;
+    }
+    .card {
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: none;
+      background: white;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+    .card-title {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .stat-card {
+      padding: 25px;
+      text-align: center;
+      position: relative;
+    }
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+      font-size: 1.5rem;
+      color: white;
+    }
+    .stat-icon.balance { background: linear-gradient(135deg, var(--accent), #16a085); }
+    .stat-icon.income { background: linear-gradient(135deg, var(--success), #229954); }
+    .stat-icon.expense { background: linear-gradient(135deg, var(--warning), #e67e22); }
+    @media (max-width: 768px) {
+      body { padding-left: 0; }
+      .sidebar {
+        transform: translateX(-100%);
+        z-index: 1000;
+      }
+      .sidebar.active { transform: translateX(0); }
+      .sidebar-toggle {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1100;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <a class="navbar-brand" href="/"><i class="fas fa-chart-line me-2"></i>MyFinance360</a>
+  <ul class="nav flex-column">
+    <li class="nav-item"><a class="nav-link active" href="/dashboard"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" href="/transactions"><i class="fas fa-exchange-alt"></i>Transactions</a></li>
+    <li class="nav-item"><a class="nav-link" href="/reports"><i class="fas fa-chart-bar"></i>Reports</a></li>
+    <li class="nav-item"><a class="nav-link" href="/settings"><i class="fas fa-cog"></i>Settings</a></li>
+    <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-sign-out-alt"></i>Logout</a></li>
+  </ul>
+</div>
+
+<!-- Toggle -->
+<button class="sidebar-toggle d-md-none" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+<!-- Dashboard -->
+<section class="py-5" id="dashboard" style="background-color: #f8fafc;">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Welcome, <span id="userName">User</span></h1>
+        <p class="page-subtitle">Monitor your finances with real-time insights and reports</p>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-md-4">
+        <div class="card stat-card">
+          <div class="stat-icon balance"><i class="fas fa-wallet"></i></div>
+          <h5 class="card-title">Total Balance</h5>
+          <h3 id="totalBalance"><i class="fas fa-spinner fa-spin"></i></h3>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card stat-card">
+          <div class="stat-icon income"><i class="fas fa-money-check-alt"></i></div>
+          <h5 class="card-title">Monthly Income</h5>
+          <h3 id="monthlyIncome"><i class="fas fa-spinner fa-spin"></i></h3>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card stat-card">
+          <div class="stat-icon expense"><i class="fas fa-shopping-cart"></i></div>
+          <h5 class="card-title">Monthly Expenses</h5>
+          <h3 id="monthlyExpenses"><i class="fas fa-spinner fa-spin"></i></h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget Alerts Section -->
+    <div class="row g-4 mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Budget Alerts</h5>
+            <a href="/budgets" class="btn btn-sm btn-outline-primary">View All Budgets</a>
+          </div>
+          <div class="card-body" id="budgetAlerts">
+            <div class="text-center text-muted">
+              <i class="fas fa-spinner fa-spin"></i> Loading budget alerts...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts and Recent Transactions -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Spending Trends</h5>
+          </div>
+          <div class="card-body">
+            <canvas id="spendingChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-12 col-lg-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Recent Transactions</h5>
+            <a href="/transactions" class="btn btn-sm btn-outline-primary">View All</a>
+          </div>
+          <div class="card-body p-0" id="recentTransactions">
+            <div class="text-center text-muted p-3">
+              <i class="fas fa-spinner fa-spin"></i> Loading transactions...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax Estimate Section -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Tax Estimate 2024</h5>
+          </div>
+          <div class="card-body text-center" id="taxEstimate">
+            <i class="fas fa-spinner fa-spin"></i> Calculating tax estimate...
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-12 col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-link me-2"></i>Quick Actions</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary" onclick="connectBank()">
+                <i class="fas fa-university me-2"></i>Connect Bank Account
+              </button>
+              <button class="btn btn-outline-secondary" onclick="createBudget()">
+                <i class="fas fa-plus me-2"></i>Create Budget
+              </button>
+              <button class="btn btn-outline-secondary" onclick="syncTransactions()">
+                <i class="fas fa-sync me-2"></i>Sync Transactions
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="text-center">
+  <div class="container">
+    <p>© 2025 MyFinance360. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Global variables
+const API_BASE = 'http://localhost:3000/api';
+let authToken = localStorage.getItem('token');
+let userData = {};
+
+  // Function to toggle sidebar visibility
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+  }
+
+// Authentication check and initialization
+async function initDashboard() {
+  if (!authToken) {
+    showError('Please login to access the dashboard');
+    window.location.href = '/login.html';
+    return;
+  }
+
+  try {
+    // Set default authorization header
+    axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+    
+    // Load user data
+    await loadUserData();
+    
+    // Load dashboard data in parallel
+    await Promise.all([
+      loadAccountSummary(),
+      loadBudgetAlerts(),
+      loadRecentTransactions(),
+      loadTaxEstimate(),
+      loadSpendingChart()
+    ]);
+    
+  } catch (error) {
+    console.error('Dashboard initialization error:', error);
+    if (error.response && error.response.status === 401) {
+      showError('Session expired. Please login again.');
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login.html';
+    } else {
+      const errorMessage = getDashboardErrorMessage(error);
+      showError(errorMessage);
+      
+      // Show a retry button for network/server errors
+      if (error.request || (error.response && error.response.status >= 500)) {
+        showRetryOption();
+      }
+    }
+  }
+}
+
+// Load user data
+async function loadUserData() {
+  try {
+    const userInfo = localStorage.getItem('user');
+    if (userInfo) {
+      userData = JSON.parse(userInfo);
+      document.getElementById('userName').textContent = userData.name || 'User';
+    }
+  } catch (error) {
+    console.error('Error loading user data:', error);
+  }
+}
+
+// Load account summary
+async function loadAccountSummary() {
+  try {
+    const response = await axios.get(`${API_BASE}/accounts`);
+    const accounts = response.data.data || [];
+    
+    let totalBalance = 0;
+    accounts.forEach(account => {
+      totalBalance += parseFloat(account.balance || 0);
+    });
+    
+    document.getElementById('totalBalance').textContent = formatCurrency(totalBalance);
+    
+    // Calculate monthly income/expenses from recent transactions
+    await calculateMonthlyStats();
+    
+  } catch (error) {
+    console.error('Error loading accounts:', error);
+    document.getElementById('totalBalance').textContent = '$0.00';
+  }
+}
+
+// Calculate monthly income and expenses
+async function calculateMonthlyStats() {
+  try {
+    const currentDate = new Date();
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    
+    const response = await axios.get(`${API_BASE}/transactions?limit=1000`);
+    const transactions = response.data.transactions || [];
+    
+    const monthlyTransactions = transactions.filter(tx => {
+      const txDate = new Date(tx.transaction_date);
+      return txDate >= firstDayOfMonth;
+    });
+    
+    let monthlyIncome = 0;
+    let monthlyExpenses = 0;
+    
+    monthlyTransactions.forEach(tx => {
+      const amount = Math.abs(parseFloat(tx.amount));
+      if (tx.transaction_type === 'income') {
+        monthlyIncome += amount;
+      } else if (tx.transaction_type === 'expense') {
+        monthlyExpenses += amount;
+      }
+    });
+    
+    document.getElementById('monthlyIncome').textContent = formatCurrency(monthlyIncome);
+    document.getElementById('monthlyExpenses').textContent = formatCurrency(monthlyExpenses);
+    
+  } catch (error) {
+    console.error('Error calculating monthly stats:', error);
+    document.getElementById('monthlyIncome').textContent = '$0.00';
+    document.getElementById('monthlyExpenses').textContent = '$0.00';
+  }
+}
+
+// Load budget alerts
+async function loadBudgetAlerts() {
+  try {
+    const response = await axios.get(`${API_BASE}/budgets/alerts`);
+    const alerts = response.data.data || [];
+    
+    const alertsContainer = document.getElementById('budgetAlerts');
+    alertsContainer.innerHTML = '';
+    
+    if (alerts.length > 0) {
+      alerts.forEach(alert => {
+        const alertClass = alert.alertType === 'exceeded' ? 'danger' : 'warning';
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${alertClass} alert-dismissible fade show mb-2`;
+        alertDiv.innerHTML = `
+          <strong>${alert.budgetName}:</strong> ${alert.message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertsContainer.appendChild(alertDiv);
+      });
+    } else {
+      alertsContainer.innerHTML = '<p class="text-muted mb-0">🎉 All budgets are on track!</p>';
+    }
+    
+  } catch (error) {
+    console.error('Error loading budget alerts:', error);
+    document.getElementById('budgetAlerts').innerHTML = '<p class="text-muted mb-0">Unable to load budget alerts</p>';
+  }
+}
+
+// Load recent transactions
+async function loadRecentTransactions() {
+  try {
+    const response = await axios.get(`${API_BASE}/transactions?limit=5`);
+    const transactions = response.data.transactions || [];
+    
+    const container = document.getElementById('recentTransactions');
+    container.innerHTML = '';
+    
+    if (transactions.length > 0) {
+      transactions.forEach(tx => {
+        const txDiv = document.createElement('div');
+        txDiv.className = 'd-flex justify-content-between align-items-center p-3 border-bottom';
+        
+        const amount = parseFloat(tx.amount);
+        const amountClass = amount > 0 ? 'text-success' : 'text-danger';
+        const amountPrefix = amount > 0 ? '+' : '';
+        
+        txDiv.innerHTML = `
+          <div>
+            <strong>${tx.description}</strong>
+            <br><small class="text-muted">${tx.category || 'Uncategorized'} • ${formatDate(tx.transaction_date)}</small>
+          </div>
+          <div class="text-end">
+            <strong class="${amountClass}">${amountPrefix}${formatCurrency(Math.abs(amount))}</strong>
+          </div>
+        `;
+        container.appendChild(txDiv);
+      });
+    } else {
+      container.innerHTML = '<div class="text-center text-muted p-3">No transactions yet</div>';
+    }
+    
+  } catch (error) {
+    console.error('Error loading transactions:', error);
+    document.getElementById('recentTransactions').innerHTML = '<div class="text-center text-muted p-3">Unable to load transactions</div>';
+  }
+}
+
+// Load tax estimate
+async function loadTaxEstimate() {
+  try {
+    const currentYear = new Date().getFullYear();
+    const response = await axios.post(`${API_BASE}/tax/calculate`, {
+      tax_year: currentYear,
+      filing_status: 'single'
+    });
+    
+    const taxData = response.data.data;
+    const container = document.getElementById('taxEstimate');
+    
+    container.innerHTML = `
+      <div class="row text-center">
+        <div class="col-6">
+          <h4 class="text-primary">${formatCurrency(taxData.federalTax)}</h4>
+          <small class="text-muted">Estimated Tax</small>
+        </div>
+        <div class="col-6">
+          <h4 class="text-info">${taxData.effectiveRate.toFixed(1)}%</h4>
+          <small class="text-muted">Effective Rate</small>
+        </div>
+      </div>
+      <hr>
+      <div class="text-center">
+        <small class="text-muted">Taxable Income: ${formatCurrency(taxData.taxableIncome)}</small>
+      </div>
+    `;
+    
+  } catch (error) {
+    console.error('Error loading tax estimate:', error);
+    document.getElementById('taxEstimate').innerHTML = '<p class="text-muted text-center">Tax estimate unavailable</p>';
+  }
+}
+
+// Load spending chart
+async function loadSpendingChart() {
+  try {
+    const response = await axios.get(`${API_BASE}/budgets/spending/categories`);
+    const spendingData = response.data.data || [];
+    
+    const ctx = document.getElementById('spendingChart').getContext('2d');
+    
+    if (spendingData.length > 0) {
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: spendingData.map(item => item.category),
+          datasets: [{
+            label: 'Spending by Category',
+            data: spendingData.map(item => item.totalSpent),
+            backgroundColor: [
+              '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+              '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+            ],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    } else {
+      ctx.canvas.style.display = 'none';
+      ctx.canvas.parentElement.innerHTML = '<div class="text-center text-muted p-4">No spending data available</div>';
+    }
+    
+  } catch (error) {
+    console.error('Error loading spending chart:', error);
+    const canvas = document.getElementById('spendingChart');
+    canvas.style.display = 'none';
+    canvas.parentElement.innerHTML = '<div class="text-center text-muted p-4">Unable to load chart</div>';
+  }
+}
+
+// Quick action functions
+function connectBank() {
+  window.location.href = `${API_BASE.replace('/api', '')}/api/bank/start`;
+}
+
+function createBudget() {
+  // For now, show an alert. Later this could open a modal or navigate to budget page
+  showSuccess('Budget creation feature coming soon! You can use the API endpoints for now.');
+}
+
+async function syncTransactions() {
+  try {
+    showInfo('Syncing transactions...');
+    const response = await axios.post(`${API_BASE}/bank/api/sync/transactions`);
+    showSuccess('Transactions synced successfully!');
+    
+    // Reload dashboard data
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+    
+  } catch (error) {
+    console.error('Sync error:', error);
+    showError('Failed to sync transactions. Make sure your bank is connected.');
+  }
+}
+
+// Logout function
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+  window.location.href = '/login.html';
+}
+
+// Update logout link
+document.addEventListener('DOMContentLoaded', () => {
+  const logoutLink = document.querySelector('a[href="/"]');
+  if (logoutLink && logoutLink.textContent.includes('Logout')) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      logout();
+    });
+  }
+});
+
+// Utility functions
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(amount);
+}
+
+function formatDate(dateString) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+}
+
+function showError(message) {
+  showAlert(message, 'danger');
+}
+
+function showSuccess(message) {
+  showAlert(message, 'success');
+}
+
+function showInfo(message) {
+  showAlert(message, 'info');
+}
+
+function showAlert(message, type) {
+  const alertDiv = document.createElement('div');
+  alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+  alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+  alertDiv.innerHTML = `
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  document.body.appendChild(alertDiv);
+  
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (alertDiv.parentElement) {
+      alertDiv.remove();
+    }
+  }, 5000);
+}
+
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', initDashboard);
+
+// Get detailed error message for dashboard failures
+function getDashboardErrorMessage(error) {
+  if (error.response) {
+    const status = error.response.status;
+    const data = error.response.data;
+
+    switch (status) {
+      case 400:
+        return 'Invalid request to server. Some of your data might be corrupted. Please try refreshing the page.';
+      
+      case 403:
+        return 'Access denied. You don\'t have permission to view this data. Please contact support if this persists.';
+      
+      case 404:
+        return 'Dashboard data not found. Your account might be new or data is being processed. Please try again in a few minutes.';
+      
+      case 429:
+        return 'Too many requests. Please wait a moment before refreshing the dashboard.';
+      
+      case 500:
+        return 'Database connection error. Our servers are experiencing issues loading your financial data. Please try again in a few minutes.';
+      
+      case 502:
+        return 'Server gateway error. Our financial data service is temporarily unavailable. Please try again shortly.';
+      
+      case 503:
+        return 'Dashboard service temporarily unavailable. Our system is undergoing maintenance. Your data is safe.';
+      
+      case 504:
+        return 'Dashboard loading timed out. The server is taking too long to process your financial data. Please try again.';
+      
+      default:
+        return data.error || `Failed to load dashboard (error ${status}). Please refresh the page or contact support.`;
+    }
+  } else if (error.request) {
+    return 'Network connection failed. Unable to load your financial data. Please check your internet connection and try again.';
+  } else if (error.code === 'ECONNABORTED') {
+    return 'Connection timed out while loading dashboard data. Please try again.';
+  } else {
+    return 'An unexpected error occurred while loading your dashboard. Please refresh the page.';
+  }
+}
+
+// Show retry option for recoverable errors
+function showRetryOption() {
+  const retryDiv = document.createElement('div');
+  retryDiv.className = 'text-center mt-3';
+  retryDiv.innerHTML = `
+    <button class="btn btn-outline-primary" onclick="retryDashboardLoad()">
+      <i class="fas fa-redo me-2"></i>Retry Loading Dashboard
+    </button>
+  `;
+  
+  // Add retry button to the main container
+  const container = document.querySelector('.container');
+  if (container && !document.getElementById('retry-option')) {
+    retryDiv.id = 'retry-option';
+    container.appendChild(retryDiv);
+  }
+}
+
+// Retry dashboard loading
+function retryDashboardLoad() {
+  // Remove retry button
+  const retryOption = document.getElementById('retry-option');
+  if (retryOption) {
+    retryOption.remove();
+  }
+  
+  // Show loading message
+  showInfo('Retrying dashboard load...');
+  
+  // Retry initialization
+  setTimeout(() => {
+    initDashboard();
+  }, 1000);
+}
+</script>
+</body>
+</html>

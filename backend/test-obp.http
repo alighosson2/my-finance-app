@@ -1,59 +1,93 @@
-### OBP Integration Testing File  
-### UPDATED URLS - Make sure you have completed OAuth first: http://localhost:3000/api/bank/oauth/start
+### Variables
+@baseUrl = http://localhost:3000
+@token = YOUR_JWT_TOKEN_HERE
 
-### Step 1: Test OBP Connection
-POST http://localhost:3000/api/bank/sync/test
-Content-Type: application/json
-Authorization: Bearer YOUR_JWT_TOKEN
+### 1. Test OAuth Configuration
+GET {{baseUrl}}/api/bank/test
 
-{
-  "tokenId": 1
-}
+### 2. Start OAuth Flow (Visit in browser)
+GET {{baseUrl}}/api/bank/start
 
-### Step 2: Sync Accounts from OBP
-POST http://localhost:3000/api/bank/sync/accounts  
-Content-Type: application/json
-Authorization: Bearer YOUR_JWT_TOKEN
-
-{
-  "tokenId": 1
-}
-
-### Step 3: Sync Transactions for Account (replace accountId with real ID)
-POST http://localhost:3000/api/bank/sync/transactions/1
-Content-Type: application/json
-Authorization: Bearer YOUR_JWT_TOKEN
-
-{
-  "limit": 20
-}
-
-### Step 4: Sync All Data (accounts + transactions)
-POST http://localhost:3000/api/bank/sync/all
-Content-Type: application/json  
-Authorization: Bearer YOUR_JWT_TOKEN
-
-{
-  "transactionLimit": 50
-}
-
-### Helper: Get your JWT token (login first)
-POST http://localhost:3000/api/auth/login
+### 3. Test Login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "your-email@example.com",
-  "password": "your-password"
+  "email": "test@example.com",
+  "password": "password123"
 }
 
-### Helper: Check your bank tokens
-GET http://localhost:3000/api/bank/tokens
-Authorization: Bearer YOUR_JWT_TOKEN
+### 4. Get User Profile
+GET {{baseUrl}}/api/users/profile
+Authorization: Bearer {{token}}
 
-### Helper: Check your accounts
-GET http://localhost:3000/api/accounts
-Authorization: Bearer YOUR_JWT_TOKEN
+### 5. Test OBP Connection (after OAuth)
+POST {{baseUrl}}/api/bank/api/sync/test
+Authorization: Bearer {{token}}
+Content-Type: application/json
 
-### Helper: Check your transactions
-GET http://localhost:3000/api/transactions
-Authorization: Bearer YOUR_JWT_TOKEN 
+### 6. Sync Bank Accounts from OBP
+POST {{baseUrl}}/api/bank/api/sync/accounts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 7. Get Financial Accounts
+GET {{baseUrl}}/api/accounts
+Authorization: Bearer {{token}}
+
+### 8. Get Account by ID
+GET {{baseUrl}}/api/accounts/1
+Authorization: Bearer {{token}}
+
+### 9. Create Financial Account (Manual)
+POST {{baseUrl}}/api/accounts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "account_name": "Test Savings",
+  "account_type": "SAVINGS",
+  "balance": 1500.00,
+  "currency": "USD",
+  "bank_name": "Test Bank"
+}
+
+### 10. Update Financial Account
+PUT {{baseUrl}}/api/accounts/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "account_name": "Updated Savings Account",
+  "balance": 2000.00
+}
+
+### 11. Get Account Summary
+GET {{baseUrl}}/api/accounts/stats/summary
+Authorization: Bearer {{token}}
+
+### 12. Sync Transactions for Account
+POST {{baseUrl}}/api/bank/api/sync/transactions/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "limit": 50,
+  "fromDate": "2025-01-01",
+  "toDate": "2025-01-20"
+}
+
+### 13. Get Transactions
+GET {{baseUrl}}/api/transactions
+Authorization: Bearer {{token}}
+
+### 14. Sync All Data from OBP
+POST {{baseUrl}}/api/bank/api/sync/all
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "transactionLimit": 100,
+  "fromDate": "2024-12-01",
+  "toDate": "2025-01-20"
+} 

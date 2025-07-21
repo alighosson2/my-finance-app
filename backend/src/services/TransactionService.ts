@@ -66,7 +66,6 @@ export class TransactionService {
       user_id: userId,
       account_id: data.account_id,
       budget_id: data.budget_id || null,
-      group_budget_id: data.group_budget_id || null,
       amount: data.amount as any,
       transaction_date: data.transaction_date || new Date(),
       description: data.description.trim(),
@@ -76,13 +75,7 @@ export class TransactionService {
       merchant_name: data.merchant_name?.trim() || null,
       location: data.location?.trim() || null,
       is_recurring: data.is_recurring || false,
-      tags: cleanTags,
-      // OBP Integration fields
-      external_transaction_id: null,
-      import_source: "manual",
-      sync_status: "synced",
-      created_at: null,
-      updated_at: null,
+      tags: cleanTags
     };
 
     const created = await (await this.getRepo()).create(transaction);
@@ -122,7 +115,6 @@ export class TransactionService {
       description: data.description?.trim() ?? existing.description,
       transaction_type: data.transaction_type ?? existing.transaction_type,
       budget_id: data.budget_id !== undefined ? data.budget_id : existing.budget_id,
-      group_budget_id: data.group_budget_id !== undefined ? data.group_budget_id : existing.group_budget_id,
       category: data.category !== undefined ? data.category : existing.category,
       subcategory: data.subcategory !== undefined ? data.subcategory : existing.subcategory,
       merchant_name: data.merchant_name !== undefined ? data.merchant_name?.trim() || null : existing.merchant_name,
@@ -343,8 +335,7 @@ export class TransactionService {
             location: recurring.location || null,
             is_recurring: true,
             tags: recurring.tags,
-            budget_id: recurring.budget_id || null,
-            group_budget_id: recurring.group_budget_id || null
+            budget_id: recurring.budget_id || null
           });
           
           newTransactions.push(newTransaction);

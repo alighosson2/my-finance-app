@@ -11,6 +11,7 @@ const bank_routes_1 = __importDefault(require("./bank.routes"));
 const bankOAuth_routes_1 = __importDefault(require("./bankOAuth.routes"));
 const financialAccount_routes_1 = __importDefault(require("./financialAccount.routes"));
 const transaction_routes_1 = __importDefault(require("./transaction.routes"));
+const tax_routes_1 = __importDefault(require("./tax.routes"));
 const routes = (0, express_1.Router)();
 routes.use('/user', user_routes_1.default);
 routes.use('/auth', auth_routes_1.default);
@@ -18,6 +19,7 @@ routes.use('/bank', bankOAuth_routes_1.default); // OAuth routes: /test, /start,
 routes.use('/bank/api', bank_routes_1.default); // Bank API routes under /bank/api to avoid conflicts
 routes.use('/accounts', financialAccount_routes_1.default);
 routes.use('/transactions', transaction_routes_1.default);
+routes.use('/tax', tax_routes_1.default);
 exports.default = routes;
 /*import { Router } from "express";
 const routes = Router();

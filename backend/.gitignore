@@ -6,3 +6,18 @@ coverage
 logs
 /generated/prisma
 
+# TypeScript compiled output
+*.js
+*.js.map
+dist/
+*.tsbuildinfo
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+

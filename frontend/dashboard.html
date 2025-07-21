@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - MyFinance360</title>
+  
+  <!-- Bootstrap & Font‑Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root { 
+      --primary: #2c3e50; 
+      --accent: #1abc9c; 
+      --dark: #2c3e50; 
+      --success: #27ae60;
+      --warning: #f39c12;
+      --info: #3498db;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      color: #333; 
+      line-height: 1.6;
+    }
+    
+    .sidebar {
+      height: 100vh;
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem 0;
+      position: fixed;
+      width: 240px;
+      overflow-y: auto;
+    }
+    
+    .sidebar .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: white !important;
+      padding: 0 1.25rem;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+    
+    .sidebar a {
+      color: rgba(255,255,255,0.85);
+      display: block;
+      padding: 0.75rem 1.25rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+    }
+    
+    .sidebar a:hover, .sidebar a.active {
+      background-color: rgba(255,255,255,0.15);
+      color: white;
+      border-left-color: var(--accent);
+    }
+    
+    .content {
+      margin-left: 240px;
+      padding: 2rem;
+    }
+    
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      border: none;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+      color: white;
+      font-weight: 600;
+      border-bottom: none;
+    }
+    
+    .section-title h2 {
+      color: var(--primary);
+      position: relative;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    
+    .section-title h2::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    
+    .btn {
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1.5rem;
+    }
+    
+    .btn-primary {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+    
+    .btn-primary:hover {
+      background-color: #16a085;
+      border-color: #16a085;
+      transform: translateY(-2px);
+    }
+    
+    .btn-success:hover {
+      transform: translateY(-2px);
+    }
+    
+    .btn-warning:hover {
+      transform: translateY(-2px);
+    }
+    
+    .btn-info:hover {
+      transform: translateY(-2px);
+    }
+    
+    .btn-dark:hover {
+      transform: translateY(-2px);
+    }
+    
+    .alert {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      .content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <a class="navbar-brand" href="dashboard.html">
+        <i class="fas fa-chart-line me-2"></i>MyFinance360
+      </a>
+      
+      <a href="dashboard.html" class="active">
+        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+      </a>
+      <a href="accounts.html">
+        <i class="fas fa-wallet me-2"></i>Accounts
+      </a>
+      <a href="transactions.html">
+        <i class="fas fa-exchange-alt me-2"></i>Transactions
+      </a>
+      <a href="budgets.html">
+        <i class="fas fa-chart-pie me-2"></i>Budgets
+      </a>
+      <a href="tax.html">
+        <i class="fas fa-file-invoice-dollar me-2"></i>Tax Records
+      </a>
+      <a href="/api/auth/logout">
+        <i class="fas fa-sign-out-alt me-2"></i>Logout
+      </a>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="row">
+        <div class="col-12">
+          <h1 class="mb-4">Dashboard</h1>
+        </div>
+      </div>
+
+      <!-- Connect Bank Token -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-plug me-2"></i>Connect Bank Account</h5>
+        </div>
+        <div class="card-body p-4">
+          <form action="/api/bank/api/tokens" method="POST" class="row g-3">
+            <div class="col-md-6">
+              <label for="provider" class="form-label">Bank Provider</label>
+              <input 
+                type="text" 
+                id="provider" 
+                name="provider" 
+                class="form-control" 
+                placeholder="e.g., Bank Of America" 
+                required
+              >
+              <div class="form-text">Enter your bank name</div>
+            </div>
+            <div class="col-md-6">
+              <label for="access_token" class="form-label">Access Token</label>
+              <input 
+                type="text" 
+                id="access_token" 
+                name="access_token" 
+                class="form-control" 
+                placeholder="Enter your bank API access token" 
+                required
+              >
+              <div class="form-text">For testing, use: test-token-123</div>
+            </div>
+            <div class="col-md-6">
+              <label for="access_token_secret" class="form-label">Access Token Secret (Optional)</label>
+              <input 
+                type="text" 
+                id="access_token_secret" 
+                name="access_token_secret" 
+                class="form-control" 
+                placeholder="Token secret if required"
+              >
+            </div>
+            <div class="col-md-6">
+              <label for="expires_at" class="form-label">Expires At</label>
+              <input 
+                type="datetime-local" 
+                id="expires_at" 
+                name="expires_at" 
+                class="form-control" 
+                required
+              >
+              <div class="form-text">When this token expires</div>
+            </div>
+            <div class="col-12">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>For Testing:</strong> Use access token "test-token-123" and set expiry to tomorrow's date.
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Connect Bank Account
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- View Existing Tokens -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-list me-2"></i>Your Connected Banks</h5>
+        </div>
+        <div class="card-body p-4">
+          <form action="/api/bank/api/tokens" method="GET" class="mb-3">
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="fas fa-sync-alt me-2"></i>Refresh Bank List
+            </button>
+          </form>
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Your connected bank accounts will appear here. Click "Refresh Bank List" to see current connections.
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Data Sync -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-sync-alt me-2"></i>Bank Data Synchronization</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <!-- Test Connection -->
+            <div class="col-md-6 col-lg-3">
+              <form action="/api/bank/api/sync/test" method="POST" class="h-100">
+                <div class="text-center">
+                  <i class="fas fa-vial fa-2x text-warning mb-3"></i>
+                  <h6>Test Connection</h6>
+                  <p class="text-muted small">Verify your bank connection is working</p>
+                  <button type="submit" class="btn btn-warning w-100">
+                    <i class="fas fa-vial me-2"></i>Test
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Sync Accounts -->
+            <div class="col-md-6 col-lg-3">
+              <form action="/api/bank/api/sync/accounts" method="POST" class="h-100">
+                <div class="text-center">
+                  <i class="fas fa-university fa-2x text-success mb-3"></i>
+                  <h6>Sync Accounts</h6>
+                  <p class="text-muted small">Import your bank account information</p>
+                  <button type="submit" class="btn btn-success w-100">
+                    <i class="fas fa-download me-2"></i>Sync Accounts
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Sync Transactions -->
+            <div class="col-md-6 col-lg-3">
+              <form action="/api/bank/api/sync/transactions" method="POST" class="h-100">
+                <div class="text-center">
+                  <i class="fas fa-exchange-alt fa-2x text-info mb-3"></i>
+                  <h6>Sync Transactions</h6>
+                  <div class="mb-2">
+                    <input 
+                      type="number" 
+                      name="accountId" 
+                      class="form-control form-control-sm" 
+                      placeholder="Account ID" 
+                      required
+                    >
+                  </div>
+                  <p class="text-muted small">Download recent transactions</p>
+                  <button type="submit" class="btn btn-info w-100">
+                    <i class="fas fa-download me-2"></i>Sync Transactions
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Sync All Data -->
+            <div class="col-md-6 col-lg-3">
+              <form action="/api/bank/api/sync/all" method="POST" class="h-100">
+                <div class="text-center">
+                  <i class="fas fa-database fa-2x text-dark mb-3"></i>
+                  <h6>Sync All Data</h6>
+                  <p class="text-muted small">Complete synchronization of all bank data</p>
+                  <button type="submit" class="btn btn-dark w-100">
+                    <i class="fas fa-sync-alt me-2"></i>Sync All
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="alert alert-warning mt-4">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Important:</strong> Make sure you have connected at least one bank account before attempting to sync data.
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Quick Actions</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <a href="accounts.html" class="btn btn-outline-primary w-100">
+                <i class="fas fa-eye me-2"></i>View Accounts
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="transactions.html" class="btn btn-outline-info w-100">
+                <i class="fas fa-list me-2"></i>View Transactions
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="budgets.html" class="btn btn-outline-success w-100">
+                <i class="fas fa-chart-pie me-2"></i>Manage Budgets
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="tax.html" class="btn btn-outline-warning w-100">
+                <i class="fas fa-file-invoice-dollar me-2"></i>Tax Records
+              </a>
+            </div>
+          </div>
+        </div>
+      </div> 
+    </div>
+  </div>
+  
+<script>
+  const form = document.querySelector('form[action="/api/bank/api/tokens"]');
+  
+  form.addEventListener('submit', function (e) {
+    e.preventDefault(); // Prevent the browser's default submission
+    
+    const input = document.getElementById('expires_at');
+    
+    if (input && input.value) {
+      const localDate = new Date(input.value);
+      const utcISOString = localDate.toISOString(); // Convert to UTC ISO format
+      input.value = utcISOString;
+    }
+
+    // ✅ Manually submit the form after modifying the input
+    form.submit();
+  });
+</script>
+
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body> 
+</html>

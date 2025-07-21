@@ -54,9 +54,9 @@ export class UserService {
       profile_settings: data.profile_settings ?? {},
       is_active: data.is_active ?? true,
       role: data.role ?? user_role.user,
-      created_at: null,
-      updated_at: null,
-      date_joined: null,
+      created_at: new Date(),
+      updated_at: new Date(),
+      date_joined: new Date(),
     };
     return (await this.getRepo()).create(user);
   }

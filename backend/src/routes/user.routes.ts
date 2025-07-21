@@ -1,25 +1,35 @@
 // src/routes/user.routes.ts
-import { Router, Request, Response } from 'express';
-import { UserController } from '../controllers/UserController';
+import express from 'express';
 import { UserService } from '../services/UserService';
+import { UserController } from '../controllers/UserController';
 import { asyncHandler } from '../middleware/errorMiddleware';
 import { authenticate } from '../middleware/auth';
 
-const router = Router();
+const router = express.Router();
 const userService = new UserService();
 const userController = new UserController(userService);
 
-// Public routes (no authentication required)
+// 🌐 Web User routes (redirects for registration)
 router.route('/')
-  .get(asyncHandler(userController.getAllUsers.bind(userController))) // Protected: get all users
-  .post(asyncHandler(userController.createUser.bind(userController))); // Public: user registration
+  .get(asyncHandler(userController.getAllUsers.bind(userController)))
+  .post(asyncHandler(userController.createUser.bind(userController)));
+
+// 📱 Mobile API User routes (JSON responses)
+router.route('/register-api')
+  .post(asyncHandler(userController.createUserAPI.bind(userController)));
 
 router.route('/:id')
-  .get(asyncHandler(userController.getUserById.bind(userController))) // Protected: get user by ID
-  .put(authenticate, asyncHandler(userController.updateUser.bind(userController))) // Protected: update user
-  .delete(authenticate, asyncHandler(userController.deleteUser.bind(userController))); // Protected: delete user
+  .get(asyncHandler(userController.getUserById.bind(userController)))
+  .put(asyncHandler(userController.updateUser.bind(userController)))
+  .delete(asyncHandler(userController.deleteUser.bind(userController)));
+
+router.route('/login')
+  .post(asyncHandler(userController.loginUser.bind(userController)));
 
 router.route('/:id/bank-tokens')
-  .get(authenticate, asyncHandler(userController.getUserBankTokens.bind(userController))); // Protected: get user bank tokens
+  .get(authenticate, asyncHandler(userController.getUserBankTokens.bind(userController)));
+
+router.route('/:id/accounts')
+  .get(authenticate, asyncHandler(userController.getUserAccounts.bind(userController)));
 
 export default router;

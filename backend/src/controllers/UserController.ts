@@ -34,18 +34,68 @@ export class UserController {
   }
 
   async createUser(req: Request, res: Response): Promise<void> {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) throw new BadRequestException('All fields required');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new BadRequestException('Invalid email format');
+    }
+    const newUser = await this.userService.createUser({ name, email, password });
+    // Strip out the hash, if you need it for logging or auditing:
+    // const { password_hash, ...userData } = newUser;
+
+    // ----> HERE <----
+    // Instead of sending JSON, send a 302 redirect:
+    res.redirect('/login.html');
+  } catch (error: any) {
+    const status = error instanceof BadRequestException ? 400 : 500;
+    res.status(status).json({ 
+      error: error.message || 'Error creating user' 
+    });
+  }
+}
+
+  // 🆕 NEW: Mobile API Registration (JSON Response)
+  async createUserAPI(req: Request, res: Response): Promise<any> {
     try {
       const { name, email, password } = req.body;
-      if (!name || !email || !password) throw new BadRequestException('All fields required');
-      if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-        throw new BadRequestException('Invalid email');
+      if (!name || !email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: 'All fields are required'
+        });
       }
+      
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email format'
+        });
+      }
+      
       const newUser = await this.userService.createUser({ name, email, password });
-      res.status(201).json(newUser);
-    } catch (error) {
-      throw new ServiceException('Error creating user');
+      
+      // Return JSON response for mobile
+      return res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        data: {
+          userId: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          createdAt: newUser.created_at
+        }
+      });
+      
+    } catch (error: any) {
+      const status = error instanceof BadRequestException ? 400 : 500;
+      return res.status(status).json({
+        success: false,
+        message: error.message || 'Error creating user'
+      });
     }
   }
+
 
   async updateUser(req: Request, res: Response): Promise<void> {
     try {
@@ -83,7 +133,6 @@ export class UserController {
     }
   }
 
-  // NEW: Relationship endpoints
   async getUserBankTokens(req: Request, res: Response): Promise<void> {
     try {
       const userId = Number(req.params.id);

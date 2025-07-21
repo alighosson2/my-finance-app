@@ -1,4 +1,4 @@
-import { transaction_type, financial_accounts, users, budgets, group_budgets } from '@prisma/client';
+import { transaction_type, financial_accounts, users, budgets } from '@prisma/client';
 
 // 1. Use Prisma's generated enum directly
 export { transaction_type as TransactionType };
@@ -9,7 +9,6 @@ export interface ITransaction {
   user_id: number;
   account_id: number;
   budget_id?: number | null;
-  group_budget_id?: number | null;
   amount: number;
   transaction_date: Date;
   description: string;
@@ -19,7 +18,7 @@ export interface ITransaction {
   merchant_name?: string | null;
   location?: string | null;
   is_recurring?: boolean | null;
-  tags: string[];
+  tags?: string[];
   // OBP Integration fields
   external_transaction_id?: string | null;
   import_source?: string | null;
@@ -30,7 +29,6 @@ export interface ITransaction {
   financial_account?: financial_accounts;
   user?: users;
   budget?: budgets | null;
-  group_budget?: group_budgets | null;
 }
 
 // 3. Entity class with business logic
@@ -38,11 +36,6 @@ export class TransactionEntity implements ITransaction {
   private _amount: number;
   private _description: string;
   public budget_id: number | null;
-  public group_budget_id: number | null;
-  public category: string | null;
-  public subcategory: string | null;
-  public merchant_name: string | null;
-  public location: string | null;
 
   constructor(
     public id: number,
@@ -51,13 +44,12 @@ export class TransactionEntity implements ITransaction {
     amount: number,
     public transaction_date: Date,
     description: string,
+    public category: string | null = null,
+    public subcategory: string | null = null,
     public transaction_type: transaction_type,
     budget_id: number | null = null,
-    group_budget_id: number | null = null,
-    category: string | null = null,
-    subcategory: string | null = null,
-    merchant_name: string | null = null,
-    location: string | null = null,
+    public merchant_name: string | null = null,
+    public location: string | null = null,
     public is_recurring: boolean | null = false,
     public tags: string[] = [],
     // OBP Integration fields
@@ -68,19 +60,19 @@ export class TransactionEntity implements ITransaction {
     public updated_at: Date | null = new Date(),
     public financial_account?: financial_accounts,
     public user?: users,
-    public budget?: budgets | null,
-    public group_budget?: group_budgets | null
+    public budget?: budgets | null
   ) {
     this._amount = amount;
     this._description = description.trim();
     
     // Convert undefined to null for Prisma compatibility
     this.budget_id = budget_id ?? null;
-    this.group_budget_id = group_budget_id ?? null;
-    this.category = category ?? null;
-    this.subcategory = subcategory ?? null;
     this.merchant_name = merchant_name ?? null;
     this.location = location ?? null;
+    this.is_recurring = is_recurring ?? false;
+    this.external_transaction_id = external_transaction_id ?? null;
+    this.import_source = import_source ?? "manual";
+    this.sync_status = sync_status ?? "synced";
   }
 
   get amount(): number {
@@ -152,7 +144,6 @@ export class TransactionEntity implements ITransaction {
       user_id: this.user_id,
       account_id: this.account_id,
       budget_id: this.budget_id,
-      group_budget_id: this.group_budget_id,
       amount: this.amount,
       transaction_date: this.transaction_date,
       description: this.description,
@@ -169,10 +160,10 @@ export class TransactionEntity implements ITransaction {
       sync_status: this.sync_status,
       created_at: this.created_at,
       updated_at: this.updated_at,
+      // Include relationship objects if available
       financial_account: this.financial_account,
       user: this.user,
-      budget: this.budget,
-      group_budget: this.group_budget
+      budget: this.budget
     };
   }
 }
@@ -210,7 +201,6 @@ export interface CreateTransactionRequest {
   is_recurring?: boolean;
   tags?: string[];
   budget_id?: number | null;
-  group_budget_id?: number | null;
 }
 
 export interface UpdateTransactionRequest {
@@ -226,7 +216,6 @@ export interface UpdateTransactionRequest {
   is_recurring?: boolean;
   tags?: string[];
   budget_id?: number | null;
-  group_budget_id?: number | null;
 }
 
 export interface TransactionSearchFilters {
