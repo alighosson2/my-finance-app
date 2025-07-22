@@ -1,7 +1,6 @@
 import { PrismaClient, tax_records } from '@prisma/client';
 import { ConnectionManager } from './ConnectionManager';
 import { TaxRecordEntity, CreateTaxRecordRequest, UpdateTaxRecordRequest } from '../model/TaxModel';
-import logger from '../util/logger';
 
 export class TaxRepository {
   private prisma: PrismaClient | null = null;
@@ -9,7 +8,7 @@ export class TaxRepository {
   async init(): Promise<void> {
     if (!this.prisma) {
       this.prisma = await ConnectionManager.getConnection();
-      logger.info('TaxRepository initialized');
+      console.info('TaxRepository initialized');
     }
   }
 
@@ -23,7 +22,7 @@ export class TaxRepository {
   // Create new tax record
   async create(userId: number, data: CreateTaxRecordRequest): Promise<TaxRecordEntity> {
     const prisma = await this.getPrisma();
-    
+
     const taxRecord = await prisma.tax_records.create({
       data: {
         user_id: userId,
@@ -43,7 +42,7 @@ export class TaxRepository {
   // Get tax record by ID
   async getById(id: number, userId: number): Promise<TaxRecordEntity | null> {
     const prisma = await this.getPrisma();
-    
+
     const taxRecord = await prisma.tax_records.findFirst({
       where: {
         id,
@@ -57,7 +56,7 @@ export class TaxRepository {
   // Get tax record by user and year
   async getByUserAndYear(userId: number, taxYear: number): Promise<TaxRecordEntity | null> {
     const prisma = await this.getPrisma();
-    
+
     const taxRecord = await prisma.tax_records.findFirst({
       where: {
         user_id: userId,
@@ -71,7 +70,7 @@ export class TaxRepository {
   // Get all tax records for user
   async getByUser(userId: number): Promise<TaxRecordEntity[]> {
     const prisma = await this.getPrisma();
-    
+
     const taxRecords = await prisma.tax_records.findMany({
       where: {
         user_id: userId
@@ -87,7 +86,7 @@ export class TaxRepository {
   // Update tax record
   async update(id: number, userId: number, data: Partial<tax_records>): Promise<TaxRecordEntity | null> {
     const prisma = await this.getPrisma();
-    
+
     try {
       const updatedRecord = await prisma.tax_records.update({
         where: {
@@ -102,15 +101,15 @@ export class TaxRepository {
 
       return this.mapToEntity(updatedRecord);
     } catch (error) {
-      logger.error('Failed to update tax record:', error);
+      console.error('Failed to update tax record:', error);
       return null;
     }
   }
 
   // Update calculated tax values
   async updateCalculations(
-    id: number, 
-    userId: number, 
+    id: number,
+    userId: number,
     calculations: {
       taxableIncome: number;
       estimatedTax: number;
@@ -118,7 +117,7 @@ export class TaxRepository {
     }
   ): Promise<TaxRecordEntity | null> {
     const prisma = await this.getPrisma();
-    
+
     try {
       const updatedRecord = await prisma.tax_records.update({
         where: {
@@ -135,7 +134,7 @@ export class TaxRepository {
 
       return this.mapToEntity(updatedRecord);
     } catch (error) {
-      logger.error('Failed to update tax calculations:', error);
+      console.error('Failed to update tax calculations:', error);
       return null;
     }
   }
@@ -143,7 +142,7 @@ export class TaxRepository {
   // Delete tax record
   async delete(id: number, userId: number): Promise<boolean> {
     const prisma = await this.getPrisma();
-    
+
     try {
       await prisma.tax_records.delete({
         where: {
@@ -153,7 +152,7 @@ export class TaxRepository {
       });
       return true;
     } catch (error) {
-      logger.error('Failed to delete tax record:', error);
+      console.error('Failed to delete tax record:', error);
       return false;
     }
   }
@@ -161,7 +160,7 @@ export class TaxRepository {
   // Check if tax record exists for user and year
   async existsByUserAndYear(userId: number, taxYear: number): Promise<boolean> {
     const prisma = await this.getPrisma();
-    
+
     const count = await prisma.tax_records.count({
       where: {
         user_id: userId,
@@ -175,7 +174,7 @@ export class TaxRepository {
   // Get tax years for user
   async getTaxYearsByUser(userId: number): Promise<number[]> {
     const prisma = await this.getPrisma();
-    
+
     const results = await prisma.tax_records.findMany({
       where: {
         user_id: userId
@@ -208,4 +207,4 @@ export class TaxRepository {
       record.updated_at
     );
   }
-} 
+}

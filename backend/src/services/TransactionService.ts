@@ -1,7 +1,6 @@
 import { transactions, transaction_type } from '@prisma/client';
 import { createTransactionRepository } from '../Repositories/TransactionRepository';
 import { id, ITransactionRepository } from '../Repositories/IRepository';
-import logger from '../util/logger';
 import { NotFoundException } from '../exceptions/NotFoundException';
 import { BadRequestException } from '../exceptions/BadRequestException';
 import { TransactionEntity, CreateTransactionRequest, UpdateTransactionRequest, TransactionSearchFilters, TransactionHelpers } from '../model/TransactionModel';
@@ -30,7 +29,7 @@ export class TransactionService {
   async getTransactionsByUser(userId: number, page: number = 1, limit: number = 50): Promise<{ transactions: TransactionEntity[]; total: number; totalPages: number }> {
     const repo = await this.getRepo();
     const result = await repo.getTransactionsByUser(userId, page, limit);
-    
+
     return {
       ...result,
       totalPages: Math.ceil(result.total / limit)
@@ -40,7 +39,7 @@ export class TransactionService {
   async getTransactionsByAccount(accountId: number, page: number = 1, limit: number = 50): Promise<{ transactions: TransactionEntity[]; total: number; totalPages: number }> {
     const repo = await this.getRepo();
     const result = await repo.getTransactionsByAccount(accountId, page, limit);
-    
+
     return {
       ...result,
       totalPages: Math.ceil(result.total / limit)
@@ -85,9 +84,9 @@ export class TransactionService {
   async updateTransaction(transactionId: id, userId: number, data: UpdateTransactionRequest): Promise<TransactionEntity> {
     const repo = await this.getRepo();
     const existing = await repo.getTransactionById(transactionId);
-    
+
     if (!existing) throw new NotFoundException('Transaction not found');
-    
+
     // Verify ownership
     if (existing.user_id !== userId) {
       throw new BadRequestException('Unauthorized to update this transaction');
@@ -97,7 +96,7 @@ export class TransactionService {
     if (data.amount !== undefined && !TransactionHelpers.isValidAmount(data.amount)) {
       throw new BadRequestException('Invalid transaction amount');
     }
-    
+
     if (data.transaction_type && !TransactionHelpers.isValidType(data.transaction_type)) {
       throw new BadRequestException('Invalid transaction type');
     }
@@ -127,7 +126,7 @@ export class TransactionService {
 
     const updated = await repo.update(transactionId, transactionData);
     if (!updated) throw new Error(`Transaction with id ${transactionId} could not be updated`);
-    
+
     // Convert back to TransactionEntity
     return new TransactionEntity(
       updated.id,
@@ -157,9 +156,9 @@ export class TransactionService {
   async deleteTransaction(transactionId: id, userId: number): Promise<void> {
     const repo = await this.getRepo();
     const existing = await repo.getTransactionById(transactionId);
-    
+
     if (!existing) throw new NotFoundException('Transaction not found');
-    
+
     // Verify ownership
     if (existing.user_id !== userId) {
       throw new BadRequestException('Unauthorized to delete this transaction');
@@ -170,12 +169,12 @@ export class TransactionService {
 
   async searchTransactions(userId: number, filters: TransactionSearchFilters, page: number = 1, limit: number = 50): Promise<{ transactions: TransactionEntity[]; total: number; totalPages: number }> {
     const repo = await this.getRepo();
-    
+
     // Ensure user can only search their own transactions
     filters.user_id = userId;
-    
+
     const result = await repo.searchTransactions(filters, page, limit);
-    
+
     return {
       ...result,
       totalPages: Math.ceil(result.total / limit)
@@ -185,7 +184,7 @@ export class TransactionService {
   async getTransactionsByCategory(userId: number, category: string, page: number = 1, limit: number = 50): Promise<{ transactions: TransactionEntity[]; total: number; totalPages: number }> {
     const repo = await this.getRepo();
     const result = await repo.getTransactionsByCategory(userId, category, page, limit);
-    
+
     return {
       ...result,
       totalPages: Math.ceil(result.total / limit)
@@ -199,7 +198,7 @@ export class TransactionService {
 
     const repo = await this.getRepo();
     const result = await repo.getTransactionsByDateRange(userId, startDate, endDate, page, limit);
-    
+
     return {
       ...result,
       totalPages: Math.ceil(result.total / limit)
@@ -235,11 +234,11 @@ export class TransactionService {
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
-    
+
     // Get current month data
     const startOfMonth = new Date(currentYear, currentMonth - 1, 1);
     const endOfMonth = new Date(currentYear, currentMonth, 0);
-    
+
     const [monthlyTransactions, categorySummary, recentTransactions] = await Promise.all([
       repo.getMonthlyTransactionSummary(userId, currentYear, currentMonth),
       repo.getCategorySpending(userId, startOfMonth, endOfMonth),
@@ -285,7 +284,7 @@ export class TransactionService {
 
   private normalizeTags(tags?: string[]): string[] {
     if (!tags || !Array.isArray(tags)) return [];
-    
+
     return tags
       .map(tag => tag.trim().toLowerCase())
       .filter(tag => tag.length > 0)
@@ -296,17 +295,17 @@ export class TransactionService {
   // Utility method for bulk operations
   async bulkCreateTransactions(userId: number, transactions: CreateTransactionRequest[]): Promise<TransactionEntity[]> {
     const results: TransactionEntity[] = [];
-    
+
     for (const transactionData of transactions) {
       try {
         const created = await this.createTransaction(userId, transactionData);
         results.push(created);
       } catch (error) {
-        logger.error(`Failed to create transaction: ${transactionData.description}`, error);
+        console.error(`Failed to create transaction: ${transactionData.description}`, error);
         // Continue with other transactions
       }
     }
-    
+
     return results;
   }
 
@@ -314,13 +313,13 @@ export class TransactionService {
   async processRecurringTransactions(userId: number): Promise<TransactionEntity[]> {
     const recurringTransactions = await this.getRecurringTransactions(userId);
     const newTransactions: TransactionEntity[] = [];
-    
+
     for (const recurring of recurringTransactions) {
       // Simple logic: if last transaction was more than 30 days ago, create a new one
       const daysSinceLastTransaction = Math.floor(
         (new Date().getTime() - recurring.transaction_date.getTime()) / (1000 * 60 * 60 * 24)
       );
-      
+
       if (daysSinceLastTransaction >= 30) {
         try {
           const newTransaction = await this.createTransaction(userId, {
@@ -337,14 +336,14 @@ export class TransactionService {
             tags: recurring.tags,
             budget_id: recurring.budget_id || null
           });
-          
+
           newTransactions.push(newTransaction);
         } catch (error) {
-          logger.error(`Failed to process recurring transaction: ${recurring.description}`, error);
+          console.error(`Failed to process recurring transaction: ${recurring.description}`, error);
         }
       }
     }
-    
+
     return newTransactions;
   }
-} 
+}

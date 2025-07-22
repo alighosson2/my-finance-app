@@ -2,7 +2,6 @@ import bcrypt from 'bcrypt';
 import { users, user_role } from '@prisma/client';
 import { createUserRepository } from '../Repositories/UserRepository';
 import { id, IUserRepository } from '../Repositories/IRepository';
-import logger from '../util/logger';
 import { NotFoundException } from '../exceptions/NotFoundException';
 import { UserEntity } from '../model/Usermodel';
 

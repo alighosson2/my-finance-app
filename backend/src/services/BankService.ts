@@ -6,7 +6,6 @@ import { FinancialAccountService } from './FinancialAccountService';
 import { TransactionService } from './TransactionService';
 import { CreateFinancialAccountDTO } from '../model/FinancialAccountModel';
 import { CreateTransactionRequest } from '../model/TransactionModel';
-import logger from '../util/logger';
 
 export class BankService {
   private bankRepository: BankRepository | null = null;
@@ -30,12 +29,12 @@ export class BankService {
 
   async createToken(dto: CreateBankTokenDto): Promise<BankTokenEntity> {
     const repo = await this.getRepo();
-    
+
     // Validate user_id is provided
     if (!dto.user_id || dto.user_id <= 0) {
       throw new Error('Valid user_id is required');
     }
-    
+
     const token = await repo.create({
       id: 0, // This will be ignored by the repository
       user_id: dto.user_id,
@@ -47,7 +46,7 @@ export class BankService {
       created_at: new Date(),
       updated_at: new Date()
     });
-    
+
     const result = await repo.getTokenById(token.id);
     if (!result) {
       throw new Error('Failed to retrieve created token');
@@ -71,7 +70,7 @@ export class BankService {
   async updateToken(id: number, dto: UpdateBankTokenDto): Promise<BankTokenEntity> {
     const repo = await this.getRepo();
     const existing = await repo.getTokenById(id);
-    
+
     if (!existing) {
       throw new NotFoundException('Token not found');
     }
@@ -102,11 +101,11 @@ export class BankService {
   async deleteToken(id: number): Promise<void> {
     const repo = await this.getRepo();
     const token = await repo.getTokenById(id);
-    
+
     if (!token) {
       throw new NotFoundException('Token not found');
     }
-    
+
     await repo.delete(id);
   }
 
@@ -139,10 +138,10 @@ export class BankService {
    */
   async testOBPConnection(userId: number, tokenId?: number): Promise<boolean> {
     try {
-      const token = tokenId 
+      const token = tokenId
         ? await this.getTokenById(tokenId)
         : (await this.getTokensByUser(userId)).find(t => t.provider === 'obp');
-      
+
       if (!token) {
         throw new NotFoundException('No OBP bank token found for user');
       }
@@ -152,7 +151,7 @@ export class BankService {
         token.access_token_secret || ''
       );
     } catch (error) {
-      logger.error('Failed to test OBP connection:', error);
+      console.error('Failed to test OBP connection:', error);
       return false;
     }
   }
@@ -160,21 +159,21 @@ export class BankService {
   /**
    * Sync accounts from OBP to our database
    */
-  async syncAccountsFromOBP(userId: number, tokenId?: number): Promise<{ 
-    synced: number; 
-    errors: string[]; 
-    accounts: any[] 
+  async syncAccountsFromOBP(userId: number, tokenId?: number): Promise<{
+    synced: number;
+    errors: string[];
+    accounts: any[]
   }> {
     const result: { synced: number; errors: string[]; accounts: any[] } = { synced: 0, errors: [], accounts: [] };
-    
+
     try {
-      logger.info(`🔄 Starting OBP account sync for user ${userId}`);
-      
+      console.info(`🔄 Starting OBP account sync for user ${userId}`);
+
       // Get user's OBP token
-      const token = tokenId 
+      const token = tokenId
         ? await this.getTokenById(tokenId)
         : (await this.getTokensByUser(userId)).find(t => t.provider === 'obp');
-      
+
       if (!token) {
         throw new NotFoundException('No OBP bank token found for user');
       }
@@ -185,7 +184,7 @@ export class BankService {
         token.access_token_secret || ''
       );
 
-      logger.info(`📥 Fetched ${obpAccounts.length} accounts from OBP`);
+      console.info(`📥 Fetched ${obpAccounts.length} accounts from OBP`);
 
       // Process each account
       for (const obpAccount of obpAccounts) {
@@ -199,7 +198,7 @@ export class BankService {
           if (existingAccount && existingAccount.id) {
             // Update existing account
             await this.updateAccountFromOBP(existingAccount.id, obpAccount, token.id, userId);
-            logger.info(`✅ Updated existing account: ${obpAccount.label}`);
+            console.info(`✅ Updated existing account: ${obpAccount.label}`);
           } else {
             // Create new account
             const accountDto: CreateFinancialAccountDTO = {
@@ -216,7 +215,7 @@ export class BankService {
             };
 
             const newAccount = await this.accountService.createAccount(accountDto);
-            
+
             // Update with OBP-specific fields - ensure ID exists
             if (newAccount.id) {
               await this.accountService.updateAccount(newAccount.id, {
@@ -226,7 +225,7 @@ export class BankService {
               } as any, userId);
             }
 
-            logger.info(`✅ Created new account: ${obpAccount.label}`);
+            console.info(`✅ Created new account: ${obpAccount.label}`);
           }
 
           result.synced++;
@@ -239,16 +238,16 @@ export class BankService {
           });
 
         } catch (error: any) {
-          logger.error(`❌ Failed to sync account ${obpAccount.label}:`, error);
+          console.error(`❌ Failed to sync account ${obpAccount.label}:`, error);
           result.errors.push(`Account "${obpAccount.label}": ${error.message}`);
         }
       }
 
-      logger.info(`🎉 OBP account sync completed. Synced: ${result.synced}, Errors: ${result.errors.length}`);
+      console.info(`🎉 OBP account sync completed. Synced: ${result.synced}, Errors: ${result.errors.length}`);
       return result;
 
     } catch (error: any) {
-      logger.error('❌ OBP account sync failed:', error);
+      console.error('❌ OBP account sync failed:', error);
       result.errors.push(`Sync failed: ${error.message}`);
       return result;
     }
@@ -265,12 +264,12 @@ export class BankService {
     const result: { synced: number; errors: string[]; transactions: any[] } = { synced: 0, errors: [], transactions: [] };
 
     try {
-      logger.info(`🔄 Starting OBP transaction sync for account ${accountId}`);
+      console.info(`🔄 Starting OBP transaction sync for account ${accountId}`);
 
       // Get user's OBP token
       const tokens = await this.getTokensByUser(userId);
       const obpToken = tokens.find(t => t.provider === 'obp');
-      
+
       if (!obpToken) {
         throw new NotFoundException('No OBP bank token found for user');
       }
@@ -294,7 +293,7 @@ export class BankService {
         limit
       );
 
-      logger.info(`📥 Fetched ${obpTransactions.length} transactions from OBP for account ${account.account_name}`);
+      console.info(`📥 Fetched ${obpTransactions.length} transactions from OBP for account ${account.account_name}`);
 
       // Process each transaction
       for (const obpTransaction of obpTransactions) {
@@ -306,7 +305,7 @@ export class BankService {
           );
 
           if (existingTransaction) {
-            logger.info(`⏭️  Transaction ${obpTransaction.id} already exists, skipping`);
+            console.info(`⏭️  Transaction ${obpTransaction.id} already exists, skipping`);
             continue;
           }
 
@@ -324,9 +323,9 @@ export class BankService {
           };
 
           const newTransaction = await this.transactionService.createTransaction(userId, transactionDto);
-          
+
           // Update with OBP-specific fields (this would require extending TransactionService)
-          logger.info(`✅ Created transaction: ${obpTransaction.details.description} (${obpTransaction.details.value.amount} ${obpTransaction.details.value.currency})`);
+          console.info(`✅ Created transaction: ${obpTransaction.details.description} (${obpTransaction.details.value.amount} ${obpTransaction.details.value.currency})`);
 
           result.synced++;
           result.transactions.push({
@@ -338,7 +337,7 @@ export class BankService {
           });
 
         } catch (error: any) {
-          logger.error(`❌ Failed to sync transaction ${obpTransaction.id}:`, error);
+          console.error(`❌ Failed to sync transaction ${obpTransaction.id}:`, error);
           result.errors.push(`Transaction "${obpTransaction.id}": ${error.message}`);
         }
       }
@@ -348,11 +347,11 @@ export class BankService {
         last_synced_at: new Date()
       } as any, userId);
 
-      logger.info(`🎉 OBP transaction sync completed. Synced: ${result.synced}, Errors: ${result.errors.length}`);
+      console.info(`🎉 OBP transaction sync completed. Synced: ${result.synced}, Errors: ${result.errors.length}`);
       return result;
-      
+
     } catch (error: any) {
-      logger.error('❌ OBP transaction sync failed:', error);
+      console.error('❌ OBP transaction sync failed:', error);
       result.errors.push(`Sync failed: ${error.message}`);
       return result;
     }
@@ -366,11 +365,11 @@ export class BankService {
     transactions: { synced: number; errors: string[] };
   }> {
     try {
-      logger.info(`🚀 Starting full OBP data sync for user ${userId}`);
+      console.info(`🚀 Starting full OBP data sync for user ${userId}`);
 
       // First sync accounts
       const accountResult = await this.syncAccountsFromOBP(userId);
-      
+
       // Then sync transactions for each account
       let totalTransactionsSynced = 0;
       const transactionErrors: string[] = [];
@@ -390,7 +389,7 @@ export class BankService {
         }
       }
 
-      logger.info(`🎉 Full OBP sync completed. Accounts: ${accountResult.synced}, Transactions: ${totalTransactionsSynced}`);
+      console.info(`🎉 Full OBP sync completed. Accounts: ${accountResult.synced}, Transactions: ${totalTransactionsSynced}`);
 
       return {
         accounts: { synced: accountResult.synced, errors: accountResult.errors },
@@ -398,7 +397,7 @@ export class BankService {
       };
 
     } catch (error: any) {
-      logger.error('❌ Full OBP sync failed:', error);
+      console.error('❌ Full OBP sync failed:', error);
       throw error;
     }
   }
@@ -419,7 +418,7 @@ export class BankService {
 
   private categorizeTransaction(description: string): string {
     const desc = description.toLowerCase();
-    
+
     // Simple categorization based on common patterns
     if (desc.includes('salary') || desc.includes('payroll')) return 'Income';
     if (desc.includes('grocery') || desc.includes('supermarket')) return 'Food & Dining';
@@ -428,7 +427,7 @@ export class BankService {
     if (desc.includes('pharmacy') || desc.includes('medical') || desc.includes('hospital')) return 'Healthcare';
     if (desc.includes('electric') || desc.includes('water') || desc.includes('gas bill')) return 'Bills & Utilities';
     if (desc.includes('amazon') || desc.includes('shopping') || desc.includes('store')) return 'Shopping';
-    
+
     return 'Other';
   }
 }

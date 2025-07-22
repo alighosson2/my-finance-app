@@ -1,7 +1,6 @@
 import { PrismaClient, BankToken } from '@prisma/client';
 import { ConnectionManager } from './ConnectionManager';
 import { id, IBankRepository } from './IRepository';
-import logger from '../util/logger';
 import { BankTokenEntity } from '../model/Bankmodel';
 
 function toBankTokenEntity(token: BankToken): BankTokenEntity {
@@ -44,7 +43,7 @@ export class BankRepository implements IBankRepository {
 
     // Check if token already exists for this user and provider
     const existing = await this.prisma!.bankToken.findFirst({
-      where: { 
+      where: {
         user_id: token.user_id,
         provider: token.provider
       }
@@ -105,6 +104,7 @@ export class BankRepository implements IBankRepository {
       if ((error as Error).message === 'Token not found') {
         throw error;
       }
+      console.error(`Failed to update token: ${(error as Error).message}`);
       throw new Error(`Failed to update token: ${(error as Error).message}`);
     }
   }
@@ -127,6 +127,7 @@ export class BankRepository implements IBankRepository {
       if ((error as Error).message === 'Token not found') {
         throw error;
       }
+      console.error(`Failed to get token: ${(error as Error).message}`);
       throw new Error(`Failed to get token: ${(error as Error).message}`);
     }
   }
@@ -156,6 +157,7 @@ export class BankRepository implements IBankRepository {
       if ((error as Error).message === 'Token not found') {
         throw error;
       }
+      console.error(`Failed to delete token: ${(error as Error).message}`);
       throw new Error(`Failed to delete token: ${(error as Error).message}`);
     }
   }
@@ -163,7 +165,7 @@ export class BankRepository implements IBankRepository {
   // Bank-specific methods
   async getTokensByUser(userId: number): Promise<BankTokenEntity[]> {
     this.ensureConnected();
-    
+
     if (userId <= 0) {
       throw new Error('Invalid user ID');
     }
@@ -172,9 +174,10 @@ export class BankRepository implements IBankRepository {
       const tokens = await this.prisma!.bankToken.findMany({
         where: { user_id: userId }
       });
-      
+
       return tokens.map(toBankTokenEntity);
     } catch (error) {
+      console.error(`Failed to get tokens: ${(error as Error).message}`);
       throw new Error(`Failed to get tokens: ${(error as Error).message}`);
     }
   }
@@ -190,6 +193,7 @@ export class BankRepository implements IBankRepository {
 
       return token ? toBankTokenEntity(token) : null;
     } catch (error) {
+      console.error(`Failed to get token: ${(error as Error).message}`);
       throw new Error(`Failed to get token: ${(error as Error).message}`);
     }
   }

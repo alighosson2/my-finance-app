@@ -3,7 +3,6 @@ import config from "../config";
 import { TokenPayload } from "../config/types";
 import { InvalidTokenException, TOkenEXpiredExpection } from "../exceptions/AuthenticationExceptions";
 import { ServiceException } from "../exceptions/ServiceException";
-import logger from "../util/logger";
 import { Response } from "express";
 import ms from "ms";
 
@@ -29,7 +28,7 @@ export class AuthenticationService {
     try {
       return jwt.verify(token, this.secretKey) as TokenPayload;
     } catch (error) {
-      logger.error('token verification failed', error)
+      console.error('token verification failed', error)
       if (error instanceof jwt.TokenExpiredError) {
         throw new TOkenEXpiredExpection();
       }

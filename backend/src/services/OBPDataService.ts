@@ -2,7 +2,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { getOAuth, createOAuthRequest } from '../util/OAuthHelper';
 import config from '../config';
-import logger from '../util/logger';
 
 // OBP API Response Types (based on OBP v4.0.0 API documentation)
 export interface OBPAccount {
@@ -145,26 +144,26 @@ export class OBPDataService {
   ): Promise<T> {
     try {
       const fullUrl = `${this.baseUrl}${endpoint}`;
-      
+
       // Create OAuth signed request
       const requestData = createOAuthRequest(fullUrl, method, data || {});
-      
+
       // Get OAuth helper to generate signature
       const oauth = getOAuth();
-      
+
       // Create token object for signing
       const token = {
         key: accessToken,
         secret: accessTokenSecret
       };
-      
+
       // Generate OAuth header
       const authHeader = oauth.toHeader(
         oauth.authorize(requestData, token)
       );
-      
-      logger.info(`🔗 Making OBP API request to: ${endpoint}`);
-      
+
+      console.info(`🔗 Making OBP API request to: ${endpoint}`);
+
       const response: AxiosResponse<T> = await axios({
         method: method,
         url: fullUrl,
@@ -178,16 +177,16 @@ export class OBPDataService {
         timeout: 30000,
         validateStatus: (status) => status < 500
       });
-      
+
       if (response.status !== 200) {
         throw new Error(`OBP API returned status ${response.status}: ${JSON.stringify(response.data)}`);
       }
-      
-      logger.info(`✅ OBP API request successful: ${endpoint}`);
+
+      console.info(`✅ OBP API request successful: ${endpoint}`);
       return response.data;
-      
+
     } catch (error: any) {
-      logger.error(`❌ OBP API request failed for ${endpoint}:`, {
+      console.error(`❌ OBP API request failed for ${endpoint}:`, {
         error: error.message,
         response: error.response?.data,
         status: error.response?.status
@@ -201,20 +200,20 @@ export class OBPDataService {
    */
   async fetchAccounts(accessToken: string, accessTokenSecret: string): Promise<OBPAccount[]> {
     try {
-      logger.info('🏦 Fetching accounts from OBP API...');
-      
+      console.info('🏦 Fetching accounts from OBP API...');
+
       const response = await this.makeOAuthRequest<OBPAccountsResponse>(
         '/obp/v4.0.0/my/accounts',
         'GET',
         accessToken,
         accessTokenSecret
       );
-      
-      logger.info(`✅ Fetched ${response.accounts.length} accounts from OBP`);
+
+      console.info(`✅ Fetched ${response.accounts.length} accounts from OBP`);
       return response.accounts;
-      
+
     } catch (error) {
-      logger.error('❌ Failed to fetch accounts from OBP:', error);
+      console.error('❌ Failed to fetch accounts from OBP:', error);
       throw error;
     }
   }
@@ -230,22 +229,22 @@ export class OBPDataService {
     limit: number = 100
   ): Promise<OBPTransaction[]> {
     try {
-      logger.info(`💰 Fetching transactions for account ${accountId} from OBP API...`);
-      
+      console.info(`💰 Fetching transactions for account ${accountId} from OBP API...`);
+
       const endpoint = `/obp/v4.0.0/my/accounts/${accountId}/transactions?limit=${limit}`;
-      
+
       const response = await this.makeOAuthRequest<OBPTransactionsResponse>(
         endpoint,
         'GET',
         accessToken,
         accessTokenSecret
       );
-      
-      logger.info(`✅ Fetched ${response.transactions.length} transactions from OBP`);
+
+      console.info(`✅ Fetched ${response.transactions.length} transactions from OBP`);
       return response.transactions;
-      
+
     } catch (error) {
-      logger.error(`❌ Failed to fetch transactions for account ${accountId}:`, error);
+      console.error(`❌ Failed to fetch transactions for account ${accountId}:`, error);
       throw error;
     }
   }
@@ -260,20 +259,20 @@ export class OBPDataService {
     accessTokenSecret: string
   ): Promise<OBPAccount> {
     try {
-      logger.info(`🔍 Fetching account details for ${accountId} from OBP API...`);
-      
+      console.info(`🔍 Fetching account details for ${accountId} from OBP API...`);
+
       const response = await this.makeOAuthRequest<OBPAccount>(
         `/obp/v4.0.0/my/accounts/${accountId}`,
         'GET',
         accessToken,
         accessTokenSecret
       );
-      
-      logger.info(`✅ Fetched account details for ${accountId}`);
+
+      console.info(`✅ Fetched account details for ${accountId}`);
       return response;
-      
+
     } catch (error) {
-      logger.error(`❌ Failed to fetch account details for ${accountId}:`, error);
+      console.error(`❌ Failed to fetch account details for ${accountId}:`, error);
       throw error;
     }
   }
@@ -283,8 +282,8 @@ export class OBPDataService {
    */
   async testConnection(accessToken: string, accessTokenSecret: string): Promise<boolean> {
     try {
-      logger.info('🧪 Testing OBP API connection...');
-      
+      console.info('🧪 Testing OBP API connection...');
+
       // Try to fetch user info as a simple test
       await this.makeOAuthRequest<any>(
         '/obp/v4.0.0/users/current',
@@ -292,12 +291,12 @@ export class OBPDataService {
         accessToken,
         accessTokenSecret
       );
-      
-      logger.info('✅ OBP API connection test successful');
+
+      console.info('✅ OBP API connection test successful');
       return true;
-      
+
     } catch (error) {
-      logger.error('❌ OBP API connection test failed:', error);
+      console.error('❌ OBP API connection test failed:', error);
       return false;
     }
   }
@@ -314,7 +313,7 @@ export class OBPDataService {
       'LOAN': 'loan',
       'DEPOSIT': 'savings'
     };
-    
+
     return typeMapping[obpAccountType.toUpperCase()] || 'other';
   }
 
@@ -323,7 +322,7 @@ export class OBPDataService {
    */
   mapTransactionType(amount: string): 'income' | 'expense' | 'transfer' {
     const numAmount = parseFloat(amount);
-    
+
     if (numAmount > 0) {
       return 'income';
     } else if (numAmount < 0) {
@@ -341,15 +340,15 @@ export class OBPDataService {
     if (transaction.counterparty?.name) {
       return transaction.counterparty.name;
     }
-    
+
     if (transaction.counterparty?.holder?.name) {
       return transaction.counterparty.holder.name;
     }
-    
+
     if (transaction.metadata?.narrative) {
       return transaction.metadata.narrative;
     }
-    
+
     return transaction.details?.description || null;
   }
-} 
+}

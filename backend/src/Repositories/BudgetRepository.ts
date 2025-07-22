@@ -1,7 +1,6 @@
 import { PrismaClient, budgets, transactions } from '@prisma/client';
 import { ConnectionManager } from './ConnectionManager';
 import { BudgetEntity, CreateBudgetRequest, UpdateBudgetRequest, BudgetSearchFilters } from '../model/BudgetModel';
-import logger from '../util/logger';
 
 export class BudgetRepository {
   private prisma: PrismaClient | null = null;
@@ -9,7 +8,7 @@ export class BudgetRepository {
   async init(): Promise<void> {
     if (!this.prisma) {
       this.prisma = await ConnectionManager.getConnection();
-      logger.info('BudgetRepository initialized');
+      console.info('BudgetRepository initialized');
     }
   }
 
@@ -23,7 +22,7 @@ export class BudgetRepository {
   // Create new budget
   async create(userId: number, data: CreateBudgetRequest): Promise<BudgetEntity> {
     const prisma = await this.getPrisma();
-    
+
     const budget = await prisma.budgets.create({
       data: {
         user_id: userId,
@@ -45,7 +44,7 @@ export class BudgetRepository {
   // Get budget by ID
   async getById(id: number, userId: number): Promise<BudgetEntity | null> {
     const prisma = await this.getPrisma();
-    
+
     const budget = await prisma.budgets.findFirst({
       where: {
         id,
@@ -58,13 +57,13 @@ export class BudgetRepository {
 
   // Get all budgets for user with filters
   async getByUser(
-    userId: number, 
-    page: number = 1, 
+    userId: number,
+    page: number = 1,
     limit: number = 20,
     filters: BudgetSearchFilters = {}
   ): Promise<{ budgets: BudgetEntity[]; total: number }> {
     const prisma = await this.getPrisma();
-    
+
     const where: any = {
       user_id: userId
     };
@@ -121,9 +120,9 @@ export class BudgetRepository {
   // Get active budgets for user
   async getActiveBudgets(userId: number): Promise<BudgetEntity[]> {
     const prisma = await this.getPrisma();
-    
+
     const now = new Date();
-    
+
     const budgets = await prisma.budgets.findMany({
       where: {
         user_id: userId,
@@ -147,7 +146,7 @@ export class BudgetRepository {
   // Get budgets by category
   async getBudgetsByCategory(userId: number, category: string): Promise<BudgetEntity[]> {
     const prisma = await this.getPrisma();
-    
+
     const budgets = await prisma.budgets.findMany({
       where: {
         user_id: userId,
@@ -165,7 +164,7 @@ export class BudgetRepository {
   // Update budget
   async update(id: number, userId: number, data: Partial<budgets>): Promise<BudgetEntity | null> {
     const prisma = await this.getPrisma();
-    
+
     try {
       const updatedBudget = await prisma.budgets.update({
         where: {
@@ -180,7 +179,7 @@ export class BudgetRepository {
 
       return this.mapToEntity(updatedBudget);
     } catch (error) {
-      logger.error('Failed to update budget:', error);
+      console.error('Failed to update budget:', error);
       return null;
     }
   }
@@ -188,7 +187,7 @@ export class BudgetRepository {
   // Delete budget
   async delete(id: number, userId: number): Promise<boolean> {
     const prisma = await this.getPrisma();
-    
+
     try {
       // First, unlink any transactions associated with this budget
       await prisma.transactions.updateMany({
@@ -208,10 +207,10 @@ export class BudgetRepository {
           user_id: userId
         }
       });
-      
+
       return true;
     } catch (error) {
-      logger.error('Failed to delete budget:', error);
+      console.error('Failed to delete budget:', error);
       return false;
     }
   }
@@ -227,7 +226,7 @@ export class BudgetRepository {
     transactions: transactions[];
   }> {
     const prisma = await this.getPrisma();
-    
+
     const transactions = await prisma.transactions.findMany({
       where: {
         budget_id: budgetId,
@@ -249,13 +248,13 @@ export class BudgetRepository {
 
   // Get spending by category for budget analysis
   async getSpendingByCategory(
-    userId: number, 
-    startDate: Date, 
-    endDate: Date, 
+    userId: number,
+    startDate: Date,
+    endDate: Date,
     category?: string
   ): Promise<{ category: string; totalSpent: number; transactionCount: number }[]> {
     const prisma = await this.getPrisma();
-    
+
     const where: any = {
       user_id: userId,
       transaction_type: 'expense',
@@ -279,7 +278,7 @@ export class BudgetRepository {
 
     // Group by category
     const categorySpending = new Map<string, { totalSpent: number; count: number }>();
-    
+
     transactions.forEach(tx => {
       const cat = tx.category || 'Uncategorized';
       const existing = categorySpending.get(cat) || { totalSpent: 0, count: 0 };
@@ -298,7 +297,7 @@ export class BudgetRepository {
   // Check if budget name exists for user
   async budgetNameExists(userId: number, name: string, excludeId?: number): Promise<boolean> {
     const prisma = await this.getPrisma();
-    
+
     const where: any = {
       user_id: userId,
       name,
@@ -316,7 +315,7 @@ export class BudgetRepository {
   // Get budget categories used by user
   async getUserBudgetCategories(userId: number): Promise<string[]> {
     const prisma = await this.getPrisma();
-    
+
     const results = await prisma.budgets.findMany({
       where: {
         user_id: userId,
@@ -347,4 +346,4 @@ export class BudgetRepository {
       budget.updated_at
     );
   }
-} 
+}

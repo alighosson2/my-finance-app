@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { TaxService } from '../services/TaxService';
 import { CreateTaxRecordRequest, UpdateTaxRecordRequest, FilingStatus } from '../model/TaxModel';
 import { AuthRequest } from '../config/types';
-import logger from '../util/logger';
 
 export class TaxController {
   private taxService: TaxService;
@@ -44,23 +43,23 @@ export class TaxController {
 
       const taxRecord = await this.taxService.createTaxRecord(userId, data);
 
-      logger.info(`Tax record created for user ${userId}, year ${data.tax_year}`);
-      
+      console.info(`Tax record created for user ${userId}, year ${data.tax_year}`);
+
       res.status(201).json({
         message: 'Tax record created successfully',
         data: taxRecord.toJSON()
       });
     } catch (error: any) {
-      logger.error('Error creating tax record:', error);
-      
+      console.error('Error creating tax record:', error);
+
       if (error.message.includes('already exists')) {
         res.status(409).json({ error: error.message });
         return;
       }
-      
-      res.status(500).json({ 
+
+      res.status(500).json({
         error: 'Failed to create tax record',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -88,10 +87,10 @@ export class TaxController {
         data: taxRecord.toJSON()
       });
     } catch (error: any) {
-      logger.error('Error getting tax record:', error);
-      res.status(500).json({ 
+      console.error('Error getting tax record:', error);
+      res.status(500).json({
         error: 'Failed to retrieve tax record',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -119,10 +118,10 @@ export class TaxController {
         data: taxRecord.toJSON()
       });
     } catch (error: any) {
-      logger.error('Error getting tax record by year:', error);
-      res.status(500).json({ 
+      console.error('Error getting tax record by year:', error);
+      res.status(500).json({
         error: 'Failed to retrieve tax record',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -139,10 +138,10 @@ export class TaxController {
         count: taxRecords.length
       });
     } catch (error: any) {
-      logger.error('Error getting all tax records:', error);
-      res.status(500).json({ 
+      console.error('Error getting all tax records:', error);
+      res.status(500).json({
         error: 'Failed to retrieve tax records',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -174,17 +173,17 @@ export class TaxController {
         return;
       }
 
-      logger.info(`Tax record ${taxRecordId} updated for user ${userId}`);
+      console.info(`Tax record ${taxRecordId} updated for user ${userId}`);
 
       res.json({
         message: 'Tax record updated successfully',
         data: updatedRecord.toJSON()
       });
     } catch (error: any) {
-      logger.error('Error updating tax record:', error);
-      res.status(500).json({ 
+      console.error('Error updating tax record:', error);
+      res.status(500).json({
         error: 'Failed to update tax record',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -207,16 +206,16 @@ export class TaxController {
         return;
       }
 
-      logger.info(`Tax record ${taxRecordId} deleted for user ${userId}`);
+      console.info(`Tax record ${taxRecordId} deleted for user ${userId}`);
 
       res.json({
         message: 'Tax record deleted successfully'
       });
     } catch (error: any) {
-      logger.error('Error deleting tax record:', error);
-      res.status(500).json({ 
+      console.error('Error deleting tax record:', error);
+      res.status(500).json({
         error: 'Failed to delete tax record',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -243,17 +242,17 @@ export class TaxController {
 
       const calculation = await this.taxService.calculateTaxEstimate(userId, tax_year, filing_status);
 
-      logger.info(`Tax calculation completed for user ${userId}, year ${tax_year}`);
+      console.info(`Tax calculation completed for user ${userId}, year ${tax_year}`);
 
       res.json({
         message: 'Tax estimate calculated successfully',
         data: calculation
       });
     } catch (error: any) {
-      logger.error('Error calculating tax estimate:', error);
-      res.status(500).json({ 
+      console.error('Error calculating tax estimate:', error);
+      res.status(500).json({
         error: 'Failed to calculate tax estimate',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -271,23 +270,23 @@ export class TaxController {
 
       const report = await this.taxService.generateTaxReport(userId, taxYear);
 
-      logger.info(`Tax report generated for user ${userId}, year ${taxYear}`);
+      console.info(`Tax report generated for user ${userId}, year ${taxYear}`);
 
       res.json({
         message: 'Tax report generated successfully',
         data: report
       });
     } catch (error: any) {
-      logger.error('Error generating tax report:', error);
-      
+      console.error('Error generating tax report:', error);
+
       if (error.message.includes('No tax record found')) {
         res.status(404).json({ error: error.message });
         return;
       }
-      
-      res.status(500).json({ 
+
+      res.status(500).json({
         error: 'Failed to generate tax report',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -310,17 +309,17 @@ export class TaxController {
         return;
       }
 
-      logger.info(`Tax calculations refreshed for user ${userId}, year ${taxYear}`);
+      console.info(`Tax calculations refreshed for user ${userId}, year ${taxYear}`);
 
       res.json({
         message: 'Tax calculations refreshed successfully',
         data: updatedRecord.toJSON()
       });
     } catch (error: any) {
-      logger.error('Error refreshing tax calculations:', error);
-      res.status(500).json({ 
+      console.error('Error refreshing tax calculations:', error);
+      res.status(500).json({
         error: 'Failed to refresh tax calculations',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -337,11 +336,11 @@ export class TaxController {
         count: taxYears.length
       });
     } catch (error: any) {
-      logger.error('Error getting tax years:', error);
-      res.status(500).json({ 
+      console.error('Error getting tax years:', error);
+      res.status(500).json({
         error: 'Failed to retrieve tax years',
-        details: error.message 
+        details: error.message
       });
     }
   };
-} 
+}

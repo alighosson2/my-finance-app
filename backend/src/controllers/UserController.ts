@@ -3,7 +3,6 @@ import { UserService } from '../services/UserService';
 import { BadRequestException } from '../exceptions/BadRequestException';
 import { NotFoundException } from '../exceptions/NotFoundException';
 import { ServiceException } from '../exceptions/ServiceException';
-import logger from '../util/logger';
 
 export class UserController {
   constructor(private userService: UserService) {}
@@ -13,7 +12,7 @@ export class UserController {
       const users = await this.userService.getAllUsers();
       res.status(200).json(users);
     } catch (error) {
-      logger.error('Error fetching users', error);
+      console.error('Error fetching users', error);
       throw new ServiceException('Error fetching users');
     }
   }
@@ -49,8 +48,8 @@ export class UserController {
     res.redirect('/login.html');
   } catch (error: any) {
     const status = error instanceof BadRequestException ? 400 : 500;
-    res.status(status).json({ 
-      error: error.message || 'Error creating user' 
+    res.status(status).json({
+      error: error.message || 'Error creating user'
     });
   }
 }
@@ -65,16 +64,16 @@ export class UserController {
           message: 'All fields are required'
         });
       }
-      
+
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return res.status(400).json({
           success: false,
           message: 'Invalid email format'
         });
       }
-      
+
       const newUser = await this.userService.createUser({ name, email, password });
-      
+
       // Return JSON response for mobile
       return res.status(201).json({
         success: true,
@@ -86,7 +85,7 @@ export class UserController {
           createdAt: newUser.created_at
         }
       });
-      
+
     } catch (error: any) {
       const status = error instanceof BadRequestException ? 400 : 500;
       return res.status(status).json({

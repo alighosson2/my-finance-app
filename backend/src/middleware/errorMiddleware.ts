@@ -1,6 +1,5 @@
 // src/middleware/errorMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
-import logger from '../util/logger';
 
 export interface CustomError extends Error {
   status?: number;
@@ -21,7 +20,7 @@ export const errorHandler = (
   error.message = err.message;
 
   // Log error
-  logger.error(`Error ${err.name}: ${err.message}`, {
+  console.error(`Error ${err.name}: ${err.message}`, {
     stack: err.stack,
     url: req.originalUrl,
     method: req.method,
@@ -60,7 +59,7 @@ export const errorHandler = (
   }
 
   // Database connection errors
-  if (err.message?.includes('Database not initialized') || 
+  if (err.message?.includes('Database not initialized') ||
       err.message?.includes('Connection')) {
     statusCode = 503;
     message = 'Database connection error';

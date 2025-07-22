@@ -1,7 +1,6 @@
 import { PrismaClient, users, user_role } from '@prisma/client';
 import { ConnectionManager } from './ConnectionManager';
 import { id, IUserRepository } from './IRepository';
-import logger from '../util/logger';
 import { UserEntity, UserRole } from '../model/Usermodel';
 
 function toUserEntity(user: users & {

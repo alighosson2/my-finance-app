@@ -1,7 +1,6 @@
 import { PrismaClient, transactions, transaction_type } from '@prisma/client';
 import { ConnectionManager } from './ConnectionManager';
 import { id, ITransactionRepository } from './IRepository';
-import logger from '../util/logger';
 import { TransactionEntity, TransactionSearchFilters } from '../model/TransactionModel';
 
 function toTransactionEntity(transaction: transactions & {
@@ -67,14 +66,14 @@ export class TransactionRepository implements ITransactionRepository {
 
   async create(transaction: transactions): Promise<transactions> {
     this.ensureConnected();
-    
+
     // Validate required fields
     if (!transaction.user_id || !transaction.account_id || !transaction.amount || !transaction.description) {
       throw new Error('Missing required transaction fields');
     }
 
     const { id, created_at, updated_at, ...transactionData } = transaction;
-    
+
     return this.prisma!.transactions.create({
       data: {
         ...transactionData,
@@ -112,15 +111,15 @@ export class TransactionRepository implements ITransactionRepository {
         updated_at: new Date(),
       },
     });
-    
+
     return updated;
   }
 
   async get(id: id): Promise<transactions> {
     this.ensureConnected();
     this.parseId(id);
-    
-    const transaction = await this.prisma!.transactions.findUnique({ 
+
+    const transaction = await this.prisma!.transactions.findUnique({
       where: { id },
       include: {
         financial_accounts: true,
@@ -128,7 +127,7 @@ export class TransactionRepository implements ITransactionRepository {
         budget: true
       }
     });
-    
+
     if (!transaction) throw new Error('Transaction not found');
     return transaction;
   }
@@ -143,19 +142,19 @@ export class TransactionRepository implements ITransactionRepository {
   async delete(id: id): Promise<void> {
     this.ensureConnected();
     this.parseId(id);
-    
+
     const transaction = await this.prisma!.transactions.findUnique({ where: { id } });
     if (!transaction) throw new Error('Transaction not found');
-    
+
     await this.prisma!.transactions.delete({ where: { id } });
   }
 
   // Extended methods for transaction-specific operations
   async getTransactionsByUser(userId: number, page: number = 1, limit: number = 50): Promise<{ transactions: TransactionEntity[]; total: number }> {
     this.ensureConnected();
-    
+
     const offset = (page - 1) * limit;
-    
+
     const [transactions, total] = await Promise.all([
       this.prisma!.transactions.findMany({
         where: { user_id: userId },
@@ -178,9 +177,9 @@ export class TransactionRepository implements ITransactionRepository {
 
   async getTransactionsByAccount(accountId: number, page: number = 1, limit: number = 50): Promise<{ transactions: TransactionEntity[]; total: number }> {
     this.ensureConnected();
-    
+
     const offset = (page - 1) * limit;
-    
+
     const [transactions, total] = await Promise.all([
       this.prisma!.transactions.findMany({
         where: { account_id: accountId },
@@ -203,12 +202,12 @@ export class TransactionRepository implements ITransactionRepository {
 
   async searchTransactions(filters: TransactionSearchFilters, page: number = 1, limit: number = 50): Promise<{ transactions: TransactionEntity[]; total: number }> {
     this.ensureConnected();
-    
+
     const offset = (page - 1) * limit;
-    
+
     // Build where clause dynamically
     const whereClause: any = {};
-    
+
     if (filters.user_id) whereClause.user_id = filters.user_id;
     if (filters.account_id) whereClause.account_id = filters.account_id;
     if (filters.category) whereClause.category = filters.category;
@@ -216,21 +215,21 @@ export class TransactionRepository implements ITransactionRepository {
     if (filters.transaction_type) whereClause.transaction_type = filters.transaction_type;
     if (filters.merchant_name) whereClause.merchant_name = { contains: filters.merchant_name, mode: 'insensitive' };
     if (filters.is_recurring !== undefined) whereClause.is_recurring = filters.is_recurring;
-    
+
     // Date range filter
     if (filters.date_from || filters.date_to) {
       whereClause.transaction_date = {};
       if (filters.date_from) whereClause.transaction_date.gte = filters.date_from;
       if (filters.date_to) whereClause.transaction_date.lte = filters.date_to;
     }
-    
+
     // Amount range filter
     if (filters.amount_min || filters.amount_max) {
       whereClause.amount = {};
       if (filters.amount_min) whereClause.amount.gte = filters.amount_min;
       if (filters.amount_max) whereClause.amount.lte = filters.amount_max;
     }
-    
+
     // Tags filter
     if (filters.tags && filters.tags.length > 0) {
       whereClause.tags = { hasEvery: filters.tags };
@@ -258,14 +257,14 @@ export class TransactionRepository implements ITransactionRepository {
 
   async getTransactionsByCategory(userId: number, category: string, page: number = 1, limit: number = 50): Promise<{ transactions: TransactionEntity[]; total: number }> {
     this.ensureConnected();
-    
+
     const offset = (page - 1) * limit;
-    
+
     const [transactions, total] = await Promise.all([
       this.prisma!.transactions.findMany({
-        where: { 
+        where: {
           user_id: userId,
-          category: category 
+          category: category
         },
         include: {
           financial_accounts: true,
@@ -275,10 +274,10 @@ export class TransactionRepository implements ITransactionRepository {
         skip: offset,
         take: limit
       }),
-      this.prisma!.transactions.count({ 
-        where: { 
+      this.prisma!.transactions.count({
+        where: {
           user_id: userId,
-          category: category 
+          category: category
         }
       })
     ]);
@@ -291,9 +290,9 @@ export class TransactionRepository implements ITransactionRepository {
 
   async getTransactionsByDateRange(userId: number, startDate: Date, endDate: Date, page: number = 1, limit: number = 50): Promise<{ transactions: TransactionEntity[]; total: number }> {
     this.ensureConnected();
-    
+
     const offset = (page - 1) * limit;
-    
+
     const [transactions, total] = await Promise.all([
       this.prisma!.transactions.findMany({
         where: {
@@ -330,11 +329,11 @@ export class TransactionRepository implements ITransactionRepository {
 
   async getRecurringTransactions(userId: number): Promise<TransactionEntity[]> {
     this.ensureConnected();
-    
+
     const transactions = await this.prisma!.transactions.findMany({
-      where: { 
+      where: {
         user_id: userId,
-        is_recurring: true 
+        is_recurring: true
       },
       include: {
         financial_accounts: true,
@@ -348,10 +347,10 @@ export class TransactionRepository implements ITransactionRepository {
 
   async getMonthlyTransactionSummary(userId: number, year: number, month: number): Promise<any> {
     this.ensureConnected();
-    
+
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);
-    
+
     const summary = await this.prisma!.transactions.groupBy({
       by: ['transaction_type'],
       where: {
@@ -380,7 +379,7 @@ export class TransactionRepository implements ITransactionRepository {
 
   async getCategorySpending(userId: number, startDate: Date, endDate: Date): Promise<any[]> {
     this.ensureConnected();
-    
+
     const categorySpending = await this.prisma!.transactions.groupBy({
       by: ['category'],
       where: {
@@ -409,7 +408,7 @@ export class TransactionRepository implements ITransactionRepository {
 
   async getTransactionById(id: number): Promise<TransactionEntity | null> {
     this.ensureConnected();
-    
+
     const transaction = await this.prisma!.transactions.findUnique({
       where: { id },
       include: {
@@ -438,4 +437,4 @@ export async function createTransactionRepository(): Promise<ITransactionReposit
   const repo = new TransactionRepository();
   await repo.init();
   return repo;
-} 
+}
