@@ -11,8 +11,7 @@ export default {
   isProduction: process.env.NODE_ENV === 'production',
   port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,
   host: process.env.HOST || '0.0.0.0', // allow access from emulator/device
-
-  frontendPath: path.join(__dirname, '../../../frontend'),
+  static_files_path: path.join(__dirname, '../../static'),
 
   auth: {
     secretKey: process.env.JWT_SECRET_KEY || 'secret12345678',

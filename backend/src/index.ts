@@ -70,7 +70,7 @@ app.use('/api/users', userRoutes);
 // app.use('/api/admin', adminRoutes);    // <-- Add this line
 
 // Static frontend
-app.use(express.static(config.frontendPath));
+app.use(express.static(config.static_files_path));
 
 // Error handler
 app.use(
