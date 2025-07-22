@@ -21,8 +21,7 @@ import adminRoutes from './routes/admin.routes';
 
 const app = express();
 
-// Security
-app.use(helmet());
+
 
 // Body parsing
 app.use(bodyParser.json());
