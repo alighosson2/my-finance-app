@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { BudgetService } from '../services/BudgetService';
 import { CreateBudgetRequest, UpdateBudgetRequest, BudgetSearchFilters, BudgetPeriod, BudgetCategory } from '../model/BudgetModel';
 import { AuthRequest } from '../config/types';
-import logger from '../util/logger';
 
 export class BudgetController {
   private budgetService: BudgetService;
@@ -57,23 +56,23 @@ export class BudgetController {
 
       const budget = await this.budgetService.createBudget(userId, data);
 
-      logger.info(`Budget created: ${data.name} for user ${userId}`);
-      
+      console.info(`Budget created: ${data.name} for user ${userId}`);
+
       res.status(201).json({
         message: 'Budget created successfully',
         data: budget.toJSON()
       });
     } catch (error: any) {
-      logger.error('Error creating budget:', error);
-      
+      console.error('Error creating budget:', error);
+
       if (error.message.includes('already exists')) {
         res.status(409).json({ error: error.message });
         return;
       }
-      
-      res.status(500).json({ 
+
+      res.status(500).json({
         error: 'Failed to create budget',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -101,10 +100,10 @@ export class BudgetController {
         data: budget.toJSON()
       });
     } catch (error: any) {
-      logger.error('Error getting budget:', error);
-      res.status(500).json({ 
+      console.error('Error getting budget:', error);
+      res.status(500).json({
         error: 'Failed to retrieve budget',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -115,10 +114,10 @@ export class BudgetController {
       const userId = req.user_id!;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
-      
+
       // Build filters from query parameters
       const filters: BudgetSearchFilters = {};
-      
+
       if (req.query.category) {
         filters.category = req.query.category as BudgetCategory;
       }
@@ -150,10 +149,10 @@ export class BudgetController {
         summary: result.summary
       });
     } catch (error: any) {
-      logger.error('Error getting all budgets:', error);
-      res.status(500).json({ 
+      console.error('Error getting all budgets:', error);
+      res.status(500).json({
         error: 'Failed to retrieve budgets',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -170,10 +169,10 @@ export class BudgetController {
         count: budgets.length
       });
     } catch (error: any) {
-      logger.error('Error getting active budgets:', error);
-      res.status(500).json({ 
+      console.error('Error getting active budgets:', error);
+      res.status(500).json({
         error: 'Failed to retrieve active budgets',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -221,23 +220,23 @@ export class BudgetController {
         return;
       }
 
-      logger.info(`Budget ${budgetId} updated for user ${userId}`);
+      console.info(`Budget ${budgetId} updated for user ${userId}`);
 
       res.json({
         message: 'Budget updated successfully',
         data: updatedBudget.toJSON()
       });
     } catch (error: any) {
-      logger.error('Error updating budget:', error);
-      
+      console.error('Error updating budget:', error);
+
       if (error.message.includes('already exists')) {
         res.status(409).json({ error: error.message });
         return;
       }
-      
-      res.status(500).json({ 
+
+      res.status(500).json({
         error: 'Failed to update budget',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -260,16 +259,16 @@ export class BudgetController {
         return;
       }
 
-      logger.info(`Budget ${budgetId} deleted for user ${userId}`);
+      console.info(`Budget ${budgetId} deleted for user ${userId}`);
 
       res.json({
         message: 'Budget deleted successfully'
       });
     } catch (error: any) {
-      logger.error('Error deleting budget:', error);
-      res.status(500).json({ 
+      console.error('Error deleting budget:', error);
+      res.status(500).json({
         error: 'Failed to delete budget',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -292,17 +291,17 @@ export class BudgetController {
         return;
       }
 
-      logger.info(`Budget ${budgetId} deactivated for user ${userId}`);
+      console.info(`Budget ${budgetId} deactivated for user ${userId}`);
 
       res.json({
         message: 'Budget deactivated successfully',
         data: deactivatedBudget.toJSON()
       });
     } catch (error: any) {
-      logger.error('Error deactivating budget:', error);
-      res.status(500).json({ 
+      console.error('Error deactivating budget:', error);
+      res.status(500).json({
         error: 'Failed to deactivate budget',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -325,16 +324,16 @@ export class BudgetController {
         data: spending
       });
     } catch (error: any) {
-      logger.error('Error getting budget spending:', error);
-      
+      console.error('Error getting budget spending:', error);
+
       if (error.message.includes('not found')) {
         res.status(404).json({ error: error.message });
         return;
       }
-      
-      res.status(500).json({ 
+
+      res.status(500).json({
         error: 'Failed to retrieve budget spending',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -350,10 +349,10 @@ export class BudgetController {
         data: summary
       });
     } catch (error: any) {
-      logger.error('Error getting budget summary:', error);
-      res.status(500).json({ 
+      console.error('Error getting budget summary:', error);
+      res.status(500).json({
         error: 'Failed to retrieve budget summary',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -370,10 +369,10 @@ export class BudgetController {
         count: alerts.length
       });
     } catch (error: any) {
-      logger.error('Error getting budget alerts:', error);
-      res.status(500).json({ 
+      console.error('Error getting budget alerts:', error);
+      res.status(500).json({
         error: 'Failed to retrieve budget alerts',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -388,10 +387,10 @@ export class BudgetController {
         data: categories
       });
     } catch (error: any) {
-      logger.error('Error getting budget categories:', error);
-      res.status(500).json({ 
+      console.error('Error getting budget categories:', error);
+      res.status(500).json({
         error: 'Failed to retrieve budget categories',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -415,10 +414,10 @@ export class BudgetController {
         }
       });
     } catch (error: any) {
-      logger.error('Error getting spending by category:', error);
-      res.status(500).json({ 
+      console.error('Error getting spending by category:', error);
+      res.status(500).json({
         error: 'Failed to retrieve spending by category',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -436,10 +435,10 @@ export class BudgetController {
         }
       });
     } catch (error: any) {
-      logger.error('Error auto-assigning transactions:', error);
-      res.status(500).json({ 
+      console.error('Error auto-assigning transactions:', error);
+      res.status(500).json({
         error: 'Failed to auto-assign transactions',
-        details: error.message 
+        details: error.message
       });
     }
   };
@@ -455,11 +454,11 @@ export class BudgetController {
         data: recommendations
       });
     } catch (error: any) {
-      logger.error('Error getting budget recommendations:', error);
-      res.status(500).json({ 
+      console.error('Error getting budget recommendations:', error);
+      res.status(500).json({
         error: 'Failed to generate budget recommendations',
-        details: error.message 
+        details: error.message
       });
     }
   };
-} 
+}

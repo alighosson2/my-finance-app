@@ -4,20 +4,19 @@ import express, { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import path from 'path';
 import cookieParser from 'cookie-parser';
 import { HttpException } from './exceptions/HttpException';
 
 // ✅ Import the user routes
 import userRoutes from './routes/user.routes';
 import authRoutes from './routes/auth.routes';
-// import bankOAuth from './routes/bankOAuth.routes';
-// import bankRoutes from './routes/bank.routes';
-// import accountRoutes from './routes/financialAccount.routes';
-// import transactionRoutes from './routes/transaction.routes';
-// import taxRoutes from './routes/tax.routes';
-// import budgetRoutes from './routes/budget.routes';
-// import adminRoutes from './routes/admin.routes';
+import bankOAuth from './routes/bankOAuth.routes';
+import bankRoutes from './routes/bank.routes';
+import accountRoutes from './routes/financialAccount.routes';
+import transactionRoutes from './routes/transaction.routes';
+import taxRoutes from './routes/tax.routes';
+import budgetRoutes from './routes/budget.routes';
+import adminRoutes from './routes/admin.routes';
 
 
 const app = express();
@@ -61,13 +60,13 @@ app.use(cookieParser());
 // ✅ Mount API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-// app.use('/api/bank', bankOAuth);       // OAuth routes at /bank (matches OBP registration)
-// app.use('/api/bank/api', bankRoutes);  // Bank API routes at /bank/api
-// app.use('/api/accounts', accountRoutes);
-// app.use('/api/transactions', transactionRoutes);
-// app.use('/api/tax', taxRoutes);
-// app.use('/api/budgets', budgetRoutes);
-// app.use('/api/admin', adminRoutes);    // <-- Add this line
+app.use('/api/bank', bankOAuth);       // OAuth routes at /bank (matches OBP registration)
+app.use('/api/bank/api', bankRoutes);  // Bank API routes at /bank/api
+app.use('/api/accounts', accountRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/tax', taxRoutes);
+app.use('/api/budgets', budgetRoutes);
+app.use('/api/admin', adminRoutes);    // <-- Add this line
 
 // Static frontend
 app.use(express.static(config.static_files_path));
