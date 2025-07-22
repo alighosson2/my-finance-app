@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Budgets - MyFinance360</title>
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root { 
+      --primary: #2c3e50; 
+      --accent: #1abc9c; 
+      --dark: #2c3e50; 
+      --success: #27ae60;
+      --warning: #f39c12;
+      --info: #3498db;
+    }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      color: #333; 
+      background-color: #fff;
+      line-height: 1.6;
+    }
+    .sidebar {
+      height: 100vh;
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem 0;
+      position: fixed;
+      width: 240px;
+      overflow-y: auto;
+      z-index: 1030;
+      left: 0;
+      top: 0;
+      transition: left 0.3s;
+    }
+    .sidebar .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--accent)!important;
+      padding: 0 1.25rem;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+    .sidebar a {
+      color: var(--accent) !important;
+      display: block;
+      padding: 0.75rem 1.25rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+      font-weight: 500;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background-color: rgba(255,255,255,0.10);
+      color: #fff !important;
+      border-left-color: var(--accent);
+    }
+    .sidebar .logout-link {
+      color: #fff !important;
+      margin-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 1rem;
+    }
+    .sidebar-toggle {
+      display: none;
+      position: absolute;
+      top: 1rem;
+      right: -2.5rem;
+      background: var(--primary);
+      border: none;
+      color: var(--accent);
+      font-size: 2rem;
+      z-index: 1040;
+    }
+    .content {
+      margin-left: 240px;
+      padding: 2rem 1rem;
+      transition: margin-left 0.3s;
+      background: #fff;
+      min-height: 100vh;
+    }
+    .dashboard-title {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      border: none;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+      color: white;
+      font-weight: 600;
+      border-bottom: none;
+    }
+    .btn {
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1.5rem;
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+    .btn-primary:hover {
+      background-color: #16a085;
+      border-color: #16a085;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    .progress {
+      height: 1.2rem;
+      border-radius: 8px;
+      background: #e9ecef;
+    }
+    .progress-bar {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .alert {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    @media (max-width: 991.98px) {
+      .sidebar {
+        left: -240px;
+        width: 240px;
+        position: fixed;
+        top: 0;
+        height: 100vh;
+        transition: left 0.3s;
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .sidebar-toggle {
+        display: block;
+        right: 1rem;
+        left: auto;
+        top: 1rem;
+      }
+      .content {
+        margin-left: 0;
+        padding: 1rem 0.5rem;
+      }
+      .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.2);
+        z-index: 1029;
+      }
+      .sidebar.open + .sidebar-backdrop {
+        display: block;
+      }
+    }
+    @media (max-width: 575.98px) {
+      .dashboard-title {
+        font-size: 1.2rem;
+      }
+      .card-header h5 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+  <nav class="sidebar" id="sidebar">
+    <a class="navbar-brand" href="dashboard.html">
+      <i class="fas fa-chart-line me-2"></i>MyFinance360
+    </a>
+    <a href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a href="accounts.html"><i class="fas fa-wallet me-2"></i>Accounts</a>
+    <a href="transactions.html"><i class="fas fa-exchange-alt me-2"></i>Transactions</a>
+    <a href="budget.html" class="active"><i class="fas fa-chart-pie me-2"></i>Budgets</a>
+    <a href="taxrecords.html"><i class="fas fa-file-invoice-dollar me-2"></i>Tax Records</a>
+    <a href="/api/auth/logout" class="logout-link"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+  </nav>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <div class="content">
+    <h1 class="dashboard-title">Budgets</h1>
+    <!-- Summary Card -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Total Budgets</div>
+            <h4 class="mb-0">4</h4>
+          </div>
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Total Budgeted</div>
+            <h4 class="mb-0 text-primary">$3,500.00</h4>
+          </div>
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Total Spent</div>
+            <h4 class="mb-0 text-danger">$2,150.00</h4>
+          </div>
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Total Remaining</div>
+            <h4 class="mb-0 text-success">$1,350.00</h4>
+          </div>
+          <div class="col-md-2 col-6">
+            <div class="text-muted">On Track</div>
+            <h4 class="mb-0 text-success">3</h4>
+          </div>
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Exceeded</div>
+            <h4 class="mb-0 text-warning">1</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Alerts Section -->
+    <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      <div>
+        <strong>Warning:</strong> Your "Dining Out" budget is 95% used!
+      </div>
+    </div>
+    <!-- Create Budget Button -->
+    <div class="mb-4 text-end">
+      <button class="btn btn-primary"><i class="fas fa-plus me-2"></i>Create Budget</button>
+    </div>
+    <!-- Budgets List -->
+    <div class="row g-4">
+      <!-- Budget Card 1 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="fas fa-utensils me-2"></i>Dining Out</span>
+            <span class="badge bg-warning">Exceeded</span>
+          </div>
+          <div class="card-body">
+            <div class="mb-2"><strong>Period:</strong> Monthly</div>
+            <div class="mb-2"><strong>Budgeted:</strong> $400.00</div>
+            <div class="mb-2"><strong>Spent:</strong> $380.00</div>
+            <div class="mb-2"><strong>Remaining:</strong> $20.00</div>
+            <div class="mb-2"><strong>Days Left:</strong> 3</div>
+            <div class="mb-3">
+              <div class="progress">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 95%">95%</div>
+              </div>
+            </div>
+            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
+            <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
+          </div>
+        </div>
+      </div>
+      <!-- Budget Card 2 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="fas fa-shopping-cart me-2"></i>Shopping</span>
+            <span class="badge bg-success">Active</span>
+          </div>
+          <div class="card-body">
+            <div class="mb-2"><strong>Period:</strong> Monthly</div>
+            <div class="mb-2"><strong>Budgeted:</strong> $600.00</div>
+            <div class="mb-2"><strong>Spent:</strong> $250.00</div>
+            <div class="mb-2"><strong>Remaining:</strong> $350.00</div>
+            <div class="mb-2"><strong>Days Left:</strong> 3</div>
+            <div class="mb-3">
+              <div class="progress">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 42%">42%</div>
+              </div>
+            </div>
+            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
+            <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
+          </div>
+        </div>
+      </div>
+      <!-- Budget Card 3 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="fas fa-bolt me-2"></i>Utilities</span>
+            <span class="badge bg-success">Active</span>
+          </div>
+          <div class="card-body">
+            <div class="mb-2"><strong>Period:</strong> Monthly</div>
+            <div class="mb-2"><strong>Budgeted:</strong> $300.00</div>
+            <div class="mb-2"><strong>Spent:</strong> $120.00</div>
+            <div class="mb-2"><strong>Remaining:</strong> $180.00</div>
+            <div class="mb-2"><strong>Days Left:</strong> 3</div>
+            <div class="mb-3">
+              <div class="progress">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 40%">40%</div>
+              </div>
+            </div>
+            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
+            <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
+          </div>
+        </div>
+      </div>
+      <!-- Budget Card 4 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="fas fa-heartbeat me-2"></i>Healthcare</span>
+            <span class="badge bg-success">Active</span>
+          </div>
+          <div class="card-body">
+            <div class="mb-2"><strong>Period:</strong> Monthly</div>
+            <div class="mb-2"><strong>Budgeted:</strong> $2,200.00</div>
+            <div class="mb-2"><strong>Spent:</strong> $1,400.00</div>
+            <div class="mb-2"><strong>Remaining:</strong> $800.00</div>
+            <div class="mb-2"><strong>Days Left:</strong> 3</div>
+            <div class="mb-3">
+              <div class="progress">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 64%">64%</div>
+              </div>
+            </div>
+            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
+            <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Sidebar toggle for mobile
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    sidebarToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      sidebarBackdrop.classList.toggle('open');
+    });
+    sidebarBackdrop.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      sidebarBackdrop.classList.remove('open');
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

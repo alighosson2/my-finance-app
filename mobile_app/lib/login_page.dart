@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'register_page.dart';
-import 'home_page.dart';
+import 'dashboard/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -34,7 +34,8 @@ class _LoginPageState extends State<LoginPage> {
         final data = json.decode(response.body);
         // Check for token and refreshToken in the response
         final token = data['token'] ?? data['data']?['token'];
-        final refreshToken = data['refreshToken'] ?? data['data']?['refreshToken'];
+        final refreshToken =
+            data['refreshToken'] ?? data['data']?['refreshToken'];
         if (token != null && refreshToken != null) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', token);
@@ -82,7 +83,8 @@ class _LoginPageState extends State<LoginPage> {
             child: Card(
               elevation: 24,
               color: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24)),
               margin: EdgeInsets.all(32),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 40, vertical: 48),
@@ -95,9 +97,11 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.show_chart, size: 36, color: Color(0xFF22223B)),
+                          Icon(Icons.show_chart,
+                              size: 36, color: Color(0xFF22223B)),
                           SizedBox(width: 8),
-                          Text("MyFinance360",
+                          Text(
+                            "MyFinance360",
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -111,7 +115,8 @@ class _LoginPageState extends State<LoginPage> {
                       // Bold header with underline
                       Column(
                         children: [
-                          Text("Login to MyFinance360",
+                          Text(
+                            "Login to MyFinance360",
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -159,7 +164,8 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide(color: Color(0xFF20C997), width: 2),
+                            borderSide:
+                                BorderSide(color: Color(0xFF20C997), width: 2),
                           ),
                         ),
                         keyboardType: TextInputType.emailAddress,
@@ -167,7 +173,8 @@ class _LoginPageState extends State<LoginPage> {
                           if (value?.isEmpty ?? true) {
                             return 'Please enter your email';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)) {
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(value!)) {
                             return 'Please enter a valid email';
                           }
                           return null;
@@ -181,7 +188,9 @@ class _LoginPageState extends State<LoginPage> {
                           labelText: "Password",
                           prefixIcon: Icon(Icons.lock),
                           suffixIcon: IconButton(
-                            icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                            icon: Icon(_obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off),
                             onPressed: () {
                               setState(() {
                                 _obscurePassword = !_obscurePassword;
@@ -200,7 +209,8 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide(color: Color(0xFF20C997), width: 2),
+                            borderSide:
+                                BorderSide(color: Color(0xFF20C997), width: 2),
                           ),
                         ),
                         obscureText: _obscurePassword,
@@ -224,8 +234,12 @@ class _LoginPageState extends State<LoginPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF20C997),
                             foregroundColor: Colors.white,
-                            textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                            textStyle: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28)),
                           ),
                           child: _isLoading
                               ? CircularProgressIndicator(color: Colors.white)
@@ -237,16 +251,23 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("Don't have an account? ", style: TextStyle(color: Color(0xFF6C757D), fontSize: 16)),
+                          Text("Don't have an account? ",
+                              style: TextStyle(
+                                  color: Color(0xFF6C757D), fontSize: 16)),
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => RegisterPage()),
+                                MaterialPageRoute(
+                                    builder: (context) => RegisterPage()),
                               );
                             },
                             child: Text("Sign up",
-                              style: TextStyle(color: Color(0xFF20C997), fontSize: 16, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
+                                style: TextStyle(
+                                    color: Color(0xFF20C997),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline)),
                           ),
                         ],
                       ),

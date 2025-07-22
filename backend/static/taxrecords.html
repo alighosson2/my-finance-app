@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tax Records - MyFinance360</title>
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root { 
+      --primary: #2c3e50; 
+      --accent: #1abc9c; 
+      --dark: #2c3e50; 
+      --success: #27ae60;
+      --warning: #f39c12;
+      --info: #3498db;
+    }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      color: #333; 
+      background-color: #fff;
+      line-height: 1.6;
+    }
+    .sidebar {
+      height: 100vh;
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem 0;
+      position: fixed;
+      width: 240px;
+      overflow-y: auto;
+      z-index: 1030;
+      left: 0;
+      top: 0;
+      transition: left 0.3s;
+    }
+    .sidebar .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--accent)!important;
+      padding: 0 1.25rem;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+    .sidebar a {
+      color: var(--accent) !important;
+      display: block;
+      padding: 0.75rem 1.25rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+      font-weight: 500;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background-color: rgba(255,255,255,0.10);
+      color: #fff !important;
+      border-left-color: var(--accent);
+    }
+    .sidebar .logout-link {
+      color: #fff !important;
+      margin-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 1rem;
+    }
+    .sidebar-toggle {
+      display: none;
+      position: absolute;
+      top: 1rem;
+      right: -2.5rem;
+      background: var(--primary);
+      border: none;
+      color: var(--accent);
+      font-size: 2rem;
+      z-index: 1040;
+    }
+    .content {
+      margin-left: 240px;
+      padding: 2rem 1rem;
+      transition: margin-left 0.3s;
+      background: #fff;
+      min-height: 100vh;
+    }
+    .dashboard-title {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      border: none;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+      color: white;
+      font-weight: 600;
+      border-bottom: none;
+    }
+    .btn {
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1.5rem;
+    }
+    .btn-primary {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+    .btn-primary:hover {
+      background-color: #16a085;
+      border-color: #16a085;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    .table thead th {
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+    }
+    .table-striped > tbody > tr:nth-of-type(odd) {
+      background-color: #f8f9fa;
+    }
+    .alert {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    @media (max-width: 991.98px) {
+      .sidebar {
+        left: -240px;
+        width: 240px;
+        position: fixed;
+        top: 0;
+        height: 100vh;
+        transition: left 0.3s;
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .sidebar-toggle {
+        display: block;
+        right: 1rem;
+        left: auto;
+        top: 1rem;
+      }
+      .content {
+        margin-left: 0;
+        padding: 1rem 0.5rem;
+      }
+      .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.2);
+        z-index: 1029;
+      }
+      .sidebar.open + .sidebar-backdrop {
+        display: block;
+      }
+    }
+    @media (max-width: 575.98px) {
+      .dashboard-title {
+        font-size: 1.2rem;
+      }
+      .card-header h5 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+  <nav class="sidebar" id="sidebar">
+    <a class="navbar-brand" href="dashboard.html">
+      <i class="fas fa-chart-line me-2"></i>MyFinance360
+    </a>
+    <a href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a href="accounts.html"><i class="fas fa-wallet me-2"></i>Accounts</a>
+    <a href="transactions.html"><i class="fas fa-exchange-alt me-2"></i>Transactions</a>
+    <a href="budget.html"><i class="fas fa-chart-pie me-2"></i>Budgets</a>
+    <a href="taxrecords.html" class="active"><i class="fas fa-file-invoice-dollar me-2"></i>Tax Records</a>
+    <a href="/api/auth/logout" class="logout-link"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+  </nav>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <div class="content">
+    <h1 class="dashboard-title">Tax Records</h1>
+    <!-- Summary Card -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Total Records</div>
+            <h4 class="mb-0">3</h4>
+          </div>
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Total Taxable Income</div>
+            <h4 class="mb-0 text-primary">$85,000.00</h4>
+          </div>
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Total Estimated Tax</div>
+            <h4 class="mb-0 text-danger">$12,500.00</h4>
+          </div>
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Avg. Effective Rate</div>
+            <h4 class="mb-0 text-info">14.7%</h4>
+          </div>
+          <div class="col-md-2 col-6">
+            <div class="text-muted">Most Recent Year</div>
+            <h4 class="mb-0 text-success">2024</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Alerts Section -->
+    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+      <i class="fas fa-info-circle me-2"></i>
+      <div>
+        <strong>Tip:</strong> Add your tax record for 2023 to keep your records up to date.
+      </div>
+    </div>
+    <!-- Create Tax Record Button -->
+    <div class="mb-4 text-end">
+      <button class="btn btn-primary"><i class="fas fa-plus me-2"></i>Create Tax Record</button>
+    </div>
+    <!-- Tax Records Table -->
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Filing Status</th>
+                <th>Taxable Income</th>
+                <th>Estimated Tax</th>
+                <th>Effective Rate</th>
+                <th>Deductions</th>
+                <th>Credits</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2024</td>
+                <td>Single</td>
+                <td>$40,000.00</td>
+                <td>$5,800.00</td>
+                <td>14.5%</td>
+                <td>$2,000.00</td>
+                <td>$500.00</td>
+                <td class="text-end">
+                  <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
+                  <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
+                </td>
+              </tr>
+              <tr>
+                <td>2023</td>
+                <td>Married Jointly</td>
+                <td>$30,000.00</td>
+                <td>$3,900.00</td>
+                <td>13.0%</td>
+                <td>$1,500.00</td>
+                <td>$300.00</td>
+                <td class="text-end">
+                  <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
+                  <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
+                </td>
+              </tr>
+              <tr>
+                <td>2022</td>
+                <td>Head of Household</td>
+                <td>$15,000.00</td>
+                <td>$2,800.00</td>
+                <td>18.7%</td>
+                <td>$1,000.00</td>
+                <td>$200.00</td>
+                <td class="text-end">
+                  <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
+                  <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Sidebar toggle for mobile
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    sidebarToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      sidebarBackdrop.classList.toggle('open');
+    });
+    sidebarBackdrop.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      sidebarBackdrop.classList.remove('open');
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

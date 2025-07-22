@@ -13,7 +13,6 @@ export class AuthenticationController {
   async login(req: Request, res: Response) {
     const { email, password } = req.body;
     if (!email || !password) {
-      // if you prefer to redirect with query params:
       return res.redirect('/login.html?error=missing');
     }
 
@@ -22,22 +21,26 @@ export class AuthenticationController {
       const userId = await this.userService.validateUser(email, password);
 
       // 2. generate tokens & set cookies
-      const token = this.authService.generateToken(userId);
+      /*const token = this.authService.generateToken(userId);
       const refreshToken = this.authService.generateRefreshToken(userId);
       this.authService.setTokenIntoCookie(res, token);
-      this.authService.setRefreshTokenIntoCookie(res, refreshToken);
+      this.authService.setRefreshTokenIntoCookie(res, refreshToken);*/
       this.authService.persistAuthentication(res, userId);
 
       // 3. REDIRECT to dashboard
-      return res.redirect('/dashboard.html');
+     // return res.redirect('/dashboard.html');
+      res.status(200).json({message: 'Login successful'});
 
     } catch (error) {
+      if((error as Error).message === 'User not found') {
+      //  throw new BadRequestException('Invalid email or password');
+      
       // on invalid credentials
       return res.redirect('/login.html?error=invalid');
-    }
+    }}
   }
 
-  // 🆕 NEW: Mobile API Login (JSON Response)
+  //  Mobile API Login (JSON Response)
   async loginAPI(req: Request, res: Response) {
     const { email, password } = req.body;
     
@@ -77,13 +80,14 @@ export class AuthenticationController {
   }
 
   async logout(req: AuthRequest, res: Response) {
+    const AuthRequest = req as AuthRequest;
     this.authService.clearTokens(res);
-    res.status(200).json({ message: 'Logout successful' });
+  //  res.status(200).json({message: 'Logout successful'});
+    return res.redirect('/login.html');
   }
 
-  // 🆕 NEW: Mobile API Logout
+  // Mobile API Logout
   async logoutAPI(req: AuthRequest, res: Response) {
-    // For mobile, just return success (client handles token removal)
     res.status(200).json({ 
       success: true,
       message: 'Logout successful' 

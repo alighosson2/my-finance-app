@@ -68,7 +68,9 @@ app.use('/api/budgets', budgetRoutes);
 app.use('/api/admin', adminRoutes);    // <-- Add this line
 
 // Static frontend
-app.use(express.static(config.static_files_path));
+app.use(express.static(config.frontendPath));
+
+
 
 // Error handler
 app.use(

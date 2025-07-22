@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
 import 'register_page.dart';
-import 'home_page.dart';
+import 'dashboard/home_page.dart';
 
 void main() {
   runApp(MyFinanceApp());

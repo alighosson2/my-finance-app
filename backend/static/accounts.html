@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Accounts - MyFinance360</title>
   
-  <!-- Bootstrap & Font‑Awesome -->
+  <!-- Bootstrap & Font-Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -22,6 +22,7 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
       color: #333; 
       line-height: 1.6;
+      background-color: #fff;
     }
     
     .sidebar {
@@ -32,19 +33,23 @@
       position: fixed;
       width: 240px;
       overflow-y: auto;
+      z-index: 1030;
+      left: 0;
+      top: 0;
+      transition: left 0.3s;
     }
     
     .sidebar .navbar-brand {
       font-weight: 700;
       font-size: 1.5rem;
-      color: white !important;
+      color: var(--accent) !important;
       padding: 0 1.25rem;
       margin-bottom: 1.5rem;
       display: block;
     }
     
     .sidebar a {
-      color: rgba(255,255,255,0.85);
+      color: var(--accent) !important;
       display: block;
       padding: 0.75rem 1.25rem;
       text-decoration: none;
@@ -53,14 +58,49 @@
     }
     
     .sidebar a:hover, .sidebar a.active {
-      background-color: rgba(255,255,255,0.15);
-      color: white;
+      background-color: rgba(255,255,255,0.10);
+      color: #fff !important;
       border-left-color: var(--accent);
+    }
+    
+    .sidebar .logout-link {
+      color: #fff !important;
+      margin-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 1rem;
+    }
+    
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--primary);
+      border: none;
+      color: var(--accent);
+      font-size: 2rem;
+      z-index: 1040;
+    }
+    
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.2);
+      z-index: 1029;
+    }
+    
+    .sidebar-backdrop.open {
+      display: block;
     }
     
     .content {
       margin-left: 240px;
       padding: 2rem;
+      transition: margin-left 0.3s;
     }
     
     .card {
@@ -71,11 +111,11 @@
     }
     
     .account-card {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: transform 0.3s Minnes.glide(0.3s ease), box-shadow 0.3s ease;
     }
     
     .account-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-5px) scale(1.02);
       box-shadow: 0 12px 30px rgba(0,0,0,0.15);
     }
     
@@ -108,202 +148,205 @@
       transform: translateY(-2px);
     }
     
-    @media (max-width: 768px) {
+    @media (max-width: 991.98px) {
       .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
+        left: -240px;
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .sidebar-toggle {
+        display: block;
       }
       .content {
         margin-left: 0;
+        padding: 1rem 0.5rem;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="d-flex">
-    <!-- Sidebar -->
-    <nav class="sidebar">
-      <a class="navbar-brand" href="dashboard.html">
-        <i class="fas fa-chart-line me-2"></i>MyFinance360
-      </a>
-      
-      <a href="dashboard.html">
-        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-      </a>
-      <a href="accounts.html" class="active">
-        <i class="fas fa-wallet me-2"></i>Accounts
-      </a>
-      <a href="transactions.html">
-        <i class="fas fa-exchange-alt me-2"></i>Transactions
-      </a>
-      <a href="budgets.html">
-        <i class="fas fa-chart-pie me-2"></i>Budgets
-      </a>
-      <a href="tax.html">
-        <i class="fas fa-file-invoice-dollar me-2"></i>Tax Records
-      </a>
-      <a href="/api/auth/logout">
-        <i class="fas fa-sign-out-alt me-2"></i>Logout
-      </a>
-    </nav>
+  <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+  <nav class="sidebar" id="sidebar">
+    <a class="navbar-brand" href="dashboard.html">
+      <i class="fas fa-chart-line me-2"></i>MyFinance360
+    </a>
+    <a href="dashboard.html"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a href="accounts.html" class="active"><i class="fas fa-wallet me-2"></i>Accounts</a>
+    <a href="transactions.html"><i class="fas fa-exchange-alt me-2"></i>Transactions</a>
+    <a href="budget.html"><i class="fas fa-chart-pie me-2"></i>Budgets</a>
+    <a href="taxrecords.html"><i class="fas fa-file-invoice-dollar me-2"></i>Tax Records</a>
+    <a href="/api/auth/logout" class="logout-link"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+  </nav>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <div class="content">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="mb-4">Your Bank Accounts</h1>
+      </div>
+    </div>
 
-    <!-- Main Content -->
-    <div class="content">
-      <div class="row">
-        <div class="col-12">
-          <h1 class="mb-4">Your Bank Accounts</h1>
+    <!-- Quick Actions -->
+    <div class="card">
+      <div class="card-body p-4">
+        <h5 class="mb-3">
+          <i class="fas fa-sync-alt me-2"></i>Account Management
+        </h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <form action="/api/accounts" method="GET">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-refresh me-2"></i>Refresh Accounts
+              </button>
+            </form>
+          </div>
+          <div class="col-md-4">
+            <form action="/api/bank/api/sync/accounts" method="POST">
+              <button type="submit" class="btn btn-success w-100">
+                <i class="fas fa-download me-2"></i>Sync from Bank
+              </button>
+            </form>
+          </div>
+          <div class="col-md-4">
+            <a href="dashboard.html" class="btn btn-outline-secondary w-100">
+              <i class="fas fa-plus me-2"></i>Connect New Bank
+            </a>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Quick Actions -->
-      <div class="card">
-        <div class="card-body p-4">
-          <h5 class="mb-3">
-            <i class="fas fa-sync-alt me-2"></i>Account Management
-          </h5>
-          <div class="row g-3">
-            <div class="col-md-4">
-              <form action="/api/accounts" method="GET">
-                <button type="submit" class="btn btn-primary w-100">
-                  <i class="fas fa-refresh me-2"></i>Refresh Accounts
+    <!-- Sample Account Cards -->
+    <div class="row">
+      <!-- Sample Checking Account -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card account-card">
+          <div class="card-body text-center p-4">
+            <div class="mb-3">
+              <i class="fas fa-university fa-3x text-primary"></i>
+            </div>
+            <h5>Bank Of America</h5>
+            <p class="account-type text-muted">Checking Account</p>
+            <div class="account-balance text-success mb-3">$2,450.75</div>
+            <small class="text-muted">Account: •••• 1234</small>
+            <hr>
+            <div class="d-flex justify-content-between">
+              <form action="/api/bank/api/sync/transactions/1" method="POST" class="flex-fill me-1">
+                <button type="submit" class="btn btn-outline-info btn-sm w-100">
+                  Sync Transactions
                 </button>
               </form>
-            </div>
-            <div class="col-md-4">
-              <form action="/api/bank/api/sync/accounts" method="POST">
-                <button type="submit" class="btn btn-success w-100">
-                  <i class="fas fa-download me-2"></i>Sync from Bank
-                </button>
-              </form>
-            </div>
-            <div class="col-md-4">
-              <a href="dashboard.html" class="btn btn-outline-secondary w-100">
-                <i class="fas fa-plus me-2"></i>Connect New Bank
+              <a href="transactions.html?account=1" class="btn btn-outline-primary btn-sm flex-fill ms-1">
+                View Details
               </a>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Sample Account Cards -->
-      <div class="row">
-        <!-- Sample Checking Account -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card account-card">
-            <div class="card-body text-center p-4">
-              <div class="mb-3">
-                <i class="fas fa-university fa-3x text-primary"></i>
-              </div>
-              <h5>Bank Of America</h5>
-              <p class="account-type text-muted">Checking Account</p>
-              <div class="account-balance text-success mb-3">$2,450.75</div>
-              <small class="text-muted">Account: •••• 1234</small>
-              <hr>
-              <div class="d-flex justify-content-between">
-                <form action="/api/bank/api/sync/transactions/1" method="POST" class="flex-fill me-1">
-                  <button type="submit" class="btn btn-outline-info btn-sm w-100">
-                    Sync Transactions
-                  </button>
-                </form>
-                <a href="transactions.html?account=1" class="btn btn-outline-primary btn-sm flex-fill ms-1">
-                  View Details
-                </a>
-              </div>
+      <!-- Sample Savings Account -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card account-card">
+          <div class="card-body text-center p-4">
+            <div class="mb-3">
+              <i class="fas fa-piggy-bank fa-3x text-success"></i>
             </div>
-          </div>
-        </div>
-
-        <!-- Sample Savings Account -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card account-card">
-            <div class="card-body text-center p-4">
-              <div class="mb-3">
-                <i class="fas fa-piggy-bank fa-3x text-success"></i>
-              </div>
-              <h5>Bank Of America</h5>
-              <p class="account-type text-muted">Savings Account</p>
-              <div class="account-balance text-success mb-3">$8,920.30</div>
-              <small class="text-muted">Account: •••• 5678</small>
-              <hr>
-              <div class="d-flex justify-content-between">
-                <form action="/api/bank/api/sync/transactions/2" method="POST" class="flex-fill me-1">
-                  <button type="submit" class="btn btn-outline-info btn-sm w-100">
-                    Sync Transactions
-                  </button>
-                </form>
-                <a href="transactions.html?account=2" class="btn btn-outline-primary btn-sm flex-fill ms-1">
-                  View Details
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Add New Account Card -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card account-card" style="border: 2px dashed #dee2e6;">
-            <div class="card-body text-center p-4 d-flex flex-column justify-content-center" style="min-height: 300px;">
-              <div class="mb-3">
-                <i class="fas fa-plus-circle fa-3x text-muted"></i>
-              </div>
-              <h5 class="text-muted">Connect Another Bank</h5>
-              <p class="text-muted">Add more accounts to get a complete financial picture</p>
-              <a href="dashboard.html" class="btn btn-outline-primary">
-                <i class="fas fa-plus me-2"></i>Add Account
+            <h5>Bank Of America</h5>
+            <p class="account-type text-muted">Savings Account</p>
+            <div class="account-balance text-success mb-3">$8,920.30</div>
+            <small class="text-muted">Account: •••• 5678</small>
+            <hr>
+            <div class="d-flex justify-content-between">
+              <form action="/api/bank/api/sync/transactions/2" method="POST" class="flex-fill me-1">
+                <button type="submit" class="btn btn-outline-info btn-sm w-100">
+                  Sync Transactions
+                </button>
+              </form>
+              <a href="transactions.html?account=2" class="btn btn-outline-primary btn-sm flex-fill ms-1">
+                View Details
               </a>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Account Summary -->
-      <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0">
-            <i class="fas fa-chart-bar me-2"></i>Account Summary
-          </h5>
-        </div>
-        <div class="card-body">
-          <div class="row text-center">
-            <div class="col-md-3">
-              <div class="border-end">
-                <h4 class="text-success mb-1">$11,371.05</h4>
-                <small class="text-muted">Total Balance</small>
-              </div>
+      <!-- Add New Account Card -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card account-card" style="border: 2px dashed #dee2e6;">
+          <div class="card-body text-center p-4 d-flex flex-column justify-content-center" style="min-height: 300px;">
+            <div class="mb-3">
+              <i class="fas fa-plus-circle fa-3x text-muted"></i>
             </div>
-            <div class="col-md-3">
-              <div class="border-end">
-                <h4 class="text-info mb-1">2</h4>
-                <small class="text-muted">Connected Accounts</small>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="border-end">
-                <h4 class="text-warning mb-1">1</h4>
-                <small class="text-muted">Connected Banks</small>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <h4 class="text-primary mb-1">Active</h4>
-              <small class="text-muted">Sync Status</small>
-            </div>
+            <h5 class="text-muted">Connect Another Bank</h5>
+            <p class="text-muted">Add more accounts to get a complete financial picture</p>
+            <a href="dashboard.html" class="btn btn-outline-primary">
+              <i class="fas fa-plus me-2"></i>Add Account
+            </a>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Instructions -->
-      <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i>
-        <strong>Next Steps:</strong> 
-        After connecting your bank in the dashboard, your real accounts will appear here. 
-        Click "Sync from Bank" to refresh account data, or "Sync Transactions" on individual accounts to get transaction history.
+    <!-- Account Summary -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-chart-bar me-2"></i>Account Summary
+        </h5>
       </div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-md-3">
+            <div class="border-end">
+              <h4 class="text-success mb-1">$11,371.05</h4>
+              <small class="text-muted">Total Balance</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="border-end">
+              <h4 class="text-info mb-1">2</h4>
+              <small class="text-muted">Connected Accounts</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="border-end">
+              <h4 class="text-warning mb-1">1</h4>
+              <small class="text-muted">Connected Banks</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <h4 class="text-primary mb-1">Active</h4>
+            <small class="text-muted">Sync Status</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i>
+      <strong>Next Steps:</strong> 
+      After connecting your bank in the dashboard, your real accounts will appear here. 
+      Click "Sync from Bank" to refresh account data, or "Sync Transactions" on individual accounts to get transaction history.
     </div>
   </div>
 
+  <!-- JavaScript for Sidebar Toggle -->
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    sidebarToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      sidebarBackdrop.classList.toggle('open');
+    });
+    sidebarBackdrop.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      sidebarBackdrop.classList.remove('open');
+    });
+  </script>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body> 
-</html> 
+</html>
