@@ -154,6 +154,36 @@
       border-radius: 12px;
       color: #6c757d;
     }
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+    }
+    .info-banner {
+      background: linear-gradient(135deg, var(--accent), #16a085);
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+    .info-banner i {
+      font-size: 1.2rem;
+      margin-right: 0.5rem;
+    }
+    .sync-status {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+    .sync-status.synced {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .sync-status.manual {
+      background-color: #ffeaa7;
+      color: #856404;
+    }
     @media (max-width: 991.98px) {
       .sidebar {
         left: -240px;
@@ -211,6 +241,9 @@
     </div>
   </div>
 
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
   <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
   <nav class="sidebar" id="sidebar">
     <a class="navbar-brand" href="dashboard.html">
@@ -231,11 +264,18 @@
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h1 class="mb-0">Transactions</h1>
-          <button class="btn btn-primary" id="addTransactionBtn">
-            <i class="fas fa-plus me-2"></i>Add Transaction
-          </button>
+          <a href="accounts.html" class="btn btn-outline-primary">
+            <i class="fas fa-sync-alt me-2"></i>Manage Bank Sync
+          </a>
         </div>
       </div>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="info-banner">
+      <i class="fas fa-info-circle"></i>
+      <strong>Bank Integration:</strong> Your transactions are automatically synced from your connected bank accounts.
+      To add new transactions, they need to be made through your actual bank accounts.
     </div>
 
     <!-- Filter Bar -->
@@ -295,7 +335,7 @@
                 <th>Account</th>
                 <th>Type</th>
                 <th class="text-end">Amount</th>
-                <th>Actions</th>
+                <th>Source</th>
               </tr>
             </thead>
             <tbody id="transactionsTableBody">
@@ -306,12 +346,12 @@
 
         <!-- Empty state -->
         <div class="alert-empty d-none" id="emptyState">
-          <i class="fas fa-receipt fa-3x mb-3"></i>
+          <i class="fas fa-university fa-3x mb-3"></i>
           <h5>No transactions found</h5>
-          <p>Add your first transaction to get started</p>
-          <button class="btn btn-primary" onclick="addTransaction()">
-            <i class="fas fa-plus me-2"></i>Add Transaction
-          </button>
+          <p>Transactions will appear here once they are synced from your connected bank accounts.</p>
+          <a href="accounts.html" class="btn btn-primary">
+            <i class="fas fa-link me-2"></i>Connect Bank Accounts
+          </a>
         </div>
 
         <!-- Pagination -->
@@ -332,6 +372,11 @@
     let totalPages = 1;
     let currentFilters = {};
     let accounts = [];
+    let categories = [];
+
+    // API configuration
+    const API_BASE = '/api';
+    const ITEMS_PER_PAGE = 20;
 
     // DOM elements
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -340,9 +385,9 @@
     const paginationContainer = document.getElementById('paginationContainer');
     const pagination = document.getElementById('pagination');
     const filterForm = document.getElementById('filterForm');
-    const addTransactionBtn = document.getElementById('addTransactionBtn');
+    const toastContainer = document.getElementById('toastContainer');
 
-    // Show/hide loading overlay
+    // Utility functions
     function showLoading() {
       loadingOverlay.style.display = 'flex';
     }
@@ -351,63 +396,151 @@
       loadingOverlay.style.display = 'none';
     }
 
-    // API calls
+    function showToast(message, type = 'success') {
+      const toastId = 'toast-' + Date.now();
+      const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+
+      const toastHtml = `
+        <div class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
+          <div class="d-flex">
+            <div class="toast-body">
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      `;
+
+      toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+      const toastElement = document.getElementById(toastId);
+      const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+      toast.show();
+
+      toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+      });
+    }
+
+    async function makeAPICall(url, options = {}) {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+          },
+          ...options
+        });
+
+        if (response.status === 401) {
+          window.location.href = '/login.html';
+          return null;
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Handle 204 No Content responses
+        if (response.status === 204) {
+          return { success: true };
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+      }
+    }
+
     async function fetchTransactions(page = 1, filters = {}) {
       try {
         showLoading();
 
         const params = new URLSearchParams({
           page: page.toString(),
-          limit: '20',
-          ...filters
+          limit: ITEMS_PER_PAGE.toString()
         });
 
-        const response = await fetch(`/api/transactions/search?${params}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        // Add filters to params
+        Object.keys(filters).forEach(key => {
+          if (filters[key]) {
+            // Map frontend filter names to backend field names
+            const backendKey = mapFilterKey(key);
+            params.append(backendKey, filters[key]);
+          }
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await makeAPICall(`${API_BASE}/transactions/search?${params}`);
         return data;
       } catch (error) {
         console.error('Error fetching transactions:', error);
-        showError('Failed to load transactions. Please try again.');
+        showToast('Failed to load transactions. Please try again.', 'error');
         return null;
       } finally {
         hideLoading();
       }
     }
 
+    function mapFilterKey(frontendKey) {
+      const keyMap = {
+        'account_id': 'account_id',
+        'category': 'category',
+        'transaction_type': 'transaction_type',
+        'start_date': 'date_from',
+        'end_date': 'date_to'
+      };
+      return keyMap[frontendKey] || frontendKey;
+    }
+
     async function fetchAccounts() {
       try {
-        const response = await fetch('/api/financial-accounts', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await makeAPICall(`${API_BASE}/financial-accounts`);
+        if (data && (data.accounts || data.data)) {
+          accounts = data.accounts || data.data || data;
+          return accounts;
         }
-
-        const data = await response.json();
-        accounts = data;
-        return data;
+        return [];
       } catch (error) {
         console.error('Error fetching accounts:', error);
         return [];
       }
     }
 
+    async function fetchCategories() {
+      try {
+        // Get categories from recent transactions or use predefined categories
+        const transactionData = await makeAPICall(`${API_BASE}/transactions?limit=100`);
+        const categorySet = new Set();
+
+        if (transactionData && (transactionData.transactions || transactionData.data)) {
+          const transactions = transactionData.transactions || transactionData.data || [];
+          transactions.forEach(t => {
+            if (t.category) categorySet.add(t.category);
+          });
+        }
+
+        // Add predefined categories
+        const predefinedCategories = [
+          'Food & Dining', 'Transportation', 'Shopping', 'Entertainment',
+          'Bills & Utilities', 'Healthcare', 'Education', 'Travel',
+          'Salary', 'Freelance', 'Investment', 'Business', 'Other Income'
+        ];
+
+        predefinedCategories.forEach(cat => categorySet.add(cat));
+
+        categories = Array.from(categorySet).sort();
+        return categories;
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        return [];
+      }
+    }
+
     // Render functions
-    function renderTransactions(transactions) {
+    function renderTransactions(data) {
+      const transactions = data?.transactions || data?.data || [];
+
       if (!transactions || transactions.length === 0) {
         transactionsTableBody.innerHTML = '';
         emptyState.classList.remove('d-none');
@@ -425,6 +558,7 @@
         const amountClass = isPositive ? 'positive' : 'negative';
         const amountSign = isPositive ? '+' : '-';
         const accountName = getAccountName(transaction.account_id);
+        const syncSource = getSyncSource(transaction.import_source, transaction.sync_status);
 
         return `
           <tr>
@@ -433,6 +567,7 @@
               <div>
                 <strong>${transaction.description}</strong>
                 ${transaction.merchant_name ? `<br><small class="text-muted">${transaction.merchant_name}</small>` : ''}
+                ${transaction.location ? `<br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> ${transaction.location}</small>` : ''}
               </div>
             </td>
             <td>
@@ -449,14 +584,8 @@
               ${amountSign} $${Math.abs(amount).toFixed(2)}
             </td>
             <td>
-              <div class="btn-group btn-group-sm">
-                <button class="btn btn-outline-primary" onclick="editTransaction(${transaction.id})" title="Edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-outline-danger" onclick="deleteTransaction(${transaction.id})" title="Delete">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
+              ${syncSource}
+              ${transaction.external_transaction_id ? `<br><small class="text-muted">ID: ${transaction.external_transaction_id.substring(0, 8)}...</small>` : ''}
             </td>
           </tr>
         `;
@@ -465,7 +594,10 @@
       transactionsTableBody.innerHTML = html;
     }
 
-    function renderPagination(totalPages, currentPage) {
+    function renderPagination(data) {
+      const totalPages = data?.total_pages || data?.totalPages || 1;
+      const currentPageFromData = data?.page || currentPage;
+
       if (totalPages <= 1) {
         pagination.innerHTML = '';
         return;
@@ -475,8 +607,8 @@
 
       // Previous button
       html += `
-        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-          <a class="page-link" href="#" onclick="changePage(${currentPage - 1})" aria-label="Previous">
+        <li class="page-item ${currentPageFromData === 1 ? 'disabled' : ''}">
+          <a class="page-link" href="#" onclick="changePage(${currentPageFromData - 1})" aria-label="Previous">
             <span aria-hidden="true">&laquo;</span>
           </a>
         </li>
@@ -484,7 +616,7 @@
 
       // Page numbers
       const maxVisible = 5;
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+      let startPage = Math.max(1, currentPageFromData - Math.floor(maxVisible / 2));
       let endPage = Math.min(totalPages, startPage + maxVisible - 1);
 
       if (endPage - startPage < maxVisible - 1) {
@@ -493,7 +625,7 @@
 
       for (let i = startPage; i <= endPage; i++) {
         html += `
-          <li class="page-item ${i === currentPage ? 'active' : ''}">
+          <li class="page-item ${i === currentPageFromData ? 'active' : ''}">
             <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
           </li>
         `;
@@ -501,8 +633,8 @@
 
       // Next button
       html += `
-        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-          <a class="page-link" href="#" onclick="changePage(${currentPage + 1})" aria-label="Next">
+        <li class="page-item ${currentPageFromData === totalPages ? 'disabled' : ''}">
+          <a class="page-link" href="#" onclick="changePage(${currentPageFromData + 1})" aria-label="Next">
             <span aria-hidden="true">&raquo;</span>
           </a>
         </li>
@@ -520,17 +652,33 @@
       accounts.forEach(account => {
         const option = document.createElement('option');
         option.value = account.id;
-        option.textContent = `${account.bank_name} - ${account.account_type}`;
+        option.textContent = `${account.bank_name || 'Unknown Bank'} - ${account.account_type}`;
         accountSelect.appendChild(option);
       });
 
       accountSelect.value = currentValue;
     }
 
+    function renderCategoryOptions(categories) {
+      const categorySelect = document.getElementById('categorySelect');
+      const currentValue = categorySelect.value;
+
+      categorySelect.innerHTML = '<option value="">All Categories</option>';
+
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+      });
+
+      categorySelect.value = currentValue;
+    }
+
     // Helper functions
     function getAccountName(accountId) {
       const account = accounts.find(acc => acc.id === accountId);
-      return account ? `${account.bank_name} - ${account.account_type}` : 'Unknown Account';
+      return account ? `${account.bank_name || 'Unknown Bank'} - ${account.account_type}` : 'Unknown Account';
     }
 
     function getTypeColor(type) {
@@ -542,20 +690,14 @@
       }
     }
 
-    function showError(message) {
-      // Create a toast or alert for error messages
-      const alert = document.createElement('div');
-      alert.className = 'alert alert-danger alert-dismissible fade show position-fixed';
-      alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
-      alert.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      `;
-      document.body.appendChild(alert);
-
-      setTimeout(() => {
-        alert.remove();
-      }, 5000);
+    function getSyncSource(importSource, syncStatus) {
+      if (importSource === 'obp' || importSource === 'bank') {
+        return `<span class="sync-status synced"><i class="fas fa-university"></i> Bank Synced</span>`;
+      } else if (importSource === 'manual') {
+        return `<span class="sync-status manual"><i class="fas fa-user-edit"></i> Manual</span>`;
+      } else {
+        return `<span class="sync-status synced"><i class="fas fa-sync"></i> ${syncStatus || 'Synced'}</span>`;
+      }
     }
 
     // Event handlers
@@ -565,79 +707,34 @@
       loadTransactions();
     }
 
-    function addTransaction() {
-      window.location.href = 'addtransactionsforms.html';
-    }
-
-    function editTransaction(id) {
-      window.location.href = `addtransactionsforms.html?edit=${id}`;
-    }
-
-    async function deleteTransaction(id) {
-      if (!confirm('Are you sure you want to delete this transaction?')) {
-        return;
-      }
-
-      try {
-        showLoading();
-
-        const response = await fetch(`/api/transactions/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Reload transactions
-        await loadTransactions();
-
-        // Show success message
-        showSuccess('Transaction deleted successfully');
-      } catch (error) {
-        console.error('Error deleting transaction:', error);
-        showError('Failed to delete transaction. Please try again.');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    function showSuccess(message) {
-      const alert = document.createElement('div');
-      alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
-      alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
-      alert.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      `;
-      document.body.appendChild(alert);
-
-      setTimeout(() => {
-        alert.remove();
-      }, 3000);
-    }
-
     // Main load function
     async function loadTransactions() {
       const data = await fetchTransactions(currentPage, currentFilters);
       if (data) {
-        renderTransactions(data.transactions);
-        totalPages = data.totalPages;
-        renderPagination(totalPages, currentPage);
+        renderTransactions(data);
+        renderPagination(data);
+        totalPages = data.total_pages || data.totalPages || 1;
       }
     }
 
     // Initialize page
     async function init() {
-      // Load accounts for filter dropdown
-      const accountsData = await fetchAccounts();
-      renderAccountOptions(accountsData);
+      try {
+        // Load accounts and categories in parallel
+        const [accountsData, categoriesData] = await Promise.all([
+          fetchAccounts(),
+          fetchCategories()
+        ]);
 
-      // Load initial transactions
-      await loadTransactions();
+        renderAccountOptions(accountsData);
+        renderCategoryOptions(categoriesData);
+
+        // Load initial transactions
+        await loadTransactions();
+      } catch (error) {
+        console.error('Error initializing page:', error);
+        showToast('Error loading page data. Please refresh.', 'error');
+      }
     }
 
     // Event listeners
@@ -662,8 +759,6 @@
       currentPage = 1;
       await loadTransactions();
     });
-
-    addTransactionBtn.addEventListener('click', addTransaction);
 
     // Sidebar toggle for mobile
     const sidebar = document.getElementById('sidebar');
