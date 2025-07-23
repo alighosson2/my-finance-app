@@ -4,27 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Accounts - MyFinance360</title>
-  
+
   <!-- Bootstrap & Font-Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
   <style>
-    :root { 
-      --primary: #2c3e50; 
-      --accent: #1abc9c; 
-      --dark: #2c3e50; 
+    :root {
+      --primary: #2c3e50;
+      --accent: #1abc9c;
+      --dark: #2c3e50;
       --success: #27ae60;
       --info: #3498db;
     }
-    
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      color: #333; 
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
       line-height: 1.6;
       background-color: #fff;
     }
-    
+
     .sidebar {
       height: 100vh;
       background-color: var(--primary);
@@ -38,7 +38,7 @@
       top: 0;
       transition: left 0.3s;
     }
-    
+
     .sidebar .navbar-brand {
       font-weight: 700;
       font-size: 1.5rem;
@@ -47,7 +47,7 @@
       margin-bottom: 1.5rem;
       display: block;
     }
-    
+
     .sidebar a {
       color: var(--accent) !important;
       display: block;
@@ -56,20 +56,20 @@
       transition: all 0.3s ease;
       border-left: 3px solid transparent;
     }
-    
+
     .sidebar a:hover, .sidebar a.active {
       background-color: rgba(255,255,255,0.10);
       color: #fff !important;
       border-left-color: var(--accent);
     }
-    
+
     .sidebar .logout-link {
       color: #fff !important;
       margin-top: 2rem;
       border-top: 1px solid rgba(255,255,255,0.1);
       padding-top: 1rem;
     }
-    
+
     .sidebar-toggle {
       display: none;
       position: fixed;
@@ -81,7 +81,7 @@
       font-size: 2rem;
       z-index: 1040;
     }
-    
+
     .sidebar-backdrop {
       display: none;
       position: fixed;
@@ -92,62 +92,62 @@
       background: rgba(0,0,0,0.2);
       z-index: 1029;
     }
-    
+
     .sidebar-backdrop.open {
       display: block;
     }
-    
+
     .content {
       margin-left: 240px;
       padding: 2rem;
       transition: margin-left 0.3s;
     }
-    
+
     .card {
       border-radius: 12px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.08);
       border: none;
       margin-bottom: 2rem;
     }
-    
+
     .account-card {
-      transition: transform 0.3s Minnes.glide(0.3s ease), box-shadow 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     .account-card:hover {
       transform: translateY(-5px) scale(1.02);
       box-shadow: 0 12px 30px rgba(0,0,0,0.15);
     }
-    
+
     .account-balance {
       font-size: 1.5rem;
       font-weight: 700;
     }
-    
+
     .account-type {
       text-transform: uppercase;
       font-size: 0.8rem;
       letter-spacing: 1px;
       opacity: 0.8;
     }
-    
+
     .btn {
       border-radius: 8px;
       font-weight: 600;
       transition: all 0.3s ease;
     }
-    
+
     .btn-primary {
       background-color: var(--accent);
       border-color: var(--accent);
     }
-    
+
     .btn-primary:hover {
       background-color: #16a085;
       border-color: #16a085;
       transform: translateY(-2px);
     }
-    
+
     @media (max-width: 991.98px) {
       .sidebar {
         left: -240px;
@@ -218,74 +218,8 @@
     </div>
 
     <!-- Sample Account Cards -->
-    <div class="row">
-      <!-- Sample Checking Account -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card account-card">
-          <div class="card-body text-center p-4">
-            <div class="mb-3">
-              <i class="fas fa-university fa-3x text-primary"></i>
-            </div>
-            <h5>Bank Of America</h5>
-            <p class="account-type text-muted">Checking Account</p>
-            <div class="account-balance text-success mb-3">$2,450.75</div>
-            <small class="text-muted">Account: •••• 1234</small>
-            <hr>
-            <div class="d-flex justify-content-between">
-              <form action="/api/bank/api/sync/transactions/1" method="POST" class="flex-fill me-1">
-                <button type="submit" class="btn btn-outline-info btn-sm w-100">
-                  Sync Transactions
-                </button>
-              </form>
-              <a href="transactions.html?account=1" class="btn btn-outline-primary btn-sm flex-fill ms-1">
-                View Details
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sample Savings Account -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card account-card">
-          <div class="card-body text-center p-4">
-            <div class="mb-3">
-              <i class="fas fa-piggy-bank fa-3x text-success"></i>
-            </div>
-            <h5>Bank Of America</h5>
-            <p class="account-type text-muted">Savings Account</p>
-            <div class="account-balance text-success mb-3">$8,920.30</div>
-            <small class="text-muted">Account: •••• 5678</small>
-            <hr>
-            <div class="d-flex justify-content-between">
-              <form action="/api/bank/api/sync/transactions/2" method="POST" class="flex-fill me-1">
-                <button type="submit" class="btn btn-outline-info btn-sm w-100">
-                  Sync Transactions
-                </button>
-              </form>
-              <a href="transactions.html?account=2" class="btn btn-outline-primary btn-sm flex-fill ms-1">
-                View Details
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add New Account Card -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card account-card" style="border: 2px dashed #dee2e6;">
-          <div class="card-body text-center p-4 d-flex flex-column justify-content-center" style="min-height: 300px;">
-            <div class="mb-3">
-              <i class="fas fa-plus-circle fa-3x text-muted"></i>
-            </div>
-            <h5 class="text-muted">Connect Another Bank</h5>
-            <p class="text-muted">Add more accounts to get a complete financial picture</p>
-            <a href="dashboard.html" class="btn btn-outline-primary">
-              <i class="fas fa-plus me-2"></i>Add Account
-            </a>
-          </div>
-        </div>
-      </div>
+    <div class="row" id="accountsContainer">
+      <!-- Account cards will be loaded dynamically -->
     </div>
 
     <!-- Account Summary -->
@@ -296,29 +230,8 @@
         </h5>
       </div>
       <div class="card-body">
-        <div class="row text-center">
-          <div class="col-md-3">
-            <div class="border-end">
-              <h4 class="text-success mb-1">$11,371.05</h4>
-              <small class="text-muted">Total Balance</small>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="border-end">
-              <h4 class="text-info mb-1">2</h4>
-              <small class="text-muted">Connected Accounts</small>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="border-end">
-              <h4 class="text-warning mb-1">1</h4>
-              <small class="text-muted">Connected Banks</small>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <h4 class="text-primary mb-1">Active</h4>
-            <small class="text-muted">Sync Status</small>
-          </div>
+        <div class="row text-center" id="accountSummary">
+          <!-- Summary will be loaded dynamically -->
         </div>
       </div>
     </div>
@@ -326,11 +239,592 @@
     <!-- Instructions -->
     <div class="alert alert-info">
       <i class="fas fa-info-circle me-2"></i>
-      <strong>Next Steps:</strong> 
-      After connecting your bank in the dashboard, your real accounts will appear here. 
+      <strong>Next Steps:</strong>
+      After connecting your bank in the dashboard, your real accounts will appear here.
       Click "Sync from Bank" to refresh account data, or "Sync Transactions" on individual accounts to get transaction history.
     </div>
   </div>
+
+  <!-- Add Account Modal -->
+  <div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAccountModalLabel">Add Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addAccountForm">
+            <div class="mb-3">
+              <label for="accountName" class="form-label">Account Name</label>
+              <input type="text" class="form-control" id="accountName" required>
+            </div>
+            <div class="mb-3">
+              <label for="accountType" class="form-label">Account Type</label>
+              <select class="form-select" id="accountType" required>
+                <option value="">Select account type</option>
+                <option value="checking">Checking</option>
+                <option value="savings">Savings</option>
+                <option value="credit_card">Credit Card</option>
+                <option value="investment">Investment</option>
+                <option value="loan">Loan</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="balance" class="form-label">Balance</label>
+              <input type="number" step="0.01" class="form-control" id="balance" required>
+            </div>
+            <div class="mb-3">
+              <label for="currency" class="form-label">Currency</label>
+              <select class="form-select" id="currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="CAD">CAD</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="bankName" class="form-label">Bank Name</label>
+              <input type="text" class="form-control" id="bankName">
+            </div>
+            <div class="mb-3">
+              <label for="accountNumber" class="form-label">Account Number</label>
+              <input type="text" class="form-control" id="accountNumber" placeholder="Last 4 digits">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveAccount()">Save Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+    <div class="spinner-border text-light" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- JavaScript for Account Management -->
+  <script>
+    let accounts = [];
+    let editingAccountId = null;
+
+    // DOM elements
+    const accountsContainer = document.getElementById('accountsContainer');
+    const accountSummary = document.getElementById('accountSummary');
+    const addAccountModal = new bootstrap.Modal(document.getElementById('addAccountModal'));
+    const addAccountForm = document.getElementById('addAccountForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    // Show/hide loading
+    function showLoading() {
+      loadingOverlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+      loadingOverlay.style.display = 'none';
+    }
+
+    // API calls
+    async function fetchAccounts() {
+      try {
+        showLoading();
+        const response = await fetch('/api/financial-accounts', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        accounts = data.accounts || [];
+        return accounts;
+      } catch (error) {
+        console.error('Error fetching accounts:', error);
+        showError('Failed to load accounts. Please try again.');
+        return [];
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function createAccount(accountData) {
+      try {
+        showLoading();
+        const response = await fetch('/api/financial-accounts', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(accountData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.account;
+      } catch (error) {
+        console.error('Error creating account:', error);
+        showError('Failed to create account. Please try again.');
+        return null;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function updateAccount(accountId, accountData) {
+      try {
+        showLoading();
+        const response = await fetch(`/api/financial-accounts/${accountId}`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(accountData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.account;
+      } catch (error) {
+        console.error('Error updating account:', error);
+        showError('Failed to update account. Please try again.');
+        return null;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function deleteAccount(accountId) {
+      if (!confirm('Are you sure you want to delete this account?')) {
+        return false;
+      }
+
+      try {
+        showLoading();
+        const response = await fetch(`/api/financial-accounts/${accountId}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Error deleting account:', error);
+        showError('Failed to delete account. Please try again.');
+        return false;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Render functions
+    function renderAccounts(accounts) {
+      if (!accounts || accounts.length === 0) {
+        accountsContainer.innerHTML = `
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body text-center p-4">
+                <i class="fas fa-plus-circle fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No Accounts Found</h5>
+                <p class="text-muted">Add your first account to get started</p>
+                <button class="btn btn-primary" onclick="openAddAccountModal()">
+                  <i class="fas fa-plus me-2"></i>Add Account
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      accounts.forEach(account => {
+        const balance = parseFloat(account.balance) || 0;
+        const formattedBalance = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: account.currency || 'USD'
+        }).format(balance);
+
+        const accountTypeIcon = getAccountTypeIcon(account.account_type);
+        const accountTypeLabel = getAccountTypeLabel(account.account_type);
+
+        html += `
+          <div class="col-md-6 col-lg-4">
+            <div class="card account-card">
+              <div class="card-body text-center p-4">
+                <div class="mb-3">
+                  <i class="${accountTypeIcon} fa-3x text-primary"></i>
+                </div>
+                <h5>${account.bank_name || 'Unknown Bank'}</h5>
+                <p class="account-type text-muted">${accountTypeLabel}</p>
+                <div class="account-balance text-success mb-3">${formattedBalance}</div>
+                <small class="text-muted">Account: •••• ${account.account_number_masked || 'N/A'}</small>
+                <hr>
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-outline-info btn-sm flex-fill me-1" onclick="syncAccountTransactions(${account.id})">
+                    Sync Transactions
+                  </button>
+                  <div class="dropdown flex-fill ms-1">
+                    <button class="btn btn-outline-primary btn-sm dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                      Actions
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#" onclick="editAccount(${account.id})">Edit</a></li>
+                      <li><a class="dropdown-item" href="#" onclick="deleteAccountById(${account.id})">Delete</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="transactions.html?account=${account.id}">View Transactions</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Add "Add New Account" card
+      html += `
+        <div class="col-md-6 col-lg-4">
+          <div class="card account-card" style="border: 2px dashed #dee2e6;">
+            <div class="card-body text-center p-4 d-flex flex-column justify-content-center" style="min-height: 300px;">
+              <div class="mb-3">
+                <i class="fas fa-plus-circle fa-3x text-muted"></i>
+              </div>
+              <h5 class="text-muted">Add Another Account</h5>
+              <p class="text-muted">Manually add an account or connect to your bank</p>
+              <div class="d-grid gap-2">
+                <button class="btn btn-outline-primary" onclick="openAddAccountModal()">
+                  <i class="fas fa-plus me-2"></i>Add Account
+                </button>
+                <a href="dashboard.html" class="btn btn-outline-secondary">
+                  <i class="fas fa-university me-2"></i>Connect Bank
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      accountsContainer.innerHTML = html;
+    }
+
+    function renderAccountSummary(accounts) {
+      const totalBalance = accounts.reduce((sum, account) => sum + (parseFloat(account.balance) || 0), 0);
+      const activeAccounts = accounts.filter(account => account.is_active !== false).length;
+      const uniqueBanks = [...new Set(accounts.map(account => account.bank_name).filter(Boolean))].length;
+
+      const formattedTotal = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(totalBalance);
+
+      accountSummary.innerHTML = `
+        <div class="col-md-3">
+          <div class="border-end">
+            <h4 class="text-success mb-1">${formattedTotal}</h4>
+            <small class="text-muted">Total Balance</small>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="border-end">
+            <h4 class="text-info mb-1">${activeAccounts}</h4>
+            <small class="text-muted">Active Accounts</small>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="border-end">
+            <h4 class="text-warning mb-1">${uniqueBanks}</h4>
+            <small class="text-muted">Connected Banks</small>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <h4 class="text-primary mb-1">Active</h4>
+          <small class="text-muted">Sync Status</small>
+        </div>
+      `;
+    }
+
+    // Helper functions
+    function getAccountTypeIcon(type) {
+      switch (type) {
+        case 'checking': return 'fas fa-university';
+        case 'savings': return 'fas fa-piggy-bank';
+        case 'credit_card': return 'fas fa-credit-card';
+        case 'investment': return 'fas fa-chart-line';
+        case 'loan': return 'fas fa-hand-holding-usd';
+        default: return 'fas fa-university';
+      }
+    }
+
+    function getAccountTypeLabel(type) {
+      switch (type) {
+        case 'checking': return 'Checking Account';
+        case 'savings': return 'Savings Account';
+        case 'credit_card': return 'Credit Card';
+        case 'investment': return 'Investment Account';
+        case 'loan': return 'Loan Account';
+        default: return 'Account';
+      }
+    }
+
+    function showError(message) {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+      alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
+      alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      document.body.appendChild(alert);
+
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.remove();
+        }
+      }, 5000);
+    }
+
+    function showSuccess(message) {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+      alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
+      alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      document.body.appendChild(alert);
+
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.remove();
+        }
+      }, 3000);
+    }
+
+    // Account management functions
+    function openAddAccountModal() {
+      editingAccountId = null;
+      document.getElementById('addAccountModalLabel').textContent = 'Add Account';
+      addAccountForm.reset();
+      addAccountModal.show();
+    }
+
+    function editAccount(accountId) {
+      const account = accounts.find(acc => acc.id === accountId);
+      if (!account) return;
+
+      editingAccountId = accountId;
+      document.getElementById('addAccountModalLabel').textContent = 'Edit Account';
+
+      document.getElementById('accountName').value = account.account_name || '';
+      document.getElementById('accountType').value = account.account_type || '';
+      document.getElementById('balance').value = account.balance || '';
+      document.getElementById('currency').value = account.currency || 'USD';
+      document.getElementById('bankName').value = account.bank_name || '';
+      document.getElementById('accountNumber').value = account.account_number_masked || '';
+
+      addAccountModal.show();
+    }
+
+    async function saveAccount() {
+      const formData = new FormData(addAccountForm);
+      const accountData = {
+        account_name: document.getElementById('accountName').value,
+        account_type: document.getElementById('accountType').value,
+        balance: parseFloat(document.getElementById('balance').value) || 0,
+        currency: document.getElementById('currency').value,
+        bank_name: document.getElementById('bankName').value,
+        account_number_masked: document.getElementById('accountNumber').value,
+      };
+
+      // Validate required fields
+      if (!accountData.account_name || !accountData.account_type) {
+        showError('Please fill in all required fields.');
+        return;
+      }
+
+      let result;
+      if (editingAccountId) {
+        result = await updateAccount(editingAccountId, accountData);
+      } else {
+        result = await createAccount(accountData);
+      }
+
+      if (result) {
+        addAccountModal.hide();
+        showSuccess(editingAccountId ? 'Account updated successfully!' : 'Account created successfully!');
+        await loadAccounts();
+      }
+    }
+
+    async function deleteAccountById(accountId) {
+      const success = await deleteAccount(accountId);
+      if (success) {
+        showSuccess('Account deleted successfully!');
+        await loadAccounts();
+      }
+    }
+
+    async function syncAccountTransactions(accountId) {
+      try {
+        showLoading();
+        const response = await fetch(`/api/bank/api/sync/transactions/${accountId}`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        showSuccess(`Synced ${data.synced || 0} transactions successfully!`);
+      } catch (error) {
+        console.error('Error syncing transactions:', error);
+        showError('Failed to sync transactions. Please try again.');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Main load function
+    async function loadAccounts() {
+      const accountsData = await fetchAccounts();
+      renderAccounts(accountsData);
+      renderAccountSummary(accountsData);
+    }
+
+    // Handle success/error messages from URL parameters
+    function handleUrlMessages() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const success = urlParams.get('success');
+      const error = urlParams.get('error');
+      const action = urlParams.get('action');
+
+      if (success) {
+        let message = '';
+        switch (success) {
+          case 'account_created':
+            message = 'Account created successfully!';
+            break;
+          case 'account_updated':
+            message = 'Account updated successfully!';
+            break;
+          case 'account_deleted':
+            message = 'Account deleted successfully!';
+            break;
+          default:
+            if (success.includes('synced')) {
+              const parts = success.split('_');
+              const count = parts.find(part => /^\d+$/.test(part));
+              if (success.includes('accounts')) {
+                message = `Successfully synced ${count} accounts!`;
+              } else if (success.includes('transactions')) {
+                message = `Successfully synced ${count} transactions!`;
+              } else {
+                message = 'Sync completed successfully!';
+              }
+            } else {
+              message = 'Operation completed successfully!';
+            }
+        }
+        showSuccess(message);
+      }
+
+      if (error) {
+        let message = '';
+        switch (error) {
+          case 'failed_to_create_account':
+            message = 'Failed to create account. Please try again.';
+            break;
+          case 'failed_to_update_account':
+            message = 'Failed to update account. Please try again.';
+            break;
+          case 'failed_to_delete_account':
+            message = 'Failed to delete account. Please try again.';
+            break;
+          case 'failed_to_load_accounts':
+            message = 'Failed to load accounts. Please refresh the page.';
+            break;
+          case 'failed_to_load_summary':
+            message = 'Failed to load account summary.';
+            break;
+          case 'failed_to_load_account':
+            message = 'Failed to load account details.';
+            break;
+          case 'invalid_account_id':
+            message = 'Invalid account ID provided.';
+            break;
+          case 'sync_transactions_failed':
+            message = 'Failed to sync transactions from bank.';
+            break;
+          case 'sync_transactions_error':
+            message = 'Error occurred during transaction sync.';
+            break;
+          default:
+            message = 'An error occurred. Please try again.';
+        }
+        showError(message);
+      }
+
+      if (action) {
+        let message = '';
+        switch (action) {
+          case 'refreshed':
+            message = 'Accounts refreshed.';
+            break;
+          case 'summary_refreshed':
+            message = 'Account summary refreshed.';
+            break;
+          default:
+            message = 'Action completed.';
+        }
+        // For info messages, just show briefly without error styling
+        showSuccess(message);
+      }
+
+      // Clean URL after showing message
+      if (success || error || action) {
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+
+    // Initialize page
+    async function init() {
+      handleUrlMessages();
+      await loadAccounts();
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
 
   <!-- JavaScript for Sidebar Toggle -->
   <script>
@@ -348,5 +842,5 @@
   </script>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body> 
+</body>
 </html>

@@ -4,22 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard - MyFinance360</title>
-  
+
   <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root { 
-      --primary: #2c3e50; 
-      --accent: #1abc9c; 
-      --dark: #2c3e50; 
+    :root {
+      --primary: #2c3e50;
+      --accent: #1abc9c;
+      --dark: #2c3e50;
       --success: #27ae60;
       --warning: #f39c12;
       --info: #3498db;
     }
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      color: #333; 
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
       background-color: #fff;
       line-height: 1.6;
     }
@@ -203,45 +203,45 @@
               <form action="/api/bank/api/tokens" method="POST" class="row g-3">
                 <div class="col-12 col-md-6">
                   <label for="provider" class="form-label">Bank Provider</label>
-                  <input 
-                    type="text" 
-                    id="provider" 
-                    name="provider" 
-                    class="form-control" 
-                    placeholder="e.g., Bank Of America" 
+                  <input
+                    type="text"
+                    id="provider"
+                    name="provider"
+                    class="form-control"
+                    placeholder="e.g., Bank Of America"
                     required
                   >
                   <div class="form-text">Enter your bank name</div>
                 </div>
                 <div class="col-12 col-md-6">
                   <label for="access_token" class="form-label">Access Token</label>
-                  <input 
-                    type="text" 
-                    id="access_token" 
-                    name="access_token" 
-                    class="form-control" 
-                    placeholder="Enter your bank API access token" 
+                  <input
+                    type="text"
+                    id="access_token"
+                    name="access_token"
+                    class="form-control"
+                    placeholder="Enter your bank API access token"
                     required
                   >
                   <div class="form-text">For testing, use: test-token-123</div>
                 </div>
                 <div class="col-12 col-md-6">
                   <label for="access_token_secret" class="form-label">Access Token Secret (Optional)</label>
-                  <input 
-                    type="text" 
-                    id="access_token_secret" 
-                    name="access_token_secret" 
-                    class="form-control" 
+                  <input
+                    type="text"
+                    id="access_token_secret"
+                    name="access_token_secret"
+                    class="form-control"
                     placeholder="Token secret if required"
                   >
                 </div>
                 <div class="col-12 col-md-6">
                   <label for="expires_at" class="form-label">Expires At</label>
-                  <input 
-                    type="datetime-local" 
-                    id="expires_at" 
-                    name="expires_at" 
-                    class="form-control" 
+                  <input
+                    type="datetime-local"
+                    id="expires_at"
+                    name="expires_at"
+                    class="form-control"
                     required
                   >
                   <div class="form-text">When this token expires</div>
@@ -315,11 +315,11 @@
                       <i class="fas fa-exchange-alt fa-2x text-info mb-3"></i>
                       <h6>Sync Transactions</h6>
                       <div class="mb-2">
-                        <input 
-                          type="number" 
-                          name="accountId" 
-                          class="form-control form-control-sm" 
-                          placeholder="Account ID" 
+                        <input
+                          type="number"
+                          name="accountId"
+                          class="form-control form-control-sm"
+                          placeholder="Account ID"
                           required
                         >
                       </div>
@@ -379,7 +379,7 @@
                 </div>
               </div>
             </div>
-          </div> 
+          </div>
         </div>
       </div>
     </div>
@@ -397,6 +397,104 @@
       sidebar.classList.remove('open');
       sidebarBackdrop.classList.remove('open');
     });
+
+    // Handle success/error messages from URL parameters
+    function showMessage() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const success = urlParams.get('success');
+      const error = urlParams.get('error');
+      const action = urlParams.get('action');
+
+      if (success) {
+        let message = '';
+        switch (success) {
+          case 'bank_connected':
+            message = 'Bank account connected successfully!';
+            break;
+          case 'connection_test_passed':
+            message = 'Bank connection test passed!';
+            break;
+          default:
+            if (success.includes('synced')) {
+              message = success.replace(/_/g, ' ').replace(/(\d+)/g, '$1').replace(/synced/, 'Successfully synced');
+            } else {
+              message = 'Operation completed successfully!';
+            }
+        }
+        showAlert(message, 'success');
+      }
+
+      if (error) {
+        let message = '';
+        switch (error) {
+          case 'bank_connection_failed':
+            message = 'Failed to connect bank account. Please try again.';
+            break;
+          case 'connection_test_failed':
+            message = 'Bank connection test failed. Please check your settings.';
+            break;
+          case 'connection_test_error':
+            message = 'Error occurred during connection test.';
+            break;
+          case 'sync_accounts_failed':
+            message = 'Failed to sync accounts from bank.';
+            break;
+          case 'sync_accounts_error':
+            message = 'Error occurred during account sync.';
+            break;
+          case 'sync_all_failed':
+            message = 'Failed to sync all data from bank.';
+            break;
+          case 'sync_all_error':
+            message = 'Error occurred during data synchronization.';
+            break;
+          case 'failed_to_load_banks':
+            message = 'Failed to load bank connections.';
+            break;
+          default:
+            message = 'An error occurred. Please try again.';
+        }
+        showAlert(message, 'error');
+      }
+
+      if (action) {
+        let message = '';
+        switch (action) {
+          case 'banks_refreshed':
+            message = 'Bank connections refreshed.';
+            break;
+          default:
+            message = 'Action completed.';
+        }
+        showAlert(message, 'info');
+      }
+
+      // Clean URL after showing message
+      if (success || error || action) {
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+
+    function showAlert(message, type) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+      alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      document.body.appendChild(alertDiv);
+
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          alertDiv.remove();
+        }
+      }, 5000);
+    }
+
+    // Show messages on page load
+    document.addEventListener('DOMContentLoaded', showMessage);
     // UTC conversion for expires_at
     const form = document.querySelector('form[action="/api/bank/api/tokens"]');
     if (form) {

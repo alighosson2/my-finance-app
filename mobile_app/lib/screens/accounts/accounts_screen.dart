@@ -224,7 +224,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${NumberFormat('#,##0.00').format(account.balance)}',
+                        _formatCurrency(account.balance, account.currency),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -295,7 +295,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
         return AppTheme.accentColor;
       case 'savings':
         return AppTheme.successColor;
-      case 'credit':
+      case 'credit_card':
         return AppTheme.warningColor;
       case 'investment':
         return AppTheme.infoColor;
@@ -310,7 +310,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
         return Icons.account_balance_wallet;
       case 'savings':
         return Icons.savings;
-      case 'credit':
+      case 'credit_card':
         return Icons.credit_card;
       case 'investment':
         return Icons.trending_up;
@@ -357,7 +357,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                 const SizedBox(height: 20),
                 _buildDetailRow('Account Name', account.accountName),
                 _buildDetailRow('Account Type', account.accountType.toUpperCase()),
-                _buildDetailRow('Balance', '\$${NumberFormat('#,##0.00').format(account.balance)}'),
+                _buildDetailRow('Balance', _formatCurrency(account.balance, account.currency)),
                 _buildDetailRow('Currency', account.currency),
                 if (account.accountNumber.isNotEmpty)
                   _buildDetailRow('Account Number', account.accountNumber),
@@ -370,6 +370,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
                     'Created',
                     DateFormat('MMM dd, yyyy').format(account.createdAt!)
                   ),
+                // Add sync status
+                _buildSyncStatus(account),
               ],
             ),
           );
@@ -397,6 +399,46 @@ class _AccountsScreenState extends State<AccountsScreen> {
           Expanded(
             child: Text(
               value,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSyncStatus(Account account) {
+    final dataProvider = context.read<DataProvider>();
+    final lastSync = account.lastSyncedAt;
+    final isSyncing = account.isSyncing;
+
+    if (lastSync == null && !isSyncing) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: const Text(
+              'Sync Status',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              lastSync != null
+                  ? DateFormat('MMM dd, yyyy HH:mm').format(lastSync)
+                  : (isSyncing ? 'Syncing...' : 'Never synced'),
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
                 color: AppTheme.primaryColor,
@@ -454,6 +496,39 @@ class _AccountsScreenState extends State<AccountsScreen> {
       ),
     );
   }
+
+  // Helper method to format currency with proper symbol
+  String _formatCurrency(double amount, String currency) {
+    try {
+      final formatter = NumberFormat.currency(
+        locale: 'en_US',
+        symbol: _getCurrencySymbol(currency),
+        decimalDigits: 2,
+      );
+      return formatter.format(amount);
+    } catch (e) {
+      // Fallback formatting if there's an error
+      return '${_getCurrencySymbol(currency)}${NumberFormat('#,##0.00').format(amount)}';
+    }
+  }
+
+  // Helper method to get currency symbol
+  String _getCurrencySymbol(String currency) {
+    switch (currency.toUpperCase()) {
+      case 'USD':
+        return '\$';
+      case 'EUR':
+        return '€';
+      case 'GBP':
+        return '£';
+      case 'CAD':
+        return 'C\$';
+      case 'JPY':
+        return '¥';
+      default:
+        return '\$'; // Default to USD symbol
+    }
+  }
 }
 
 class AccountFormDialog extends StatefulWidget {
@@ -475,7 +550,7 @@ class _AccountFormDialogState extends State<AccountFormDialog> {
   late String _selectedType;
   late String _selectedCurrency;
 
-  final List<String> _accountTypes = ['checking', 'savings', 'credit', 'investment'];
+  final List<String> _accountTypes = ['checking', 'savings', 'credit_card', 'investment'];
   final List<String> _currencies = ['USD', 'EUR', 'GBP', 'CAD'];
 
   @override
@@ -673,6 +748,39 @@ class _AccountFormDialogState extends State<AccountFormDialog> {
           backgroundColor: success ? AppTheme.successColor : Colors.red,
         ),
       );
+    }
+  }
+
+  // Helper method to format currency with proper symbol
+  String _formatCurrency(double amount, String currency) {
+    try {
+      final formatter = NumberFormat.currency(
+        locale: 'en_US',
+        symbol: _getCurrencySymbol(currency),
+        decimalDigits: 2,
+      );
+      return formatter.format(amount);
+    } catch (e) {
+      // Fallback formatting if there's an error
+      return '${_getCurrencySymbol(currency)}${NumberFormat('#,##0.00').format(amount)}';
+    }
+  }
+
+  // Helper method to get currency symbol
+  String _getCurrencySymbol(String currency) {
+    switch (currency.toUpperCase()) {
+      case 'USD':
+        return '\$';
+      case 'EUR':
+        return '€';
+      case 'GBP':
+        return '£';
+      case 'CAD':
+        return 'C\$';
+      case 'JPY':
+        return '¥';
+      default:
+        return '\$'; // Default to USD symbol
     }
   }
 }

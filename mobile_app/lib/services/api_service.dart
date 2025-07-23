@@ -334,6 +334,8 @@ class Account {
   final String? bankName;
   final String? description;
   final DateTime? createdAt;
+  final DateTime? lastSyncedAt;
+  final bool isSyncing;
 
   Account({
     this.id,
@@ -345,6 +347,8 @@ class Account {
     this.bankName,
     this.description,
     this.createdAt,
+    this.lastSyncedAt,
+    this.isSyncing = false,
   });
 
   factory Account.fromJson(Map<String, dynamic> json) {
@@ -360,6 +364,10 @@ class Account {
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'])
           : null,
+      lastSyncedAt: json['last_synced_at'] != null
+          ? DateTime.tryParse(json['last_synced_at'])
+          : null,
+      isSyncing: json['is_syncing'] ?? false,
     );
   }
 

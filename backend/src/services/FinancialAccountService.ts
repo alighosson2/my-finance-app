@@ -1,8 +1,8 @@
-import { 
-  FinancialAccountModel, 
-  CreateFinancialAccountDTO, 
+import {
+  FinancialAccountModel,
+  CreateFinancialAccountDTO,
   UpdateFinancialAccountDTO,
-  FinancialAccountSummary 
+  FinancialAccountSummary
 } from '../model/FinancialAccountModel';
 import { FinancialAccountRepository, createFinancialAccountRepository } from '../Repositories/FinancialAccountRepository';
 import { ServiceException } from '../exceptions/ServiceException';
@@ -26,7 +26,7 @@ export class FinancialAccountService {
     try {
       const repository = await this.getRepo();
       const offset = (page - 1) * limit;
-      
+
       const result = await repository.findByUserId(userId, page, limit);
       const { accounts, total } = result;
 
@@ -71,7 +71,7 @@ export class FinancialAccountService {
       // Validate balance
       if (data.balance < 0) {
         throw new ServiceException('Balance cannot be negative');
-    }
+      }
 
       const repository = await this.getRepo();
       return await repository.create(data);
@@ -83,7 +83,7 @@ export class FinancialAccountService {
   async updateAccount(id: number, data: UpdateFinancialAccountDTO, userId: number): Promise<FinancialAccountModel> {
     try {
       const repository = await this.getRepo();
-      
+
       // Check if account exists and user owns it
       const existingAccount = await repository.findById(id);
       if (!existingAccount || existingAccount.user_id !== userId) {
@@ -109,7 +109,7 @@ export class FinancialAccountService {
   async deleteAccount(id: number, userId: number): Promise<boolean> {
     try {
       const repository = await this.getRepo();
-      
+
       // Check if account exists and user owns it
       const existingAccount = await repository.findById(id);
       if (!existingAccount || existingAccount.user_id !== userId) {
