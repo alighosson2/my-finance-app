@@ -611,7 +611,7 @@
          // Process budgets
          if (budgetsResponse.ok) {
            const budgetsData = await budgetsResponse.json();
-           budgets = budgetsData.budgets || budgetsData || [];
+           budgets = budgetsData.data || [];
          }
 
          // Process connected banks
@@ -755,30 +755,29 @@
       }
 
       const html = budgets.slice(0, 3).map(budget => {
-        const spent = parseFloat(budget.current_spent || budget.spent) || 0;
-        const budgetAmount = parseFloat(budget.budget_amount || budget.amount) || 0;
-        const percentage = budgetAmount > 0 ? (spent / budgetAmount * 100) : 0;
-        const remaining = budgetAmount - spent;
-
-        let progressColor = 'bg-success';
-        if (percentage > 80) progressColor = 'bg-warning';
-        if (percentage > 100) progressColor = 'bg-danger';
+        // Note: Individual budget objects don't include spending data by default
+        // For now, we'll show just the budget information without spending progress
+        const budgetAmount = parseFloat(budget.amount) || 0;
+        const isActive = budget.is_active && budget.is_currently_active;
 
         return `
           <div class="row align-items-center mb-3">
-            <div class="col-md-4">
-              <div class="fw-bold">${budget.name || budget.budget_name}</div>
-              <small class="text-muted">${budget.category}</small>
+            <div class="col-md-6">
+              <div class="fw-bold">${budget.name}</div>
+              <small class="text-muted">${budget.category} • ${budget.period}</small>
             </div>
-            <div class="col-md-4">
-              <div class="budget-progress">
-                <div class="budget-progress-bar ${progressColor}" style="width: ${Math.min(percentage, 100)}%"></div>
-              </div>
-              <small class="text-muted">${percentage.toFixed(1)}% used</small>
+            <div class="col-md-3">
+              <div class="fw-bold">${formatCurrency(budgetAmount)}</div>
+              <small class="text-muted">Budget limit</small>
             </div>
-            <div class="col-md-4 text-end">
-              <div class="fw-bold">${formatCurrency(spent)} / ${formatCurrency(budgetAmount)}</div>
-              <small class="text-muted ${remaining >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(remaining)} remaining</small>
+            <div class="col-md-3 text-end">
+              <span class="badge ${isActive ? 'bg-success' : 'bg-secondary'}">
+                ${isActive ? 'Active' : 'Inactive'}
+              </span>
+              ${budget.days_remaining !== undefined ?
+                `<br><small class="text-muted">${budget.days_remaining} days left</small>` :
+                ''
+              }
             </div>
           </div>
         `;
