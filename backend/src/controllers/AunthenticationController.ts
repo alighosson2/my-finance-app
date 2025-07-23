@@ -8,7 +8,7 @@ export class AuthenticationController {
   constructor(
     private authService: AuthenticationService,
     private userService: UserService
-  ) {}
+  ) { }
 
   async login(req: Request, res: Response) {
     const { email, password } = req.body;
@@ -19,31 +19,22 @@ export class AuthenticationController {
     try {
       // 1. validate credentials
       const userId = await this.userService.validateUser(email, password);
-
-      // 2. generate tokens & set cookies
-      /*const token = this.authService.generateToken(userId);
-      const refreshToken = this.authService.generateRefreshToken(userId);
-      this.authService.setTokenIntoCookie(res, token);
-      this.authService.setRefreshTokenIntoCookie(res, refreshToken);*/
+      // 2. Save Authentication State Inside a Web Cookie
       this.authService.persistAuthentication(res, userId);
-
-      // 3. REDIRECT to dashboard
-     // return res.redirect('/dashboard.html');
-      res.status(200).json({message: 'Login successful'});
-
+      // 3. Redirect to dashboard
+      return res.redirect('/dashboard.html');
     } catch (error) {
-      if((error as Error).message === 'User not found') {
-      //  throw new BadRequestException('Invalid email or password');
-      
-      // on invalid credentials
-      return res.redirect('/login.html?error=invalid');
-    }}
+      if ((error as Error).message === 'User not found') {
+        // on invalid credentials
+        return res.redirect('/login.html?error=invalid');
+      }
+    }
   }
 
   //  Mobile API Login (JSON Response)
   async loginAPI(req: Request, res: Response) {
     const { email, password } = req.body;
-    
+
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -81,16 +72,16 @@ export class AuthenticationController {
 
   async logout(req: AuthRequest, res: Response) {
     const AuthRequest = req as AuthRequest;
+    // Remove Authentication State from Web Cookie
     this.authService.clearTokens(res);
-  //  res.status(200).json({message: 'Logout successful'});
     return res.redirect('/login.html');
   }
 
   // Mobile API Logout
   async logoutAPI(req: AuthRequest, res: Response) {
-    res.status(200).json({ 
+    res.status(200).json({
       success: true,
-      message: 'Logout successful' 
+      message: 'Logout successful'
     });
   }
 }

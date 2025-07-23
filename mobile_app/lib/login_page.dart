@@ -6,6 +6,8 @@ import 'register_page.dart';
 import 'dashboard/home_page.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -29,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
           'password': _passwordController.text,
         }),
       );
-      print('Response body: ' + response.body); // Debug print
+      print('Response body: ${response.body}'); // Debug print
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         // Check for token and refreshToken in the response
@@ -46,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text('Login failed: Invalid response from server.'),
               backgroundColor: Colors.red,
             ),
@@ -75,26 +77,26 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color(0xFFF7F9FA),
+      color: const Color(0xFFF7F9FA),
       child: Center(
         child: SingleChildScrollView(
           child: Container(
-            constraints: BoxConstraints(maxWidth: 420),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Card(
               elevation: 24,
               color: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24)),
-              margin: EdgeInsets.all(32),
+              margin: const EdgeInsets.all(32),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 48),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Logo and project name
-                      Row(
+                      const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.show_chart,
@@ -111,11 +113,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 32),
+                      const SizedBox(height: 32),
                       // Bold header with underline
                       Column(
                         children: [
-                          Text(
+                          const Text(
                             "Login to MyFinance360",
                             style: TextStyle(
                               fontSize: 28,
@@ -124,20 +126,20 @@ class _LoginPageState extends State<LoginPage> {
                               fontFamily: 'Roboto',
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Container(
                             width: 80,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: Color(0xFF20C997),
+                              color: const Color(0xFF20C997),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       // Subtitle
-                      Text(
+                      const Text(
                         "Enter your credentials to access your account",
                         style: TextStyle(
                           fontSize: 16,
@@ -145,27 +147,27 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 32),
+                      const SizedBox(height: 32),
                       // Email field
                       TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
                           labelText: "Email",
-                          prefixIcon: Icon(Icons.person),
+                          prefixIcon: const Icon(Icons.person),
                           filled: true,
-                          fillColor: Color(0xFFF7F9FA),
+                          fillColor: const Color(0xFFF7F9FA),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide(color: Color(0xFFE0E3E7)),
+                            borderSide: const BorderSide(color: Color(0xFFE0E3E7)),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide(color: Color(0xFFE0E3E7)),
+                            borderSide: const BorderSide(color: Color(0xFFE0E3E7)),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide:
-                                BorderSide(color: Color(0xFF20C997), width: 2),
+                                const BorderSide(color: Color(0xFF20C997), width: 2),
                           ),
                         ),
                         keyboardType: TextInputType.emailAddress,
@@ -180,13 +182,13 @@ class _LoginPageState extends State<LoginPage> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       // Password field
                       TextFormField(
                         controller: _passwordController,
                         decoration: InputDecoration(
                           labelText: "Password",
-                          prefixIcon: Icon(Icons.lock),
+                          prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
                             icon: Icon(_obscurePassword
                                 ? Icons.visibility
@@ -198,19 +200,19 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           ),
                           filled: true,
-                          fillColor: Color(0xFFF7F9FA),
+                          fillColor: const Color(0xFFF7F9FA),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide(color: Color(0xFFE0E3E7)),
+                            borderSide: const BorderSide(color: Color(0xFFE0E3E7)),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide(color: Color(0xFFE0E3E7)),
+                            borderSide: const BorderSide(color: Color(0xFFE0E3E7)),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(18),
                             borderSide:
-                                BorderSide(color: Color(0xFF20C997), width: 2),
+                                const BorderSide(color: Color(0xFF20C997), width: 2),
                           ),
                         ),
                         obscureText: _obscurePassword,
@@ -224,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 32),
+                      const SizedBox(height: 32),
                       // Green pill-shaped button
                       SizedBox(
                         width: double.infinity,
@@ -232,9 +234,9 @@ class _LoginPageState extends State<LoginPage> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF20C997),
+                            backgroundColor: const Color(0xFF20C997),
                             foregroundColor: Colors.white,
-                            textStyle: TextStyle(
+                            textStyle: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1.2),
@@ -242,16 +244,16 @@ class _LoginPageState extends State<LoginPage> {
                                 borderRadius: BorderRadius.circular(28)),
                           ),
                           child: _isLoading
-                              ? CircularProgressIndicator(color: Colors.white)
-                              : Text("LOGIN"),
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text("LOGIN"),
                         ),
                       ),
-                      SizedBox(height: 24),
+                      const SizedBox(height: 24),
                       // Sign up link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("Don't have an account? ",
+                          const Text("Don't have an account? ",
                               style: TextStyle(
                                   color: Color(0xFF6C757D), fontSize: 16)),
                           GestureDetector(
@@ -259,10 +261,10 @@ class _LoginPageState extends State<LoginPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => RegisterPage()),
+                                    builder: (context) => const RegisterPage()),
                               );
                             },
-                            child: Text("Sign up",
+                            child: const Text("Sign up",
                                 style: TextStyle(
                                     color: Color(0xFF20C997),
                                     fontSize: 16,

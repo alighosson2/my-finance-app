@@ -54,6 +54,8 @@ class Account {
 }
 
 class AccountsPage extends StatefulWidget {
+  const AccountsPage({super.key});
+
   @override
   _AccountsPageState createState() => _AccountsPageState();
 }
@@ -147,7 +149,7 @@ class _AccountsPageState extends State<AccountsPage> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Account added successfully!'), backgroundColor: Colors.green),
+          const SnackBar(content: Text('Account added successfully!'), backgroundColor: Colors.green),
         );
         _clearForm();
         fetchAccounts(); // Refresh the list
@@ -198,12 +200,12 @@ class _AccountsPageState extends State<AccountsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Financial Accounts'),
-        backgroundColor: Color(0xFF233142),
+        title: const Text('Financial Accounts'),
+        backgroundColor: const Color(0xFF233142),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: fetchAccounts,
           ),
         ],
@@ -212,8 +214,8 @@ class _AccountsPageState extends State<AccountsPage> {
         children: [
           // Add Account Form
           Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
               color: Colors.white,
               boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
             ),
@@ -222,25 +224,25 @@ class _AccountsPageState extends State<AccountsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Add New Account', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 16),
+                  const Text('Add New Account', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _accountNameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Account Name',
                             border: OutlineInputBorder(),
                           ),
                           validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: TextFormField(
                           controller: _accountNumberController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Account Number',
                             border: OutlineInputBorder(),
                           ),
@@ -249,13 +251,13 @@ class _AccountsPageState extends State<AccountsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _balanceController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Initial Balance',
                             border: OutlineInputBorder(),
                             prefixText: '\$',
@@ -264,11 +266,11 @@ class _AccountsPageState extends State<AccountsPage> {
                           validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedType,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Account Type',
                             border: OutlineInputBorder(),
                           ),
@@ -284,23 +286,23 @@ class _AccountsPageState extends State<AccountsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _bankNameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Bank Name (Optional)',
                             border: OutlineInputBorder(),
                           ),
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedCurrency,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Currency',
                             border: OutlineInputBorder(),
                           ),
@@ -316,25 +318,25 @@ class _AccountsPageState extends State<AccountsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _descriptionController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Description (Optional)',
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 2,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: addAccount,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF20C997),
+                        backgroundColor: const Color(0xFF20C997),
                         foregroundColor: Colors.white,
                       ),
-                      child: Text('Add Account'),
+                      child: const Text('Add Account'),
                     ),
                   ),
                 ],
@@ -344,26 +346,26 @@ class _AccountsPageState extends State<AccountsPage> {
           // Accounts List
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : error != null
-                    ? Center(child: Text(error!, style: TextStyle(color: Colors.red)))
+                    ? Center(child: Text(error!, style: const TextStyle(color: Colors.red)))
                     : accounts.isEmpty
-                        ? Center(child: Text('No accounts found'))
+                        ? const Center(child: Text('No accounts found'))
                         : ListView.builder(
                             itemCount: accounts.length,
                             itemBuilder: (context, index) {
                               final account = accounts[index];
                               return Card(
-                                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                 child: ListTile(
                                   leading: CircleAvatar(
-                                    backgroundColor: Color(0xFF20C997),
+                                    backgroundColor: const Color(0xFF20C997),
                                     child: Text(
                                       _getAccountTypeIcon(account.accountType),
-                                      style: TextStyle(fontSize: 20),
+                                      style: const TextStyle(fontSize: 20),
                                     ),
                                   ),
-                                  title: Text(account.accountName, style: TextStyle(fontWeight: FontWeight.bold)),
+                                  title: Text(account.accountName, style: const TextStyle(fontWeight: FontWeight.bold)),
                                   subtitle: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -383,7 +385,7 @@ class _AccountsPageState extends State<AccountsPage> {
                                           fontSize: 16,
                                         ),
                                       ),
-                                      Text(
+                                      const Text(
                                         'Balance',
                                         style: TextStyle(fontSize: 12, color: Colors.grey),
                                       ),

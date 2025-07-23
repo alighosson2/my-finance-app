@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'Responsive.dart';
-import 'menu_modal.dart';
 // import 'package:flutter_svg/svg.dart'; // Commented out SVG for fallback to Material icons
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,8 +47,8 @@ class _MenuState extends State<Menu> {
         widget.backgroundColor ?? const Color(0xFF233142); // dark blue
     final Color selectedColor =
         widget.highlightColor ?? const Color(0xFF3A506B); // lighter blue
-    final Color tealColor = const Color(0xFF20C997); // project teal
-    final Color textColor = const Color(0xFFB2DFDB); // light teal for text
+    const Color tealColor = Color(0xFF20C997); // project teal
+    const Color textColor = Color(0xFFB2DFDB); // light teal for text
     return SafeArea(
       child: Container(
         height: MediaQuery.of(context).size.height,
@@ -72,8 +70,8 @@ class _MenuState extends State<Menu> {
                 height: 80,
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 alignment: Alignment.centerLeft,
-                color: Color(0xFF233142),
-                child: Row(
+                color: const Color(0xFF233142),
+                child: const Row(
                   children: [
                     Icon(Icons.show_chart, color: tealColor, size: 32),
                     SizedBox(width: 10),
@@ -89,7 +87,7 @@ class _MenuState extends State<Menu> {
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               for (var i = 0; i < menu.length; i++)
                 if (i == menu.length - 1) // Logout at the bottom
                   Expanded(
@@ -116,12 +114,12 @@ class _MenuState extends State<Menu> {
         width: double.infinity,
         margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
           color: isSelected ? selectedColor : Colors.transparent,
         ),
         child: InkWell(
           onTap: () => _logout(context),
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
             child: Row(
@@ -131,7 +129,7 @@ class _MenuState extends State<Menu> {
                   color: isSelected ? tealColor : textColor,
                   size: 22,
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Text(
                   menu[i].title,
                   style: TextStyle(
@@ -150,7 +148,7 @@ class _MenuState extends State<Menu> {
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
         color: isSelected ? selectedColor : Colors.transparent,
       ),
               child: InkWell(
@@ -164,27 +162,27 @@ class _MenuState extends State<Menu> {
             if (menu[i].title == "Transactions") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TransactionsPage()),
+                MaterialPageRoute(builder: (context) => const TransactionsPage()),
               );
             } else if (menu[i].title == "Accounts") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AccountsPage()),
+                MaterialPageRoute(builder: (context) => const AccountsPage()),
               );
             } else if (menu[i].title == "Budgets") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => BudgetPage()),
+                MaterialPageRoute(builder: (context) => const BudgetPage()),
               );
             } else if (menu[i].title == "Tax Records") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TaxRecordsPage()),
+                MaterialPageRoute(builder: (context) => const TaxRecordsPage()),
               );
             }
             // Add more navigation cases here for other menu items
           },
-        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
           child: Row(
@@ -194,7 +192,7 @@ class _MenuState extends State<Menu> {
                 color: isSelected ? tealColor : textColor,
                 size: 22,
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Text(
                 menu[i].title,
                 style: TextStyle(
@@ -225,7 +223,7 @@ class _MenuState extends State<Menu> {
     await prefs.remove('refreshToken');
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => const LoginPage()),
       (route) => false,
     );
   }

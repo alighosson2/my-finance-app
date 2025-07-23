@@ -37,7 +37,7 @@ class Budget {
       spent: double.tryParse(json['spent'].toString()) ?? 0.0,
       period: json['period'] ?? 'monthly',
       startDate: DateTime.parse(json['start_date'] ?? DateTime.now().toIso8601String()),
-      endDate: DateTime.parse(json['end_date'] ?? DateTime.now().add(Duration(days: 30)).toIso8601String()),
+      endDate: DateTime.parse(json['end_date'] ?? DateTime.now().add(const Duration(days: 30)).toIso8601String()),
       description: json['description'],
       createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
     );
@@ -65,6 +65,8 @@ class Budget {
 }
 
 class BudgetPage extends StatefulWidget {
+  const BudgetPage({super.key});
+
   @override
   _BudgetPageState createState() => _BudgetPageState();
 }
@@ -80,7 +82,7 @@ class _BudgetPageState extends State<BudgetPage> {
   String _selectedCategory = 'Food & Dining';
   String _selectedPeriod = 'monthly';
   DateTime _selectedStartDate = DateTime.now();
-  DateTime _selectedEndDate = DateTime.now().add(Duration(days: 30));
+  DateTime _selectedEndDate = DateTime.now().add(const Duration(days: 30));
 
   @override
   void initState() {
@@ -156,7 +158,7 @@ class _BudgetPageState extends State<BudgetPage> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Budget added successfully!'), backgroundColor: Colors.green),
+          const SnackBar(content: Text('Budget added successfully!'), backgroundColor: Colors.green),
         );
         _clearForm();
         fetchBudgets(); // Refresh the list
@@ -179,7 +181,7 @@ class _BudgetPageState extends State<BudgetPage> {
     _selectedCategory = 'Food & Dining';
     _selectedPeriod = 'monthly';
     _selectedStartDate = DateTime.now();
-    _selectedEndDate = DateTime.now().add(Duration(days: 30));
+    _selectedEndDate = DateTime.now().add(const Duration(days: 30));
   }
 
   Future<void> _selectStartDate(BuildContext context) async {
@@ -187,7 +189,7 @@ class _BudgetPageState extends State<BudgetPage> {
       context: context,
       initialDate: _selectedStartDate,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null && picked != _selectedStartDate) {
       setState(() {
@@ -201,7 +203,7 @@ class _BudgetPageState extends State<BudgetPage> {
       context: context,
       initialDate: _selectedEndDate,
       firstDate: _selectedStartDate,
-      lastDate: DateTime.now().add(Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null && picked != _selectedEndDate) {
       setState(() {
@@ -214,12 +216,12 @@ class _BudgetPageState extends State<BudgetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Budgets'),
-        backgroundColor: Color(0xFF233142),
+        title: const Text('Budgets'),
+        backgroundColor: const Color(0xFF233142),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: fetchBudgets,
           ),
         ],
@@ -228,8 +230,8 @@ class _BudgetPageState extends State<BudgetPage> {
         children: [
           // Add Budget Form
           Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
               color: Colors.white,
               boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
             ),
@@ -238,25 +240,25 @@ class _BudgetPageState extends State<BudgetPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Add New Budget', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 16),
+                  const Text('Add New Budget', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _nameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Budget Name',
                             border: OutlineInputBorder(),
                           ),
                           validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: TextFormField(
                           controller: _amountController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Budget Amount',
                             border: OutlineInputBorder(),
                             prefixText: '\$',
@@ -267,13 +269,13 @@ class _BudgetPageState extends State<BudgetPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedCategory,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Category',
                             border: OutlineInputBorder(),
                           ),
@@ -297,11 +299,11 @@ class _BudgetPageState extends State<BudgetPage> {
                           },
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedPeriod,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Period',
                             border: OutlineInputBorder(),
                           ),
@@ -317,14 +319,14 @@ class _BudgetPageState extends State<BudgetPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: InkWell(
                           onTap: () => _selectStartDate(context),
                           child: InputDecorator(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Start Date',
                               border: OutlineInputBorder(),
                             ),
@@ -332,12 +334,12 @@ class _BudgetPageState extends State<BudgetPage> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: InkWell(
                           onTap: () => _selectEndDate(context),
                           child: InputDecorator(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'End Date',
                               border: OutlineInputBorder(),
                             ),
@@ -347,25 +349,25 @@ class _BudgetPageState extends State<BudgetPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _descriptionController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Description (Optional)',
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 2,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: addBudget,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF20C997),
+                        backgroundColor: const Color(0xFF20C997),
                         foregroundColor: Colors.white,
                       ),
-                      child: Text('Add Budget'),
+                      child: const Text('Add Budget'),
                     ),
                   ),
                 ],
@@ -375,19 +377,19 @@ class _BudgetPageState extends State<BudgetPage> {
           // Budgets List
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : error != null
-                    ? Center(child: Text(error!, style: TextStyle(color: Colors.red)))
+                    ? Center(child: Text(error!, style: const TextStyle(color: Colors.red)))
                     : budgets.isEmpty
-                        ? Center(child: Text('No budgets found'))
+                        ? const Center(child: Text('No budgets found'))
                         : ListView.builder(
                             itemCount: budgets.length,
                             itemBuilder: (context, index) {
                               final budget = budgets[index];
                               return Card(
-                                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                 child: Padding(
-                                  padding: EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(16),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -397,21 +399,21 @@ class _BudgetPageState extends State<BudgetPage> {
                                           Expanded(
                                             child: Text(
                                               budget.name,
-                                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                             ),
                                           ),
                                           Text(
                                             '\$${budget.amount.toStringAsFixed(2)}',
-                                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF20C997)),
+                                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF20C997)),
                                           ),
                                         ],
                                       ),
-                                      SizedBox(height: 8),
+                                      const SizedBox(height: 8),
                                       Text(
                                         '${budget.category} • ${budget.period.toUpperCase()}',
-                                        style: TextStyle(color: Colors.grey),
+                                        style: const TextStyle(color: Colors.grey),
                                       ),
-                                      SizedBox(height: 12),
+                                      const SizedBox(height: 12),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
@@ -419,16 +421,16 @@ class _BudgetPageState extends State<BudgetPage> {
                                           Text('Remaining: \$${budget.remaining.toStringAsFixed(2)}'),
                                         ],
                                       ),
-                                      SizedBox(height: 8),
+                                      const SizedBox(height: 8),
                                       LinearProgressIndicator(
                                         value: budget.progressPercentage / 100,
                                         backgroundColor: Colors.grey[300],
                                         valueColor: AlwaysStoppedAnimation<Color>(budget.progressColor),
                                       ),
-                                      SizedBox(height: 4),
+                                      const SizedBox(height: 4),
                                       Text(
                                         '${budget.progressPercentage.toStringAsFixed(1)}% used',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                                        style: const TextStyle(fontSize: 12, color: Colors.grey),
                                       ),
                                     ],
                                   ),

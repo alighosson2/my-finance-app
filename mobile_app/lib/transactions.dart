@@ -47,6 +47,8 @@ class Transaction {
 }
 
 class TransactionsPage extends StatefulWidget {
+  const TransactionsPage({super.key});
+
   @override
   _TransactionsPageState createState() => _TransactionsPageState();
 }
@@ -138,7 +140,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Transaction added successfully!'), backgroundColor: Colors.green),
+          const SnackBar(content: Text('Transaction added successfully!'), backgroundColor: Colors.green),
         );
         _clearForm();
         fetchTransactions(); // Refresh the list
@@ -181,12 +183,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transactions'),
-        backgroundColor: Color(0xFF233142),
+        title: const Text('Transactions'),
+        backgroundColor: const Color(0xFF233142),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: fetchTransactions,
           ),
         ],
@@ -195,8 +197,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
         children: [
           // Add Transaction Form
           Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
               color: Colors.white,
               boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
             ),
@@ -205,25 +207,25 @@ class _TransactionsPageState extends State<TransactionsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Add New Transaction', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 16),
+                  const Text('Add New Transaction', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _descriptionController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Description',
                             border: OutlineInputBorder(),
                           ),
                           validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: TextFormField(
                           controller: _amountController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Amount',
                             border: OutlineInputBorder(),
                             prefixText: '\$',
@@ -234,24 +236,24 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _categoryController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Category',
                             border: OutlineInputBorder(),
                           ),
                           validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedType,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Type',
                             border: OutlineInputBorder(),
                           ),
@@ -267,24 +269,24 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _merchantController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Merchant (Optional)',
                             border: OutlineInputBorder(),
                           ),
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: InkWell(
                           onTap: () => _selectDate(context),
                           child: InputDecorator(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Date',
                               border: OutlineInputBorder(),
                             ),
@@ -294,16 +296,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: addTransaction,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF20C997),
+                        backgroundColor: const Color(0xFF20C997),
                         foregroundColor: Colors.white,
                       ),
-                      child: Text('Add Transaction'),
+                      child: const Text('Add Transaction'),
                     ),
                   ),
                 ],
@@ -313,23 +315,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
           // Transactions List
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : error != null
-                    ? Center(child: Text(error!, style: TextStyle(color: Colors.red)))
+                    ? Center(child: Text(error!, style: const TextStyle(color: Colors.red)))
                     : transactions.isEmpty
-                        ? Center(child: Text('No transactions found'))
+                        ? const Center(child: Text('No transactions found'))
                         : ListView.builder(
                             itemCount: transactions.length,
                             itemBuilder: (context, index) {
                               final transaction = transactions[index];
                               return Card(
-                                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                 child: ListTile(
                                   leading: Icon(
                                     transaction.transactionType == 'income' ? Icons.arrow_upward : Icons.arrow_downward,
                                     color: transaction.transactionType == 'income' ? Colors.green : Colors.red,
                                   ),
-                                  title: Text(transaction.description, style: TextStyle(fontWeight: FontWeight.bold)),
+                                  title: Text(transaction.description, style: const TextStyle(fontWeight: FontWeight.bold)),
                                   subtitle: Text('${transaction.category} • ${transaction.date.substring(0, 10)}'),
                                   trailing: Text(
                                     '\$${transaction.amount.toStringAsFixed(2)}',

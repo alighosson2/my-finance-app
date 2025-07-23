@@ -79,6 +79,8 @@ class TaxRecord {
 }
 
 class TaxRecordsPage extends StatefulWidget {
+  const TaxRecordsPage({super.key});
+
   @override
   _TaxRecordsPageState createState() => _TaxRecordsPageState();
 }
@@ -93,7 +95,7 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
   final _taxYearController = TextEditingController();
   String _selectedType = 'income_tax';
   String _selectedStatus = 'pending';
-  DateTime _selectedDueDate = DateTime.now().add(Duration(days: 30));
+  DateTime _selectedDueDate = DateTime.now().add(const Duration(days: 30));
 
   @override
   void initState() {
@@ -169,7 +171,7 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tax record added successfully!'), backgroundColor: Colors.green),
+          const SnackBar(content: Text('Tax record added successfully!'), backgroundColor: Colors.green),
         );
         _clearForm();
         fetchTaxRecords(); // Refresh the list
@@ -191,7 +193,7 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
     _taxYearController.text = DateTime.now().year.toString();
     _selectedType = 'income_tax';
     _selectedStatus = 'pending';
-    _selectedDueDate = DateTime.now().add(Duration(days: 30));
+    _selectedDueDate = DateTime.now().add(const Duration(days: 30));
   }
 
   Future<void> _selectDueDate(BuildContext context) async {
@@ -199,7 +201,7 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
       context: context,
       initialDate: _selectedDueDate,
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null && picked != _selectedDueDate) {
       setState(() {
@@ -229,12 +231,12 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tax Records'),
-        backgroundColor: Color(0xFF233142),
+        title: const Text('Tax Records'),
+        backgroundColor: const Color(0xFF233142),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: fetchTaxRecords,
           ),
         ],
@@ -243,8 +245,8 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
         children: [
           // Add Tax Record Form
           Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
               color: Colors.white,
               boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
             ),
@@ -253,14 +255,14 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Add New Tax Record', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 16),
+                  const Text('Add New Tax Record', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _amountController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Amount',
                             border: OutlineInputBorder(),
                             prefixText: '\$',
@@ -269,11 +271,11 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
                           validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: TextFormField(
                           controller: _taxYearController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Tax Year',
                             border: OutlineInputBorder(),
                           ),
@@ -283,13 +285,13 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedType,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Record Type',
                             border: OutlineInputBorder(),
                           ),
@@ -309,11 +311,11 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
                           },
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: _selectedStatus,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Status',
                             border: OutlineInputBorder(),
                           ),
@@ -329,25 +331,25 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _descriptionController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Description',
                             border: OutlineInputBorder(),
                           ),
                           validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: InkWell(
                           onTap: () => _selectDueDate(context),
                           child: InputDecorator(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Due Date',
                               border: OutlineInputBorder(),
                             ),
@@ -357,16 +359,16 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: addTaxRecord,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF20C997),
+                        backgroundColor: const Color(0xFF20C997),
                         foregroundColor: Colors.white,
                       ),
-                      child: Text('Add Tax Record'),
+                      child: const Text('Add Tax Record'),
                     ),
                   ),
                 ],
@@ -376,17 +378,17 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
           // Tax Records List
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : error != null
-                    ? Center(child: Text(error!, style: TextStyle(color: Colors.red)))
+                    ? Center(child: Text(error!, style: const TextStyle(color: Colors.red)))
                     : taxRecords.isEmpty
-                        ? Center(child: Text('No tax records found'))
+                        ? const Center(child: Text('No tax records found'))
                         : ListView.builder(
                             itemCount: taxRecords.length,
                             itemBuilder: (context, index) {
                               final record = taxRecords[index];
                               return Card(
-                                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                 child: ListTile(
                                   leading: CircleAvatar(
                                     backgroundColor: record.statusColor,
@@ -397,7 +399,7 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
                                   ),
                                   title: Text(
                                     _getRecordTypeDisplay(record.recordType),
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   subtitle: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -412,21 +414,21 @@ class _TaxRecordsPageState extends State<TaxRecordsPage> {
                                     children: [
                                       Text(
                                         '\$${record.amount.toStringAsFixed(2)}',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
                                           color: Color(0xFF233142),
                                         ),
                                       ),
                                       Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                         decoration: BoxDecoration(
                                           color: record.statusColor,
                                           borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: Text(
                                           record.status.toUpperCase(),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,

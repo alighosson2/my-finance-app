@@ -329,7 +329,7 @@ class HomePage extends StatelessWidget {
     );
     if (response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Bank account connected!'), backgroundColor: Colors.green),
+        const SnackBar(content: Text('Bank account connected!'), backgroundColor: Colors.green),
       );
       // Optionally clear the form
       _providerController.clear();
@@ -345,10 +345,10 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = Color(0xFF233142); // Sidebar background
-    final Color highlightColor = Color(0xFF3A506B); // Selected menu item
-    final Color mainBgColor = Color(0xFFF7F9FA); // Main content background
-    final Color accentColor = Color(0xFF20C997); // Project teal
+    const Color backgroundColor = Color(0xFF233142); // Sidebar background
+    const Color highlightColor = Color(0xFF3A506B); // Selected menu item
+    const Color mainBgColor = Color(0xFFF7F9FA); // Main content background
+    const Color accentColor = Color(0xFF20C997); // Project teal
 
     return Scaffold(
       key: _scaffoldKey,
@@ -356,9 +356,9 @@ class HomePage extends StatelessWidget {
       appBar: !Responsive.isDesktop(context)
           ? AppBar(
               backgroundColor: backgroundColor,
-              title: Text('MyFinance360'),
+              title: const Text('MyFinance360'),
               leading: IconButton(
-                icon: Icon(Icons.menu),
+                icon: const Icon(Icons.menu),
                 onPressed: () => _scaffoldKey.currentState?.openDrawer(),
               ),
             )
@@ -397,10 +397,10 @@ class HomePage extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: 40),
-                        Icon(Icons.show_chart, size: 48, color: accentColor),
-                        SizedBox(height: 16),
-                        Text(
+                        const SizedBox(height: 40),
+                        const Icon(Icons.show_chart, size: 48, color: accentColor),
+                        const SizedBox(height: 16),
+                        const Text(
                           'Welcome to MyFinance360',
                           style: TextStyle(
                             fontSize: 28,
@@ -409,7 +409,7 @@ class HomePage extends StatelessWidget {
                             fontFamily: 'Roboto',
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Container(
                           width: 80,
                           height: 4,
@@ -418,8 +418,8 @@ class HomePage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
-                        SizedBox(height: 24),
-                        Text(
+                        const SizedBox(height: 24),
+                        const Text(
                           'Your personal finance dashboard',
                           style: TextStyle(
                             fontSize: 16,
@@ -427,17 +427,17 @@ class HomePage extends StatelessWidget {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: 40),
+                        const SizedBox(height: 40),
                         // --- Forms Container ---
                         Container(
                           width: Responsive.isMobile(context)
                               ? MediaQuery.of(context).size.width * 0.9
                               : 600,
-                          padding: EdgeInsets.all(32),
+                          padding: const EdgeInsets.all(32),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                 color: Colors.black12,
                                 blurRadius: 24,
@@ -448,7 +448,7 @@ class HomePage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
+                              const Row(
                                 children: [
                                   Icon(
                                     Icons.account_balance,
@@ -466,18 +466,18 @@ class HomePage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 24),
+                              const SizedBox(height: 24),
                               // Responsive layout for form fields
                               if (Responsive.isMobile(context)) ...[
                                 // Mobile layout - vertical
                                 Column(
                                   children: [
                                     _buildBankProviderField(),
-                                    SizedBox(height: 16),
+                                    const SizedBox(height: 16),
                                     _buildAccessTokenField(),
-                                    SizedBox(height: 16),
+                                    const SizedBox(height: 16),
                                     _buildTokenSecretField(),
-                                    SizedBox(height: 16),
+                                    const SizedBox(height: 16),
                                     _buildExpiresAtField(),
                                   ],
                                 ),
@@ -486,28 +486,28 @@ class HomePage extends StatelessWidget {
                                 Row(
                                   children: [
                                     Expanded(child: _buildBankProviderField()),
-                                    SizedBox(width: 16),
+                                    const SizedBox(width: 16),
                                     Expanded(child: _buildAccessTokenField()),
                                   ],
                                 ),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                                 Row(
                                   children: [
                                     Expanded(child: _buildTokenSecretField()),
-                                    SizedBox(width: 16),
+                                    const SizedBox(width: 16),
                                     Expanded(child: _buildExpiresAtField()),
                                   ],
                                 ),
                               ],
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               Container(
                                 width: double.infinity,
-                                padding: EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFB2F0F7),
+                                  color: const Color(0xFFB2F0F7),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Row(
+                                child: const Row(
                                   children: [
                                     Icon(
                                       Icons.info_outline,
@@ -526,7 +526,7 @@ class HomePage extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               SizedBox(
                                 width: double.infinity,
                                 height: 48,
@@ -535,7 +535,7 @@ class HomePage extends StatelessWidget {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: accentColor,
                                     foregroundColor: Colors.white,
-                                    textStyle: TextStyle(
+                                    textStyle: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -543,21 +543,21 @@ class HomePage extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
-                                  child: Text('+ Connect Bank Account'),
+                                  child: const Text('+ Connect Bank Account'),
                                 ),
                               ),
                             ],
                           ),
                         ),
                         // --- End Forms Container ---
-                        SizedBox(height: 32),
+                        const SizedBox(height: 32),
                         Container(
                           width: 600,
-                          padding: EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                 color: Colors.black12,
                                 blurRadius: 16,
@@ -568,7 +568,7 @@ class HomePage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
+                              const Row(
                                 children: [
                                   Icon(Icons.list_alt,
                                       color: accentColor, size: 24),
@@ -580,39 +580,39 @@ class HomePage extends StatelessWidget {
                                           color: Color(0xFF233142))),
                                 ],
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               FutureBuilder<List<Transaction>>(
                                 future: fetchLastTransactions(),
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    return Center(
+                                    return const Center(
                                         child: CircularProgressIndicator());
                                   } else if (snapshot.hasError) {
                                     return Text('Error: ${snapshot.error}',
-                                        style: TextStyle(color: Colors.red));
+                                        style: const TextStyle(color: Colors.red));
                                   } else if (!snapshot.hasData ||
                                       snapshot.data!.isEmpty) {
-                                    return Text('No transactions found.');
+                                    return const Text('No transactions found.');
                                   }
                                   final txs = snapshot.data!;
                                   return ListView.separated(
                                     shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
+                                    physics: const NeverScrollableScrollPhysics(),
                                     itemCount: txs.length,
-                                    separatorBuilder: (context, i) => Divider(),
+                                    separatorBuilder: (context, i) => const Divider(),
                                     itemBuilder: (context, i) {
                                       final tx = txs[i];
                                       return ListTile(
-                                        leading: Icon(Icons.monetization_on,
+                                        leading: const Icon(Icons.monetization_on,
                                             color: accentColor),
                                         title: Text(tx.description,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontWeight: FontWeight.bold)),
                                         subtitle: Text(
                                             '${tx.category} • ${tx.date.substring(0, 10)}'),
                                         trailing: Text(
-                                            '${tx.amount.toStringAsFixed(2)}',
+                                            tx.amount.toStringAsFixed(2),
                                             style: TextStyle(
                                                 color: tx.amount < 0
                                                     ? Colors.red
@@ -626,7 +626,7 @@ class HomePage extends StatelessWidget {
                             ],
                           ),
                         ),
-                        SizedBox(height: 60),
+                        const SizedBox(height: 60),
                       ],
                     ),
                   ),
@@ -644,18 +644,18 @@ class HomePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Bank Provider'),
-        SizedBox(height: 8),
+        const Text('Bank Provider'),
+        const SizedBox(height: 8),
         TextField(
           controller: _providerController,
           decoration: InputDecoration(
             hintText: 'e.g., Bank Of America',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           ),
         ),
-        SizedBox(height: 4),
-        Text(
+        const SizedBox(height: 4),
+        const Text(
           'Enter your bank name',
           style: TextStyle(fontSize: 12, color: Colors.grey),
         ),
@@ -667,18 +667,18 @@ class HomePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Access Token'),
-        SizedBox(height: 8),
+        const Text('Access Token'),
+        const SizedBox(height: 8),
         TextField(
           controller: _accessTokenController,
           decoration: InputDecoration(
             hintText: 'Enter your bank API access token',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           ),
         ),
-        SizedBox(height: 4),
-        Text(
+        const SizedBox(height: 4),
+        const Text(
           'For testing, use: test-token-123',
           style: TextStyle(fontSize: 12, color: Colors.grey),
         ),
@@ -690,14 +690,14 @@ class HomePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Access Token Secret (Optional)'),
-        SizedBox(height: 8),
+        const Text('Access Token Secret (Optional)'),
+        const SizedBox(height: 8),
         TextField(
           controller: _tokenSecretController,
           decoration: InputDecoration(
             hintText: 'Token secret if required',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           ),
         ),
       ],
@@ -708,19 +708,19 @@ class HomePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Expires At'),
-        SizedBox(height: 8),
+        const Text('Expires At'),
+        const SizedBox(height: 8),
         TextField(
           controller: _expiresAtController,
           decoration: InputDecoration(
             hintText: 'mm/dd/yyyy --:-- --',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            suffixIcon: Icon(Icons.calendar_today, size: 20),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            suffixIcon: const Icon(Icons.calendar_today, size: 20),
           ),
         ),
-        SizedBox(height: 4),
-        Text(
+        const SizedBox(height: 4),
+        const Text(
           'When this token expires',
           style: TextStyle(fontSize: 12, color: Colors.grey),
         ),
