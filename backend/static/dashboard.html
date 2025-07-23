@@ -16,11 +16,12 @@
       --success: #27ae60;
       --warning: #f39c12;
       --info: #3498db;
+      --danger: #e74c3c;
     }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #333;
-      background-color: #fff;
+      background-color: #f8f9fa;
       line-height: 1.6;
     }
     .sidebar {
@@ -43,7 +44,8 @@
       padding: 0 1.25rem;
       margin-bottom: 1.5rem;
       display: block;
-    }    .sidebar a {
+    }
+    .sidebar a {
       color: var(--accent) !important;
       display: block;
       padding: 0.75rem 1.25rem;
@@ -78,34 +80,67 @@
       margin-left: 240px;
       padding: 2rem 1rem;
       transition: margin-left 0.3s;
-      background: #fff;
+      background: #f8f9fa;
       min-height: 100vh;
     }
     .dashboard-title {
       color: var(--primary);
       font-weight: 700;
-      margin-bottom: 1.5rem;
-      margin-top: 1.5rem;
-      text-align: center;
+      margin-bottom: 2rem;
     }
     .card {
       border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       border: none;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       overflow: hidden;
+      background: white;
     }
     .card-header {
-      background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
-      color: white;
+      background: white;
+      border-bottom: 1px solid #e9ecef;
+      color: var(--primary);
       font-weight: 600;
-      border-bottom: none;
+      padding: 1.25rem;
+    }
+    .stats-card {
+      text-align: center;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-bottom: 1.5rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .stats-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    .stats-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 1.5rem;
+    }
+    .stats-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .stats-label {
+      color: #6c757d;
+      font-size: 0.875rem;
+      font-weight: 500;
     }
     .btn {
       border-radius: 8px;
       font-weight: 600;
       transition: all 0.3s ease;
-      padding: 0.5rem 1.5rem;
+      padding: 0.625rem 1.5rem;
     }
     .btn-primary {
       background-color: var(--accent);
@@ -117,16 +152,50 @@
       color: #fff;
       transform: translateY(-2px);
     }
-    .btn-success:hover,
-    .btn-warning:hover,
-    .btn-info:hover,
-    .btn-dark:hover {
-      transform: translateY(-2px);
+    .recent-transaction {
+      display: flex;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid #f1f3f4;
+    }
+    .recent-transaction:last-child {
+      border-bottom: none;
+    }
+    .transaction-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      margin-right: 1rem;
+    }
+    .transaction-amount.positive {
+      color: var(--success);
+    }
+    .transaction-amount.negative {
+      color: var(--danger);
+    }
+    .budget-progress {
+      height: 8px;
+      border-radius: 4px;
+      background: #e9ecef;
+      margin: 0.5rem 0;
+    }
+    .budget-progress-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
     }
     .alert {
       border: none;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .collapse-transition {
+      transition: all 0.3s ease;
+      overflow: hidden;
     }
     /* Responsive Sidebar Overlay */
     @media (max-width: 991.98px) {
@@ -167,10 +236,10 @@
     }
     @media (max-width: 575.98px) {
       .dashboard-title {
-        font-size: 1.2rem;
+        font-size: 1.5rem;
       }
-      .card-header h5 {
-        font-size: 1rem;
+      .stats-value {
+        font-size: 1.5rem;
       }
     }
   </style>
@@ -189,193 +258,210 @@
     <a href="/api/auth/logout" class="logout-link"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
   </nav>
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
   <div class="content">
-    <h1 class="dashboard-title">Dashboard</h1>
-    <div class="container-fluid px-2 px-md-4">
-      <div class="row justify-content-center">
-        <div class="col-12 col-lg-10 col-xl-8">
-          <!-- Connect Bank Token -->
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0"><i class="fas fa-plug me-2"></i>Connect Bank Account</h5>
+    <div class="container-fluid">
+      <h1 class="dashboard-title">Financial Dashboard</h1>
+
+      <!-- Stats Overview -->
+      <div class="row">
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-icon" style="background-color: rgba(26, 188, 156, 0.1); color: var(--accent);">
+              <i class="fas fa-wallet"></i>
             </div>
-            <div class="card-body p-4">
-              <form action="/api/bank/api/tokens" method="POST" class="row g-3">
-                <div class="col-12 col-md-6">
-                  <label for="provider" class="form-label">Bank Provider</label>
-                  <input
-                    type="text"
-                    id="provider"
-                    name="provider"
-                    class="form-control"
-                    placeholder="e.g., Bank Of America"
-                    required
-                  >
-                  <div class="form-text">Enter your bank name</div>
-                </div>
-                <div class="col-12 col-md-6">
-                  <label for="access_token" class="form-label">Access Token</label>
-                  <input
-                    type="text"
-                    id="access_token"
-                    name="access_token"
-                    class="form-control"
-                    placeholder="Enter your bank API access token"
-                    required
-                  >
-                  <div class="form-text">For testing, use: test-token-123</div>
-                </div>
-                <div class="col-12 col-md-6">
-                  <label for="access_token_secret" class="form-label">Access Token Secret (Optional)</label>
-                  <input
-                    type="text"
-                    id="access_token_secret"
-                    name="access_token_secret"
-                    class="form-control"
-                    placeholder="Token secret if required"
-                  >
-                </div>
-                <div class="col-12 col-md-6">
-                  <label for="expires_at" class="form-label">Expires At</label>
-                  <input
-                    type="datetime-local"
-                    id="expires_at"
-                    name="expires_at"
-                    class="form-control"
-                    required
-                  >
-                  <div class="form-text">When this token expires</div>
-                </div>
-                <div class="col-12">
-                  <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>For Testing:</strong> Use access token "test-token-123" and set expiry to tomorrow's date.
-                  </div>
-                  <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-plus me-2"></i>Connect Bank Account
-                  </button>
-                </div>
-              </form>
-            </div>
+            <div class="stats-value text-primary" id="totalBalance">$0.00</div>
+            <div class="stats-label">Total Balance</div>
           </div>
-          <!-- View Existing Tokens -->
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0"><i class="fas fa-list me-2"></i>Your Connected Banks</h5>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-icon" style="background-color: rgba(39, 174, 96, 0.1); color: var(--success);">
+              <i class="fas fa-arrow-up"></i>
             </div>
-            <div class="card-body p-4">
-              <form action="/api/bank/api/tokens" method="GET" class="mb-3">
-                <button type="submit" class="btn btn-outline-primary w-100">
-                  <i class="fas fa-sync-alt me-2"></i>Refresh Bank List
-                </button>
-              </form>
-              <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                Your connected bank accounts will appear here. Click "Refresh Bank List" to see current connections.
+            <div class="stats-value text-success" id="monthlyIncome">$0.00</div>
+            <div class="stats-label">Monthly Income</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-icon" style="background-color: rgba(231, 76, 60, 0.1); color: var(--danger);">
+              <i class="fas fa-arrow-down"></i>
+            </div>
+            <div class="stats-value text-danger" id="monthlyExpenses">$0.00</div>
+            <div class="stats-label">Monthly Expenses</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-icon" style="background-color: rgba(52, 152, 219, 0.1); color: var(--info);">
+              <i class="fas fa-university"></i>
+            </div>
+            <div class="stats-value text-info" id="totalAccounts">0</div>
+            <div class="stats-label">Connected Accounts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Integration Form -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fas fa-university me-2"></i>Connect Bank Account</h5>
+          <button class="btn btn-sm btn-outline-secondary" onclick="toggleBankForm()">
+            <i class="fas fa-chevron-down" id="bankFormToggle"></i>
+          </button>
+        </div>
+        <div class="card-body collapse-transition d-none" id="bankFormContainer">
+          <form id="dashboardBankForm" onsubmit="handleDashboardBankSubmit(event)">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="dashboardProvider" class="form-label">Bank Provider *</label>
+                <input
+                  type="text"
+                  id="dashboardProvider"
+                  name="provider"
+                  class="form-control"
+                  placeholder="e.g., Bank Of America"
+                  required
+                >
+              </div>
+              <div class="col-md-6">
+                <label for="dashboardAccessToken" class="form-label">Access Token *</label>
+                <input
+                  type="text"
+                  id="dashboardAccessToken"
+                  name="access_token"
+                  class="form-control"
+                  placeholder="Enter your bank API access token"
+                  required
+                >
+              </div>
+              <div class="col-md-6">
+                <label for="dashboardTokenSecret" class="form-label">Access Token Secret (Optional)</label>
+                <input
+                  type="text"
+                  id="dashboardTokenSecret"
+                  name="access_token_secret"
+                  class="form-control"
+                  placeholder="Token secret if required"
+                >
+              </div>
+              <div class="col-md-6">
+                <label for="dashboardExpiresAt" class="form-label">Expires At *</label>
+                <input
+                  type="datetime-local"
+                  id="dashboardExpiresAt"
+                  name="expires_at"
+                  class="form-control"
+                  required
+                >
+              </div>
+            </div>
+
+            <div class="alert alert-info mb-3">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>For Testing:</strong> Use access token "test-token-123" and set expiry to tomorrow's date.
+            </div>
+
+            <!-- Connected Banks Status -->
+            <div id="connectedBanksStatus" class="mb-3" style="display: none;">
+              <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Connected Banks:</strong>
+                <div id="connectedBanksList" class="mt-2"></div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Connect Bank Account
+              </button>
+              <button type="button" class="btn btn-success" onclick="syncBankData('accounts', true)">
+                <i class="fas fa-university me-2"></i>Sync Accounts
+              </button>
+              <button type="button" class="btn btn-info" onclick="syncBankData('transactions', true)">
+                <i class="fas fa-exchange-alt me-2"></i>Sync Transactions
+              </button>
+              <button type="button" class="btn btn-warning" onclick="syncBankData('test', true)">
+                <i class="fas fa-vial me-2"></i>Test Connection
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Main Content Row -->
+      <div class="row">
+        <!-- Recent Transactions -->
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Transactions</h5>
+              <a href="transactions.html" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body" id="recentTransactions">
+              <div class="text-center py-4">
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
               </div>
             </div>
           </div>
-          <!-- Bank Data Sync -->
+        </div>
+
+        <!-- Account Summary & Quick Actions -->
+        <div class="col-lg-4">
+          <!-- Account Summary -->
           <div class="card">
             <div class="card-header">
-              <h5 class="mb-0"><i class="fas fa-sync-alt me-2"></i>Bank Data Synchronization</h5>
+              <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Account Summary</h5>
             </div>
-            <div class="card-body p-4">
-              <div class="row g-3">
-                <!-- Test Connection -->
-                <div class="col-12 col-md-6 col-lg-3">
-                  <form action="/api/bank/api/sync/test" method="POST" class="h-100">
-                    <div class="text-center">
-                      <i class="fas fa-vial fa-2x text-warning mb-3"></i>
-                      <h6>Test Connection</h6>
-                      <p class="text-muted small">Verify your bank connection is working</p>
-                      <button type="submit" class="btn btn-warning w-100">
-                        <i class="fas fa-vial me-2"></i>Test
-                      </button>
-                    </div>
-                  </form>
+            <div class="card-body" id="accountSummary">
+              <div class="text-center py-4">
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
                 </div>
-                <!-- Sync Accounts -->
-                <div class="col-12 col-md-6 col-lg-3">
-                  <form action="/api/bank/api/sync/accounts" method="POST" class="h-100">
-                    <div class="text-center">
-                      <i class="fas fa-university fa-2x text-success mb-3"></i>
-                      <h6>Sync Accounts</h6>
-                      <p class="text-muted small">Import your bank account information</p>
-                      <button type="submit" class="btn btn-success w-100">
-                        <i class="fas fa-download me-2"></i>Sync Accounts
-                      </button>
-                    </div>
-                  </form>
-                </div>
-                <!-- Sync Transactions -->
-                <div class="col-12 col-md-6 col-lg-3">
-                  <form action="/api/bank/api/sync/transactions" method="POST" class="h-100">
-                    <div class="text-center">
-                      <i class="fas fa-exchange-alt fa-2x text-info mb-3"></i>
-                      <h6>Sync Transactions</h6>
-                      <div class="mb-2">
-                        <input
-                          type="number"
-                          name="accountId"
-                          class="form-control form-control-sm"
-                          placeholder="Account ID"
-                          required
-                        >
-                      </div>
-                      <p class="text-muted small">Download recent transactions</p>
-                      <button type="submit" class="btn btn-info w-100">
-                        <i class="fas fa-download me-2"></i>Sync Transactions
-                      </button>
-                    </div>
-                  </form>
-                </div>
-                <!-- Sync All Data -->
-                <div class="col-12 col-md-6 col-lg-3">
-                  <form action="/api/bank/api/sync/all" method="POST" class="h-100">
-                    <div class="text-center">
-                      <i class="fas fa-database fa-2x text-dark mb-3"></i>
-                      <h6>Sync All Data</h6>
-                      <p class="text-muted small">Complete synchronization of all bank data</p>
-                      <button type="submit" class="btn btn-dark w-100">
-                        <i class="fas fa-sync-alt me-2"></i>Sync All
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-              <div class="alert alert-warning mt-4">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>Important:</strong> Make sure you have connected at least one bank account before attempting to sync data.
               </div>
             </div>
           </div>
-          <!-- Quick Stats / Actions -->
+
+          <!-- Quick Actions -->
           <div class="card">
             <div class="card-header">
-              <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Quick Actions</h5>
+              <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
             </div>
-            <div class="card-body p-4">
-              <div class="row g-3">
-                <div class="col-12 col-md-6 col-lg-3">
-                  <a href="accounts.html" class="btn btn-outline-primary w-100">
-                    <i class="fas fa-eye me-2"></i>View Accounts
-                  </a>
-                </div>
-                <div class="col-12 col-md-6 col-lg-3">
-                  <a href="transactions.html" class="btn btn-outline-info w-100">
-                    <i class="fas fa-list me-2"></i>View Transactions
-                  </a>
-                </div>
-                <div class="col-12 col-md-6 col-lg-3">
-                  <a href="budgets.html" class="btn btn-outline-success w-100">
-                    <i class="fas fa-chart-pie me-2"></i>Manage Budgets
-                  </a>
-                </div>
-                <div class="col-12 col-md-6 col-lg-3">
-                  <a href="tax.html" class="btn btn-outline-warning w-100">
-                    <i class="fas fa-file-invoice-dollar me-2"></i>Tax Records
-                  </a>
+            <div class="card-body">
+              <div class="d-grid gap-2">
+                <a href="accounts.html" class="btn btn-outline-primary">
+                  <i class="fas fa-eye me-2"></i>View Accounts
+                </a>
+                <a href="transactions.html" class="btn btn-outline-info">
+                  <i class="fas fa-plus me-2"></i>Add Transaction
+                </a>
+                <a href="budget.html" class="btn btn-outline-success">
+                  <i class="fas fa-chart-pie me-2"></i>Manage Budgets
+                </a>
+                <a href="taxrecords.html" class="btn btn-outline-warning">
+                  <i class="fas fa-file-invoice-dollar me-2"></i>Tax Records
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Budget Overview -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Budget Overview</h5>
+              <a href="budget.html" class="btn btn-sm btn-outline-primary">Manage Budgets</a>
+            </div>
+            <div class="card-body" id="budgetOverview">
+              <div class="text-center py-4">
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
                 </div>
               </div>
             </div>
@@ -384,131 +470,514 @@
       </div>
     </div>
   </div>
+
+  <!-- Bank Connection Modal -->
+  <div class="modal fade" id="bankConnectionModal" tabindex="-1" aria-labelledby="bankConnectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="bankConnectionModalLabel">
+            <i class="fas fa-university me-2"></i>Connect Bank Account
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Connect Bank Token -->
+          <form action="/api/bank/api/tokens" method="POST" class="mb-4" id="bankConnectionForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="provider" class="form-label">Bank Provider</label>
+                <input
+                  type="text"
+                  id="provider"
+                  name="provider"
+                  class="form-control"
+                  placeholder="e.g., Bank Of America"
+                  required
+                >
+              </div>
+              <div class="col-md-6">
+                <label for="access_token" class="form-label">Access Token</label>
+                <input
+                  type="text"
+                  id="access_token"
+                  name="access_token"
+                  class="form-control"
+                  placeholder="Enter your bank API access token"
+                  required
+                >
+              </div>
+              <div class="col-md-6">
+                <label for="access_token_secret" class="form-label">Access Token Secret (Optional)</label>
+                <input
+                  type="text"
+                  id="access_token_secret"
+                  name="access_token_secret"
+                  class="form-control"
+                  placeholder="Token secret if required"
+                >
+              </div>
+              <div class="col-md-6">
+                <label for="expires_at" class="form-label">Expires At</label>
+                <input
+                  type="datetime-local"
+                  id="expires_at"
+                  name="expires_at"
+                  class="form-control"
+                  required
+                >
+              </div>
+            </div>
+            <div class="alert alert-info mt-3">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>For Testing:</strong> Use access token "test-token-123" and set expiry to tomorrow's date.
+            </div>
+          </form>
+
+          <!-- Bank Sync Actions -->
+          <div class="row g-3 mt-3">
+            <div class="col-md-3">
+              <button type="button" class="btn btn-warning w-100" onclick="syncBankData('test')">
+                <i class="fas fa-vial me-2"></i>Test Connection
+              </button>
+            </div>
+            <div class="col-md-3">
+              <button type="button" class="btn btn-success w-100" onclick="syncBankData('accounts')">
+                <i class="fas fa-university me-2"></i>Sync Accounts
+              </button>
+            </div>
+            <div class="col-md-3">
+              <button type="button" class="btn btn-info w-100" onclick="syncBankData('transactions')">
+                <i class="fas fa-exchange-alt me-2"></i>Sync Transactions
+              </button>
+            </div>
+            <div class="col-md-3">
+              <button type="button" class="btn btn-dark w-100" onclick="syncBankData('all')">
+                <i class="fas fa-sync-alt me-2"></i>Sync All
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="connectBank()">
+            <i class="fas fa-plus me-2"></i>Connect Bank Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // Global variables
+    let accounts = [];
+    let transactions = [];
+    let budgets = [];
+
+    // DOM elements
+    const totalBalanceEl = document.getElementById('totalBalance');
+    const monthlyIncomeEl = document.getElementById('monthlyIncome');
+    const monthlyExpensesEl = document.getElementById('monthlyExpenses');
+    const totalAccountsEl = document.getElementById('totalAccounts');
+    const recentTransactionsEl = document.getElementById('recentTransactions');
+    const accountSummaryEl = document.getElementById('accountSummary');
+    const budgetOverviewEl = document.getElementById('budgetOverview');
+    const bankFormContainer = document.getElementById('bankFormContainer');
+    const bankFormToggle = document.getElementById('bankFormToggle');
+
+         // API calls
+     async function fetchDashboardData() {
+       try {
+         // Fetch all data in parallel
+         const [accountsResponse, transactionsResponse, budgetsResponse, banksResponse] = await Promise.all([
+           fetch('/api/financial-accounts', { credentials: 'include' }),
+           fetch('/api/transactions/search?limit=5&sort=date&order=desc', { credentials: 'include' }),
+           fetch('/api/budgets', { credentials: 'include' }),
+           fetch('/api/bank/api/tokens', { credentials: 'include' })
+         ]);
+
+         // Process accounts
+         if (accountsResponse.ok) {
+           const accountsData = await accountsResponse.json();
+           accounts = accountsData.accounts || accountsData || [];
+         }
+
+         // Process transactions
+         if (transactionsResponse.ok) {
+           const transactionsData = await transactionsResponse.json();
+           transactions = transactionsData.transactions || transactionsData || [];
+         }
+
+         // Process budgets
+         if (budgetsResponse.ok) {
+           const budgetsData = await budgetsResponse.json();
+           budgets = budgetsData.budgets || budgetsData || [];
+         }
+
+         // Process connected banks
+         if (banksResponse.ok) {
+           const banksData = await banksResponse.json();
+           updateConnectedBanksStatus(banksData);
+         }
+
+         // Update dashboard
+         updateDashboard();
+       } catch (error) {
+         console.error('Error fetching dashboard data:', error);
+         showError('Failed to load dashboard data');
+       }
+     }
+
+    // Update dashboard elements
+    function updateDashboard() {
+      updateStats();
+      updateRecentTransactions();
+      updateAccountSummary();
+      updateBudgetOverview();
+    }
+
+    function updateStats() {
+      // Calculate total balance
+      const totalBalance = accounts.reduce((sum, account) => sum + (parseFloat(account.balance) || 0), 0);
+      totalBalanceEl.textContent = formatCurrency(totalBalance);
+      totalAccountsEl.textContent = accounts.length;
+
+      // Calculate monthly income and expenses
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+
+      let monthlyIncome = 0;
+      let monthlyExpenses = 0;
+
+      transactions.forEach(transaction => {
+        const transactionDate = new Date(transaction.transaction_date || transaction.date);
+        if (transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear) {
+          const amount = parseFloat(transaction.amount) || 0;
+          if (transaction.transaction_type === 'income' || amount > 0) {
+            monthlyIncome += Math.abs(amount);
+          } else {
+            monthlyExpenses += Math.abs(amount);
+          }
+        }
+      });
+
+      monthlyIncomeEl.textContent = formatCurrency(monthlyIncome);
+      monthlyExpensesEl.textContent = formatCurrency(monthlyExpenses);
+    }
+
+    function updateRecentTransactions() {
+      if (transactions.length === 0) {
+        recentTransactionsEl.innerHTML = `
+          <div class="text-center py-4">
+            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+            <h6 class="text-muted">No Recent Transactions</h6>
+            <p class="text-muted mb-3">Connect your bank account or add transactions manually</p>
+            <a href="transactions.html" class="btn btn-primary btn-sm">Add Transaction</a>
+          </div>
+        `;
+        return;
+      }
+
+      const html = transactions.slice(0, 5).map(transaction => {
+        const amount = parseFloat(transaction.amount) || 0;
+        const isPositive = transaction.transaction_type === 'income' || amount > 0;
+        const date = new Date(transaction.transaction_date || transaction.date).toLocaleDateString();
+        const accountName = getAccountName(transaction.account_id);
+
+        return `
+          <div class="recent-transaction">
+            <div class="transaction-icon" style="background-color: ${isPositive ? 'rgba(39, 174, 96, 0.1)' : 'rgba(231, 76, 60, 0.1)'}; color: ${isPositive ? 'var(--success)' : 'var(--danger)'};">
+              <i class="fas fa-${isPositive ? 'arrow-up' : 'arrow-down'}"></i>
+            </div>
+            <div class="flex-grow-1">
+              <div class="fw-bold">${transaction.description}</div>
+              <small class="text-muted">${transaction.category || 'Other'} • ${accountName} • ${date}</small>
+            </div>
+            <div class="transaction-amount ${isPositive ? 'positive' : 'negative'} fw-bold">
+              ${isPositive ? '+' : '-'}${formatCurrency(Math.abs(amount))}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      recentTransactionsEl.innerHTML = html;
+    }
+
+    function updateAccountSummary() {
+      if (accounts.length === 0) {
+        accountSummaryEl.innerHTML = `
+          <div class="text-center py-4">
+            <i class="fas fa-university fa-3x text-muted mb-3"></i>
+            <h6 class="text-muted">No Accounts Connected</h6>
+            <p class="text-muted mb-3">Connect your first bank account to get started</p>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bankConnectionModal">
+              Connect Account
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const accountsByType = accounts.reduce((acc, account) => {
+        const type = account.account_type || 'other';
+        if (!acc[type]) acc[type] = { count: 0, balance: 0 };
+        acc[type].count++;
+        acc[type].balance += parseFloat(account.balance) || 0;
+        return acc;
+      }, {});
+
+      const html = Object.entries(accountsByType).map(([type, data]) => `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <span class="fw-bold text-capitalize">${type.replace('_', ' ')}</span>
+            <br><small class="text-muted">${data.count} account${data.count !== 1 ? 's' : ''}</small>
+          </div>
+          <div class="text-end">
+            <div class="fw-bold">${formatCurrency(data.balance)}</div>
+          </div>
+        </div>
+      `).join('');
+
+      accountSummaryEl.innerHTML = html || '<p class="text-muted">No account data available</p>';
+    }
+
+    function updateBudgetOverview() {
+      if (budgets.length === 0) {
+        budgetOverviewEl.innerHTML = `
+          <div class="text-center py-4">
+            <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+            <h6 class="text-muted">No Budgets Created</h6>
+            <p class="text-muted mb-3">Create your first budget to track your spending</p>
+            <a href="budget.html" class="btn btn-primary btn-sm">Create Budget</a>
+          </div>
+        `;
+        return;
+      }
+
+      const html = budgets.slice(0, 3).map(budget => {
+        const spent = parseFloat(budget.current_spent || budget.spent) || 0;
+        const budgetAmount = parseFloat(budget.budget_amount || budget.amount) || 0;
+        const percentage = budgetAmount > 0 ? (spent / budgetAmount * 100) : 0;
+        const remaining = budgetAmount - spent;
+
+        let progressColor = 'bg-success';
+        if (percentage > 80) progressColor = 'bg-warning';
+        if (percentage > 100) progressColor = 'bg-danger';
+
+        return `
+          <div class="row align-items-center mb-3">
+            <div class="col-md-4">
+              <div class="fw-bold">${budget.name || budget.budget_name}</div>
+              <small class="text-muted">${budget.category}</small>
+            </div>
+            <div class="col-md-4">
+              <div class="budget-progress">
+                <div class="budget-progress-bar ${progressColor}" style="width: ${Math.min(percentage, 100)}%"></div>
+              </div>
+              <small class="text-muted">${percentage.toFixed(1)}% used</small>
+            </div>
+            <div class="col-md-4 text-end">
+              <div class="fw-bold">${formatCurrency(spent)} / ${formatCurrency(budgetAmount)}</div>
+              <small class="text-muted ${remaining >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(remaining)} remaining</small>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+           budgetOverviewEl.innerHTML = html;
+     }
+
+     function updateConnectedBanksStatus(banksData) {
+       const connectedBanksStatus = document.getElementById('connectedBanksStatus');
+       const connectedBanksList = document.getElementById('connectedBanksList');
+
+       if (!banksData || banksData.length === 0) {
+         connectedBanksStatus.style.display = 'none';
+         return;
+       }
+
+       const banksHtml = banksData.map(bank => `
+         <div class="d-flex justify-content-between align-items-center mb-2">
+           <div>
+             <strong>${bank.provider || 'Unknown Bank'}</strong>
+             <br><small class="text-muted">Connected on ${new Date(bank.created_at || Date.now()).toLocaleDateString()}</small>
+           </div>
+           <div class="badge bg-success">Active</div>
+         </div>
+       `).join('');
+
+       connectedBanksList.innerHTML = banksHtml;
+       connectedBanksStatus.style.display = 'block';
+     }
+
+     // Helper functions
+    function getAccountName(accountId) {
+      const account = accounts.find(acc => acc.id === accountId);
+      return account ? `${account.bank_name || 'Bank'} ${account.account_type || 'Account'}` : 'Unknown Account';
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(amount);
+    }
+
+    function showError(message) {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+      alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
+      alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      document.body.appendChild(alert);
+      setTimeout(() => alert.remove(), 5000);
+    }
+
+    function showSuccess(message) {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+      alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
+      alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      document.body.appendChild(alert);
+      setTimeout(() => alert.remove(), 3000);
+    }
+
+    // Bank connection functions
+    async function connectBank() {
+      const form = document.getElementById('bankConnectionForm');
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('/api/bank/api/tokens', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+
+        if (response.ok) {
+          showSuccess('Bank account connected successfully!');
+          bootstrap.Modal.getInstance(document.getElementById('bankConnectionModal')).hide();
+          form.reset();
+          fetchDashboardData(); // Refresh data
+        } else {
+          showError('Failed to connect bank account');
+        }
+      } catch (error) {
+        console.error('Error connecting bank:', error);
+        showError('Error connecting bank account');
+      }
+    }
+
+    async function syncBankData(action, isDashboardForm = false) {
+      try {
+        const response = await fetch(`/api/bank/api/sync/${action}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          showSuccess(`Bank ${action} completed successfully!`);
+          fetchDashboardData(); // Refresh data
+        } else {
+          showError(`Failed to sync bank ${action}`);
+        }
+      } catch (error) {
+        console.error('Error syncing bank data:', error);
+        showError(`Error syncing bank ${action}`);
+      }
+    }
+
+              // Event listeners
+     document.addEventListener('DOMContentLoaded', () => {
+       fetchDashboardData();
+
+       // Set default expiry date to tomorrow for both forms
+       const tomorrow = new Date();
+       tomorrow.setDate(tomorrow.getDate() + 1);
+       const tomorrowString = tomorrow.toISOString().slice(0, 16);
+
+       const dashboardExpiresAt = document.getElementById('dashboardExpiresAt');
+       const modalExpiresAt = document.getElementById('expires_at');
+
+       if (dashboardExpiresAt) dashboardExpiresAt.value = tomorrowString;
+       if (modalExpiresAt) modalExpiresAt.value = tomorrowString;
+     });
+
     // Sidebar toggle for mobile
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
     sidebarToggle.addEventListener('click', function() {
       sidebar.classList.toggle('open');
       sidebarBackdrop.classList.toggle('open');
     });
+
     sidebarBackdrop.addEventListener('click', function() {
       sidebar.classList.remove('open');
       sidebarBackdrop.classList.remove('open');
     });
 
-    // Handle success/error messages from URL parameters
-    function showMessage() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const success = urlParams.get('success');
-      const error = urlParams.get('error');
-      const action = urlParams.get('action');
-
-      if (success) {
-        let message = '';
-        switch (success) {
-          case 'bank_connected':
-            message = 'Bank account connected successfully!';
-            break;
-          case 'connection_test_passed':
-            message = 'Bank connection test passed!';
-            break;
-          default:
-            if (success.includes('synced')) {
-              message = success.replace(/_/g, ' ').replace(/(\d+)/g, '$1').replace(/synced/, 'Successfully synced');
-            } else {
-              message = 'Operation completed successfully!';
-            }
-        }
-        showAlert(message, 'success');
-      }
-
-      if (error) {
-        let message = '';
-        switch (error) {
-          case 'bank_connection_failed':
-            message = 'Failed to connect bank account. Please try again.';
-            break;
-          case 'connection_test_failed':
-            message = 'Bank connection test failed. Please check your settings.';
-            break;
-          case 'connection_test_error':
-            message = 'Error occurred during connection test.';
-            break;
-          case 'sync_accounts_failed':
-            message = 'Failed to sync accounts from bank.';
-            break;
-          case 'sync_accounts_error':
-            message = 'Error occurred during account sync.';
-            break;
-          case 'sync_all_failed':
-            message = 'Failed to sync all data from bank.';
-            break;
-          case 'sync_all_error':
-            message = 'Error occurred during data synchronization.';
-            break;
-          case 'failed_to_load_banks':
-            message = 'Failed to load bank connections.';
-            break;
-          default:
-            message = 'An error occurred. Please try again.';
-        }
-        showAlert(message, 'error');
-      }
-
-      if (action) {
-        let message = '';
-        switch (action) {
-          case 'banks_refreshed':
-            message = 'Bank connections refreshed.';
-            break;
-          default:
-            message = 'Action completed.';
-        }
-        showAlert(message, 'info');
-      }
-
-      // Clean URL after showing message
-      if (success || error || action) {
-        const cleanUrl = window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-      }
+    // Bank form toggle
+    function toggleBankForm() {
+      bankFormContainer.classList.toggle('d-none');
+      bankFormToggle.classList.toggle('fa-chevron-up');
+      bankFormToggle.classList.toggle('fa-chevron-down');
     }
 
-    function showAlert(message, type) {
-      const alertDiv = document.createElement('div');
-      alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
-      alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
-      alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      `;
-      document.body.appendChild(alertDiv);
+         // Handle form submission for the dashboard bank form
+     async function handleDashboardBankSubmit(event) {
+       event.preventDefault();
+       const form = document.getElementById('dashboardBankForm');
+       const formData = new FormData(form);
 
-      setTimeout(() => {
-        if (alertDiv.parentNode) {
-          alertDiv.remove();
-        }
-      }, 5000);
-    }
+       // Convert datetime-local to UTC
+       const expiresAtInput = document.getElementById('dashboardExpiresAt');
+       if (expiresAtInput && expiresAtInput.value) {
+         const localDate = new Date(expiresAtInput.value);
+         const utcISOString = localDate.toISOString();
+         formData.set('expires_at', utcISOString);
+       }
 
-    // Show messages on page load
-    document.addEventListener('DOMContentLoaded', showMessage);
-    // UTC conversion for expires_at
-    const form = document.querySelector('form[action="/api/bank/api/tokens"]');
-    if (form) {
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const input = document.getElementById('expires_at');
-        if (input && input.value) {
-          const localDate = new Date(input.value);
-          const utcISOString = localDate.toISOString();
-          input.value = utcISOString;
-        }
-        form.submit();
-      });
-    }
+       try {
+         const response = await fetch('/api/bank/api/tokens', {
+           method: 'POST',
+           credentials: 'include',
+           body: formData
+         });
+
+         if (response.ok) {
+           showSuccess('Bank account connected successfully!');
+           form.reset();
+           fetchDashboardData(); // Refresh data
+         } else {
+           showError('Failed to connect bank account');
+         }
+       } catch (error) {
+         console.error('Error connecting bank:', error);
+         showError('Error connecting bank account');
+       }
+     }
+
+         // UTC conversion for expires_at (modal form)
+     const modalBankForm = document.getElementById('bankConnectionForm');
+     if (modalBankForm) {
+       modalBankForm.addEventListener('submit', function (e) {
+         e.preventDefault();
+         const input = document.getElementById('expires_at');
+         if (input && input.value) {
+           const localDate = new Date(input.value);
+           const utcISOString = localDate.toISOString();
+           input.value = utcISOString;
+         }
+         connectBank();
+       });
+     }
   </script>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

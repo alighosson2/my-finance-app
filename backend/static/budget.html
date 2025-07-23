@@ -8,18 +8,19 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root { 
-      --primary: #2c3e50; 
-      --accent: #1abc9c; 
-      --dark: #2c3e50; 
+    :root {
+      --primary: #2c3e50;
+      --accent: #1abc9c;
+      --dark: #2c3e50;
       --success: #27ae60;
       --warning: #f39c12;
       --info: #3498db;
+      --danger: #e74c3c;
     }
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      color: #333; 
-      background-color: #fff;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      background-color: #f8f9fa;
       line-height: 1.6;
     }
     .sidebar {
@@ -78,34 +79,34 @@
       margin-left: 240px;
       padding: 2rem 1rem;
       transition: margin-left 0.3s;
-      background: #fff;
+      background: #f8f9fa;
       min-height: 100vh;
     }
     .dashboard-title {
       color: var(--primary);
       font-weight: 700;
-      margin-bottom: 1.5rem;
-      margin-top: 1.5rem;
-      text-align: center;
+      margin-bottom: 2rem;
     }
     .card {
       border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       border: none;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       overflow: hidden;
+      background: white;
     }
     .card-header {
-      background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
-      color: white;
+      background: white;
+      border-bottom: 1px solid #e9ecef;
+      color: var(--primary);
       font-weight: 600;
-      border-bottom: none;
+      padding: 1.25rem;
     }
     .btn {
       border-radius: 8px;
       font-weight: 600;
       transition: all 0.3s ease;
-      padding: 0.5rem 1.5rem;
+      padding: 0.625rem 1.5rem;
     }
     .btn-primary {
       background-color: var(--accent);
@@ -124,12 +125,60 @@
     }
     .progress-bar {
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.75rem;
+      border-radius: 8px;
+    }
+    .budget-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .budget-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    .budget-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .stats-card {
+      text-align: center;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-bottom: 1.5rem;
+    }
+    .stats-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .stats-label {
+      color: #6c757d;
+      font-size: 0.875rem;
+      font-weight: 500;
     }
     .alert {
       border: none;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
     }
     @media (max-width: 991.98px) {
       .sidebar {
@@ -169,15 +218,22 @@
     }
     @media (max-width: 575.98px) {
       .dashboard-title {
-        font-size: 1.2rem;
+        font-size: 1.5rem;
       }
-      .card-header h5 {
-        font-size: 1rem;
+      .stats-value {
+        font-size: 1.4rem;
       }
     }
   </style>
 </head>
 <body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
   <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
   <nav class="sidebar" id="sidebar">
     <a class="navbar-brand" href="dashboard.html">
@@ -191,155 +247,575 @@
     <a href="/api/auth/logout" class="logout-link"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
   </nav>
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
   <div class="content">
-    <h1 class="dashboard-title">Budgets</h1>
-    <!-- Summary Card -->
-    <div class="card mb-4">
-      <div class="card-body">
-        <div class="row text-center">
-          <div class="col-md-2 col-6">
-            <div class="text-muted">Total Budgets</div>
-            <h4 class="mb-0">4</h4>
+    <div class="container-fluid">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="dashboard-title mb-0">Budget Management</h1>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#budgetModal">
+          <i class="fas fa-plus me-2"></i>Create Budget
+        </button>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="row" id="summaryCards">
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-value text-primary" id="totalBudgets">-</div>
+            <div class="stats-label">Total Budgets</div>
           </div>
-          <div class="col-md-2 col-6">
-            <div class="text-muted">Total Budgeted</div>
-            <h4 class="mb-0 text-primary">$3,500.00</h4>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-value text-primary" id="totalBudgeted">$0.00</div>
+            <div class="stats-label">Total Budgeted</div>
           </div>
-          <div class="col-md-2 col-6">
-            <div class="text-muted">Total Spent</div>
-            <h4 class="mb-0 text-danger">$2,150.00</h4>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-value text-danger" id="totalSpent">$0.00</div>
+            <div class="stats-label">Total Spent</div>
           </div>
-          <div class="col-md-2 col-6">
-            <div class="text-muted">Total Remaining</div>
-            <h4 class="mb-0 text-success">$1,350.00</h4>
-          </div>
-          <div class="col-md-2 col-6">
-            <div class="text-muted">On Track</div>
-            <h4 class="mb-0 text-success">3</h4>
-          </div>
-          <div class="col-md-2 col-6">
-            <div class="text-muted">Exceeded</div>
-            <h4 class="mb-0 text-warning">1</h4>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="stats-card">
+            <div class="stats-value text-success" id="totalRemaining">$0.00</div>
+            <div class="stats-label">Remaining</div>
           </div>
         </div>
       </div>
-    </div>
-    <!-- Alerts Section -->
-    <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
-      <i class="fas fa-exclamation-triangle me-2"></i>
-      <div>
-        <strong>Warning:</strong> Your "Dining Out" budget is 95% used!
-      </div>
-    </div>
-    <!-- Create Budget Button -->
-    <div class="mb-4 text-end">
-      <button class="btn btn-primary"><i class="fas fa-plus me-2"></i>Create Budget</button>
-    </div>
-    <!-- Budgets List -->
-    <div class="row g-4">
-      <!-- Budget Card 1 -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <span><i class="fas fa-utensils me-2"></i>Dining Out</span>
-            <span class="badge bg-warning">Exceeded</span>
-          </div>
-          <div class="card-body">
-            <div class="mb-2"><strong>Period:</strong> Monthly</div>
-            <div class="mb-2"><strong>Budgeted:</strong> $400.00</div>
-            <div class="mb-2"><strong>Spent:</strong> $380.00</div>
-            <div class="mb-2"><strong>Remaining:</strong> $20.00</div>
-            <div class="mb-2"><strong>Days Left:</strong> 3</div>
-            <div class="mb-3">
-              <div class="progress">
-                <div class="progress-bar bg-warning" role="progressbar" style="width: 95%">95%</div>
-              </div>
+
+      <!-- Alert Section -->
+      <div id="alertsContainer"></div>
+
+      <!-- Budgets Grid -->
+      <div class="row g-4" id="budgetsContainer">
+        <!-- Budget cards will be loaded dynamically -->
+        <div class="col-12">
+          <div class="text-center py-5">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading budgets...</span>
             </div>
-            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
-            <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
-          </div>
-        </div>
-      </div>
-      <!-- Budget Card 2 -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <span><i class="fas fa-shopping-cart me-2"></i>Shopping</span>
-            <span class="badge bg-success">Active</span>
-          </div>
-          <div class="card-body">
-            <div class="mb-2"><strong>Period:</strong> Monthly</div>
-            <div class="mb-2"><strong>Budgeted:</strong> $600.00</div>
-            <div class="mb-2"><strong>Spent:</strong> $250.00</div>
-            <div class="mb-2"><strong>Remaining:</strong> $350.00</div>
-            <div class="mb-2"><strong>Days Left:</strong> 3</div>
-            <div class="mb-3">
-              <div class="progress">
-                <div class="progress-bar bg-success" role="progressbar" style="width: 42%">42%</div>
-              </div>
-            </div>
-            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
-            <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
-          </div>
-        </div>
-      </div>
-      <!-- Budget Card 3 -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <span><i class="fas fa-bolt me-2"></i>Utilities</span>
-            <span class="badge bg-success">Active</span>
-          </div>
-          <div class="card-body">
-            <div class="mb-2"><strong>Period:</strong> Monthly</div>
-            <div class="mb-2"><strong>Budgeted:</strong> $300.00</div>
-            <div class="mb-2"><strong>Spent:</strong> $120.00</div>
-            <div class="mb-2"><strong>Remaining:</strong> $180.00</div>
-            <div class="mb-2"><strong>Days Left:</strong> 3</div>
-            <div class="mb-3">
-              <div class="progress">
-                <div class="progress-bar bg-success" role="progressbar" style="width: 40%">40%</div>
-              </div>
-            </div>
-            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
-            <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
-          </div>
-        </div>
-      </div>
-      <!-- Budget Card 4 -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <span><i class="fas fa-heartbeat me-2"></i>Healthcare</span>
-            <span class="badge bg-success">Active</span>
-          </div>
-          <div class="card-body">
-            <div class="mb-2"><strong>Period:</strong> Monthly</div>
-            <div class="mb-2"><strong>Budgeted:</strong> $2,200.00</div>
-            <div class="mb-2"><strong>Spent:</strong> $1,400.00</div>
-            <div class="mb-2"><strong>Remaining:</strong> $800.00</div>
-            <div class="mb-2"><strong>Days Left:</strong> 3</div>
-            <div class="mb-3">
-              <div class="progress">
-                <div class="progress-bar bg-success" role="progressbar" style="width: 64%">64%</div>
-              </div>
-            </div>
-            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-edit me-1"></i>Edit</button>
-            <button class="btn btn-outline-danger btn-sm ms-2"><i class="fas fa-trash me-1"></i>Delete</button>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Budget Modal -->
+  <div class="modal fade" id="budgetModal" tabindex="-1" aria-labelledby="budgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="budgetModalLabel">Create Budget</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="budgetForm">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="budgetName" class="form-label">Budget Name *</label>
+                <input type="text" class="form-control" id="budgetName" required>
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-6">
+                <label for="budgetCategory" class="form-label">Category *</label>
+                <select class="form-select" id="budgetCategory" required>
+                  <option value="">Select category</option>
+                  <option value="food">Food & Dining</option>
+                  <option value="transportation">Transportation</option>
+                  <option value="shopping">Shopping</option>
+                  <option value="entertainment">Entertainment</option>
+                  <option value="bills">Bills & Utilities</option>
+                  <option value="healthcare">Healthcare</option>
+                  <option value="education">Education</option>
+                  <option value="travel">Travel</option>
+                  <option value="personal">Personal Care</option>
+                  <option value="other">Other</option>
+                </select>
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-6">
+                <label for="budgetAmount" class="form-label">Budget Amount *</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" step="0.01" min="0" class="form-control" id="budgetAmount" required>
+                </div>
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-6">
+                <label for="budgetPeriod" class="form-label">Period *</label>
+                <select class="form-select" id="budgetPeriod" required>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly" selected>Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-6">
+                <label for="startDate" class="form-label">Start Date *</label>
+                <input type="date" class="form-control" id="startDate" required>
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-6">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate">
+                <div class="form-text">Leave empty for recurring budget</div>
+              </div>
+              <div class="col-12">
+                <label for="budgetDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="budgetDescription" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <span id="submitButtonText">Create Budget</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // Global variables
+    let budgets = [];
+    let editingBudgetId = null;
+
+    // DOM elements
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const budgetsContainer = document.getElementById('budgetsContainer');
+    const budgetModal = new bootstrap.Modal(document.getElementById('budgetModal'));
+    const budgetForm = document.getElementById('budgetForm');
+    const alertsContainer = document.getElementById('alertsContainer');
+
+    // Show/hide loading
+    function showLoading() {
+      loadingOverlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+      loadingOverlay.style.display = 'none';
+    }
+
+    // API calls
+    async function fetchBudgets() {
+      try {
+        showLoading();
+        const response = await fetch('/api/budgets', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        budgets = data.budgets || data || [];
+        return budgets;
+      } catch (error) {
+        console.error('Error fetching budgets:', error);
+        showError('Failed to load budgets. Please try again.');
+        return [];
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function createBudget(budgetData) {
+      try {
+        showLoading();
+        const response = await fetch('/api/budgets', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(budgetData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.budget || data;
+      } catch (error) {
+        console.error('Error creating budget:', error);
+        showError('Failed to create budget. Please try again.');
+        return null;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function updateBudget(budgetId, budgetData) {
+      try {
+        showLoading();
+        const response = await fetch(`/api/budgets/${budgetId}`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(budgetData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.budget || data;
+      } catch (error) {
+        console.error('Error updating budget:', error);
+        showError('Failed to update budget. Please try again.');
+        return null;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function deleteBudget(budgetId) {
+      if (!confirm('Are you sure you want to delete this budget?')) {
+        return false;
+      }
+
+      try {
+        showLoading();
+        const response = await fetch(`/api/budgets/${budgetId}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Error deleting budget:', error);
+        showError('Failed to delete budget. Please try again.');
+        return false;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Render functions
+    function renderBudgets(budgets) {
+      updateSummaryCards(budgets);
+      updateAlerts(budgets);
+
+      if (!budgets || budgets.length === 0) {
+        budgetsContainer.innerHTML = `
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body text-center p-5">
+                <i class="fas fa-chart-pie fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted mb-3">No Budgets Created</h4>
+                <p class="text-muted mb-4">Create your first budget to start tracking your spending and reach your financial goals.</p>
+                <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#budgetModal">
+                  <i class="fas fa-plus me-2"></i>Create Your First Budget
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const html = budgets.map(budget => {
+        const budgetAmount = parseFloat(budget.budget_amount || budget.amount) || 0;
+        const currentSpent = parseFloat(budget.current_spent || budget.spent) || 0;
+        const remaining = budgetAmount - currentSpent;
+        const percentage = budgetAmount > 0 ? (currentSpent / budgetAmount * 100) : 0;
+
+        // Determine status and colors
+        let statusBadge, progressColor, iconColor;
+        if (percentage >= 100) {
+          statusBadge = '<span class="badge bg-danger">Over Budget</span>';
+          progressColor = 'bg-danger';
+          iconColor = 'var(--danger)';
+        } else if (percentage >= 80) {
+          statusBadge = '<span class="badge bg-warning">Warning</span>';
+          progressColor = 'bg-warning';
+          iconColor = 'var(--warning)';
+        } else {
+          statusBadge = '<span class="badge bg-success">On Track</span>';
+          progressColor = 'bg-success';
+          iconColor = 'var(--success)';
+        }
+
+        const categoryIcon = getCategoryIcon(budget.category);
+        const formattedAmount = formatCurrency(budgetAmount);
+        const formattedSpent = formatCurrency(currentSpent);
+        const formattedRemaining = formatCurrency(remaining);
+
+        // Calculate days remaining if period is defined
+        const endDate = budget.end_date ? new Date(budget.end_date) : null;
+        const today = new Date();
+        const daysRemaining = endDate ? Math.ceil((endDate - today) / (1000 * 60 * 60 * 24)) : null;
+
+        return `
+          <div class="col-lg-4 col-md-6">
+            <div class="card budget-card h-100">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <i class="${categoryIcon} me-2" style="color: ${iconColor};"></i>
+                  <span class="fw-bold">${budget.name || budget.budget_name}</span>
+                </div>
+                ${statusBadge}
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <div class="budget-icon mx-auto" style="background-color: ${iconColor}15; color: ${iconColor};">
+                    <i class="${categoryIcon}"></i>
+                  </div>
+                  <div class="text-center">
+                    <div class="h5 mb-1">${formattedSpent} / ${formattedAmount}</div>
+                    <small class="text-muted text-uppercase">${budget.period || 'Monthly'} Budget</small>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between mb-1">
+                    <small>Progress</small>
+                    <small>${percentage.toFixed(1)}%</small>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar ${progressColor}" style="width: ${Math.min(percentage, 100)}%">
+                      ${percentage.toFixed(0)}%
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row text-center mb-3">
+                  <div class="col-6">
+                    <div class="fw-bold ${remaining >= 0 ? 'text-success' : 'text-danger'}">${formattedRemaining}</div>
+                    <small class="text-muted">Remaining</small>
+                  </div>
+                  <div class="col-6">
+                    <div class="fw-bold">${daysRemaining !== null ? daysRemaining : '∞'}</div>
+                    <small class="text-muted">Days Left</small>
+                  </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button class="btn btn-outline-primary btn-sm flex-fill" onclick="editBudget(${budget.id})">
+                    <i class="fas fa-edit me-1"></i>Edit
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm flex-fill" onclick="deleteBudgetById(${budget.id})">
+                    <i class="fas fa-trash me-1"></i>Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      budgetsContainer.innerHTML = html;
+    }
+
+    function updateSummaryCards(budgets) {
+      const totalBudgets = budgets.length;
+      const totalBudgeted = budgets.reduce((sum, budget) => sum + (parseFloat(budget.budget_amount || budget.amount) || 0), 0);
+      const totalSpent = budgets.reduce((sum, budget) => sum + (parseFloat(budget.current_spent || budget.spent) || 0), 0);
+      const totalRemaining = totalBudgeted - totalSpent;
+
+      document.getElementById('totalBudgets').textContent = totalBudgets;
+      document.getElementById('totalBudgeted').textContent = formatCurrency(totalBudgeted);
+      document.getElementById('totalSpent').textContent = formatCurrency(totalSpent);
+      document.getElementById('totalRemaining').textContent = formatCurrency(totalRemaining);
+    }
+
+    function updateAlerts(budgets) {
+      const alerts = [];
+
+      budgets.forEach(budget => {
+        const budgetAmount = parseFloat(budget.budget_amount || budget.amount) || 0;
+        const currentSpent = parseFloat(budget.current_spent || budget.spent) || 0;
+        const percentage = budgetAmount > 0 ? (currentSpent / budgetAmount * 100) : 0;
+
+        if (percentage >= 100) {
+          alerts.push({
+            type: 'danger',
+            icon: 'fas fa-exclamation-triangle',
+            message: `<strong>Over Budget!</strong> Your "${budget.name || budget.budget_name}" budget has exceeded its limit.`
+          });
+        } else if (percentage >= 90) {
+          alerts.push({
+            type: 'warning',
+            icon: 'fas fa-exclamation-triangle',
+            message: `<strong>Warning!</strong> Your "${budget.name || budget.budget_name}" budget is ${percentage.toFixed(0)}% used.`
+          });
+        }
+      });
+
+      if (alerts.length === 0) {
+        alertsContainer.innerHTML = '';
+        return;
+      }
+
+      const html = alerts.map(alert => `
+        <div class="alert alert-${alert.type} d-flex align-items-center mb-3" role="alert">
+          <i class="${alert.icon} me-2"></i>
+          <div>${alert.message}</div>
+        </div>
+      `).join('');
+
+      alertsContainer.innerHTML = html;
+    }
+
+    // Helper functions
+    function getCategoryIcon(category) {
+      const icons = {
+        food: 'fas fa-utensils',
+        transportation: 'fas fa-car',
+        shopping: 'fas fa-shopping-bag',
+        entertainment: 'fas fa-film',
+        bills: 'fas fa-file-invoice-dollar',
+        healthcare: 'fas fa-heartbeat',
+        education: 'fas fa-graduation-cap',
+        travel: 'fas fa-plane',
+        personal: 'fas fa-user',
+        other: 'fas fa-ellipsis-h'
+      };
+      return icons[category] || icons.other;
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(amount);
+    }
+
+    function showError(message) {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+      alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
+      alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      document.body.appendChild(alert);
+      setTimeout(() => alert.remove(), 5000);
+    }
+
+    function showSuccess(message) {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+      alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
+      alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      document.body.appendChild(alert);
+      setTimeout(() => alert.remove(), 3000);
+    }
+
+    // Budget management functions
+    function openCreateBudgetModal() {
+      editingBudgetId = null;
+      document.getElementById('budgetModalLabel').textContent = 'Create Budget';
+      document.getElementById('submitButtonText').textContent = 'Create Budget';
+      budgetForm.reset();
+
+      // Set default start date to beginning of current month
+      const today = new Date();
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+
+      budgetModal.show();
+    }
+
+    function editBudget(budgetId) {
+      const budget = budgets.find(b => b.id === budgetId);
+      if (!budget) return;
+
+      editingBudgetId = budgetId;
+      document.getElementById('budgetModalLabel').textContent = 'Edit Budget';
+      document.getElementById('submitButtonText').textContent = 'Update Budget';
+
+      // Fill form with budget data
+      document.getElementById('budgetName').value = budget.name || budget.budget_name || '';
+      document.getElementById('budgetCategory').value = budget.category || '';
+      document.getElementById('budgetAmount').value = budget.budget_amount || budget.amount || '';
+      document.getElementById('budgetPeriod').value = budget.period || 'monthly';
+      document.getElementById('startDate').value = budget.start_date ? budget.start_date.split('T')[0] : '';
+      document.getElementById('endDate').value = budget.end_date ? budget.end_date.split('T')[0] : '';
+      document.getElementById('budgetDescription').value = budget.description || '';
+
+      budgetModal.show();
+    }
+
+    async function deleteBudgetById(budgetId) {
+      const success = await deleteBudget(budgetId);
+      if (success) {
+        showSuccess('Budget deleted successfully!');
+        await loadBudgets();
+      }
+    }
+
+    // Form handling
+    budgetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const budgetData = {
+        name: document.getElementById('budgetName').value,
+        category: document.getElementById('budgetCategory').value,
+        budget_amount: parseFloat(document.getElementById('budgetAmount').value),
+        period: document.getElementById('budgetPeriod').value,
+        start_date: document.getElementById('startDate').value,
+        end_date: document.getElementById('endDate').value || null,
+        description: document.getElementById('budgetDescription').value
+      };
+
+      let result;
+      if (editingBudgetId) {
+        result = await updateBudget(editingBudgetId, budgetData);
+      } else {
+        result = await createBudget(budgetData);
+      }
+
+      if (result) {
+        budgetModal.hide();
+        showSuccess(editingBudgetId ? 'Budget updated successfully!' : 'Budget created successfully!');
+        await loadBudgets();
+      }
+    });
+
+    // Main load function
+    async function loadBudgets() {
+      const budgetsData = await fetchBudgets();
+      renderBudgets(budgetsData);
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', loadBudgets);
+
     // Sidebar toggle for mobile
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
     sidebarToggle.addEventListener('click', function() {
       sidebar.classList.toggle('open');
       sidebarBackdrop.classList.toggle('open');
     });
+
     sidebarBackdrop.addEventListener('click', function() {
       sidebar.classList.remove('open');
       sidebarBackdrop.classList.remove('open');
@@ -347,4 +823,4 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>
