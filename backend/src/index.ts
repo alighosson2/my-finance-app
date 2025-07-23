@@ -61,7 +61,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/bank', bankOAuth);       // OAuth routes at /bank (matches OBP registration)
 app.use('/api/bank/api', bankRoutes);  // Bank API routes at /bank/api
-app.use('/api/accounts', accountRoutes);
+app.use('/api/financial-accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/tax', taxRoutes);
 app.use('/api/budgets', budgetRoutes);

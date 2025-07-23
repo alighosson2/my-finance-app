@@ -8,17 +8,17 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root { 
-      --primary: #2c3e50; 
-      --accent: #1abc9c; 
-      --dark: #2c3e50; 
+    :root {
+      --primary: #2c3e50;
+      --accent: #1abc9c;
+      --dark: #2c3e50;
       --success: #27ae60;
       --warning: #f39c12;
       --info: #3498db;
     }
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      color: #333; 
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
       background-color: #fff;
       line-height: 1.6;
     }
@@ -355,7 +355,7 @@
     async function fetchTransactions(page = 1, filters = {}) {
       try {
         showLoading();
-        
+
         const params = new URLSearchParams({
           page: page.toString(),
           limit: '20',
@@ -386,7 +386,7 @@
 
     async function fetchAccounts() {
       try {
-        const response = await fetch('/api/accounts', {
+        const response = await fetch('/api/financial-accounts', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -425,7 +425,7 @@
         const amountClass = isPositive ? 'positive' : 'negative';
         const amountSign = isPositive ? '+' : '-';
         const accountName = getAccountName(transaction.account_id);
-        
+
         return `
           <tr>
             <td>${date}</td>
@@ -472,7 +472,7 @@
       }
 
       let html = '';
-      
+
       // Previous button
       html += `
         <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
@@ -514,16 +514,16 @@
     function renderAccountOptions(accounts) {
       const accountSelect = document.getElementById('accountSelect');
       const currentValue = accountSelect.value;
-      
+
       accountSelect.innerHTML = '<option value="">All Accounts</option>';
-      
+
       accounts.forEach(account => {
         const option = document.createElement('option');
         option.value = account.id;
         option.textContent = `${account.bank_name} - ${account.account_type}`;
         accountSelect.appendChild(option);
       });
-      
+
       accountSelect.value = currentValue;
     }
 
@@ -552,7 +552,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       `;
       document.body.appendChild(alert);
-      
+
       setTimeout(() => {
         alert.remove();
       }, 5000);
@@ -580,7 +580,7 @@
 
       try {
         showLoading();
-        
+
         const response = await fetch(`/api/transactions/${id}`, {
           method: 'DELETE',
           headers: {
@@ -594,7 +594,7 @@
 
         // Reload transactions
         await loadTransactions();
-        
+
         // Show success message
         showSuccess('Transaction deleted successfully');
       } catch (error) {
@@ -614,7 +614,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       `;
       document.body.appendChild(alert);
-      
+
       setTimeout(() => {
         alert.remove();
       }, 3000);
@@ -635,7 +635,7 @@
       // Load accounts for filter dropdown
       const accountsData = await fetchAccounts();
       renderAccountOptions(accountsData);
-      
+
       // Load initial transactions
       await loadTransactions();
     }
@@ -643,7 +643,7 @@
     // Event listeners
     filterForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       currentFilters = {
         account_id: document.getElementById('accountSelect').value,
         category: document.getElementById('categorySelect').value,
@@ -651,14 +651,14 @@
         start_date: document.getElementById('dateFrom').value,
         end_date: document.getElementById('dateTo').value,
       };
-      
+
       // Remove empty filters
       Object.keys(currentFilters).forEach(key => {
         if (!currentFilters[key]) {
           delete currentFilters[key];
         }
       });
-      
+
       currentPage = 1;
       await loadTransactions();
     });

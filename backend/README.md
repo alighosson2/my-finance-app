@@ -104,7 +104,7 @@ OBP_CALLBACK_URL=http://localhost:3000/api/bank/callback
 - **/api/users** — User management
 - **/api/bank** — OBP OAuth, connect/revoke bank accounts, sync data
 - **/api/bank/api** — Bank token management, OBP sync endpoints
-- **/api/accounts** — Financial account CRUD & stats
+- **/api/financial-accounts** — Financial account CRUD & stats
 - **/api/transactions** — Transaction CRUD, search, stats, account-specific
 - **/api/budgets** — Budget CRUD, recommendations, analysis
 - **/api/tax** — Tax record CRUD, calculations, reports
